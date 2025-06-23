@@ -116,7 +116,6 @@ class MenuPage extends StatelessWidget {
   }
 }
 
-
 class QAProduksiPage extends StatefulWidget {
   const QAProduksiPage({super.key});
 
@@ -131,25 +130,51 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _kebunController = TextEditingController();
   final _rotasiController = TextEditingController();
 
-  final List<Map<String, dynamic>> pohonSamples = [];
+  final List<Map<String, dynamic>> _samples = [];
   final String _tanggalPeriksa = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-  void _addSample() {
+  final _barisController = TextEditingController();
+  final _pokokController = TextEditingController();
+  bool _dipanen = false;
+  final _buahDipanenController = TextEditingController();
+  final _buahTidakDipanenController = TextEditingController();
+  final _lfTinggalController = TextEditingController();
+  final _tphTinggalController = TextEditingController();
+  final _buahTinggalController = TextEditingController();
+
+  void _savePokokSample() {
+    if (_barisController.text.isEmpty || _pokokController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Baris & Pokok harus diisi.")));
+      return;
+    }
+
     setState(() {
-      pohonSamples.add({
-        "baris": "",
-        "pokok": "",
-        "dipanen": false,
-        "buahDipanen": "",
-        "buahTidakDipanen": "",
-        "lfTinggal": "",
-        "tphTinggal": "",
-        "buahTinggal": "",
+      _samples.add({
+        "baris": _barisController.text,
+        "pokok": _pokokController.text,
+        "dipanen": _dipanen,
+        "buahDipanen": _buahDipanenController.text,
+        "buahTidakDipanen": _buahTidakDipanenController.text,
+        "lfTinggal": _lfTinggalController.text,
+        "tphTinggal": _tphTinggalController.text,
+        "buahTinggal": _buahTinggalController.text,
       });
+      _clearPokokForm();
     });
   }
 
-  void _saveData() {
+  void _clearPokokForm() {
+    _barisController.clear();
+    _pokokController.clear();
+    _dipanen = false;
+    _buahDipanenController.clear();
+    _buahTidakDipanenController.clear();
+    _lfTinggalController.clear();
+    _tphTinggalController.clear();
+    _buahTinggalController.clear();
+  }
+
+  void _saveAll() {
     print("== Form QA Produksi ==");
     print("Tanggal Periksa: $_tanggalPeriksa");
     print("Nama Petugas: ${_namaPetugasController.text}");
@@ -158,7 +183,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     print("Kebun: ${_kebunController.text}");
     print("Rotasi: ${_rotasiController.text} hari");
 
-    for (var p in pohonSamples) {
+    for (var p in _samples) {
       print("----");
       print("Baris ke: ${p['baris']}, Pokok ke: ${p['pokok']}");
       print("Pkk dipanen: ${p['dipanen'] ? '√' : '✗'}");
@@ -168,127 +193,88 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       print("TPH Tinggal: ${p['tphTinggal']}");
       print("Buah Tinggal: ${p['buahTinggal']}");
     }
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Data printed to console (for demo)")));
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Berhasil"),
+        content: const Text("Data berhasil disimpan."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .popUntil((route) => route.isFirst); // Back to Landing Page
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const MenuPage()));
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("QA Produksi")),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Tanggal Periksa: $_tanggalPeriksa",
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text("Tanggal Periksa: $_tanggalPeriksa", style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            TextField(
-                controller: _namaPetugasController,
-                decoration: const InputDecoration(labelText: "Nama Petugas")),
-            TextField(
-                controller: _kodeBlokController,
-                decoration: const InputDecoration(labelText: "Kode Blok")),
-            TextField(
-                controller: _divisiController,
-                decoration: const InputDecoration(labelText: "Divisi")),
-            TextField(
-                controller: _kebunController,
-                decoration: const InputDecoration(labelText: "Kebun")),
-            TextField(
-                controller: _rotasiController,
-                decoration: const InputDecoration(labelText: "Rotasi (hari)")),
-            const SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                itemCount: pohonSamples.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Sample ${index + 1}",
-                              style: const TextStyle(fontWeight: FontWeight.bold)),
-                          TextField(
-                            decoration:
-                                const InputDecoration(labelText: "Baris ke-"),
-                            onChanged: (val) => pohonSamples[index]['baris'] = val,
-                          ),
-                          TextField(
-                            decoration:
-                                const InputDecoration(labelText: "Pokok ke-"),
-                            onChanged: (val) => pohonSamples[index]['pokok'] = val,
-                          ),
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: pohonSamples[index]['dipanen'],
-                                onChanged: (val) =>
-                                    setState(() => pohonSamples[index]['dipanen'] = val),
-                              ),
-                              const Text("Pkk di Panen")
-                            ],
-                          ),
-                          TextField(
-                            decoration: const InputDecoration(
-                                labelText: "Buah di Panen (Mtg/Bsk)"),
-                            onChanged: (val) =>
-                                pohonSamples[index]['buahDipanen'] = val,
-                          ),
-                          TextField(
-                            decoration: const InputDecoration(
-                                labelText: "Buah Tidak di Panen (Mtg/Bsk)"),
-                            onChanged: (val) =>
-                                pohonSamples[index]['buahTidakDipanen'] = val,
-                          ),
-                          TextField(
-                            decoration: const InputDecoration(
-                                labelText: "LF Tinggal (pr,pk,lp,pp)"),
-                            onChanged: (val) =>
-                                pohonSamples[index]['lfTinggal'] = val,
-                          ),
-                          TextField(
-                            decoration:
-                                const InputDecoration(labelText: "TPH Tinggal"),
-                            onChanged: (val) =>
-                                pohonSamples[index]['tphTinggal'] = val,
-                          ),
-                          TextField(
-                            decoration: const InputDecoration(
-                                labelText: "Buah Tinggal (pr,pk,lp,pp)"),
-                            onChanged: (val) =>
-                                pohonSamples[index]['buahTinggal'] = val,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas")),
+            TextField(controller: _kodeBlokController, decoration: const InputDecoration(labelText: "Kode Blok")),
+            TextField(controller: _divisiController, decoration: const InputDecoration(labelText: "Divisi")),
+            TextField(controller: _kebunController, decoration: const InputDecoration(labelText: "Kebun")),
+            TextField(controller: _rotasiController, decoration: const InputDecoration(labelText: "Rotasi (hari)")),
+            const SizedBox(height: 12),
+            const Divider(),
+            const Text("Masukkan Pokok Sample", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            TextField(controller: _barisController, decoration: const InputDecoration(labelText: "Baris ke-")),
+            TextField(controller: _pokokController, decoration: const InputDecoration(labelText: "Pokok ke-")),
             Row(
               children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: _addSample,
-                  child: const Text("Tambah Pohon"),
+                Checkbox(
+                  value: _dipanen,
+                  onChanged: (val) => setState(() => _dipanen = val ?? false),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: _saveData,
-                  child: const Text("Save Demo"),
-                ),
+                const Text("Pkk di Panen")
               ],
+            ),
+            TextField(controller: _buahDipanenController, decoration: const InputDecoration(labelText: "Buah di Panen (Mtg/Bsk)")),
+            TextField(controller: _buahTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Tidak di Panen (Mtg/Bsk)")),
+            TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (pr,pk,lp,pp)")),
+            TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "TPH Tinggal")),
+            TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (pr,pk,lp,pp)")),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
+              onPressed: _savePokokSample,
+              child: const Text("Save Pokok Sample"),
+            ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const Text("Daftar Sample Yang Sudah Diinput", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            if (_samples.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text("Belum ada sample yang diinput."),
+              )
+            else
+              Column(
+                children: _samples.map((p) => ListTile(
+                      title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
+                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${p['buahTidakDipanen']}"),
+                    )).toList(),
+              ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
+              onPressed: _saveAll,
+              child: const Text("Save All"),
             ),
           ],
         ),
