@@ -175,6 +175,20 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   }
 
   void _saveAll() {
+    if (_samples.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Minimal 1 pokok sample harus diisi.")));
+      return;
+    }
+
+    if (_namaPetugasController.text.isEmpty ||
+        _kodeBlokController.text.isEmpty ||
+        _divisiController.text.isEmpty ||
+        _kebunController.text.isEmpty ||
+        _rotasiController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data form blok.")));
+      return;
+    }
+
     print("== Form QA Produksi ==");
     print("Tanggal Periksa: $_tanggalPeriksa");
     print("Nama Petugas: ${_namaPetugasController.text}");
@@ -202,10 +216,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context)
-                  .popUntil((route) => route.isFirst); // Back to Landing Page
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const MenuPage()));
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()));
             },
             child: const Text("OK"),
           ),
