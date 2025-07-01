@@ -131,7 +131,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _buahTinggalController = TextEditingController();
 
   final Map<String, String?> dropdownSelections = {};
-  final Map<String, int> dropdownCounters = {};
+  final Map<String, Map<String, int>> dropdownCounters = {};
 
   Widget _buildDropdown(String label, List<String> options, String key) {
     return DropdownButtonFormField<String>(
@@ -195,13 +195,13 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       return;
     }
 
-    // Hitung ringkasan dropdown dari semua sample
     dropdownCounters.clear();
     for (var s in _samples) {
       final drop = s['dropdowns'] as Map<String, String?>?;
       drop?.forEach((key, val) {
         if (val != null) {
-          dropdownCounters.update('$key: $val', (v) => v + 1, ifAbsent: () => 1);
+          dropdownCounters.putIfAbsent(key, () => {});
+          dropdownCounters[key]!.update(val, (v) => v + 1, ifAbsent: () => 1);
         }
       });
     }
@@ -227,9 +227,13 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     result.writeln("LF Tinggal: $totalLfTinggal");
     result.writeln("LF Tinggal di TPH: $totalTphTinggal");
     result.writeln("Buah Tinggal: $totalBuahTinggal\n");
+
     result.writeln("== Ringkasan Kondisi ==");
-    dropdownCounters.forEach((key, val) {
-      result.writeln("$key: $val");
+    dropdownCounters.forEach((category, map) {
+      result.writeln("$category:");
+      map.forEach((val, count) {
+        result.writeln("  - $val: $count");
+      });
     });
 
     showDialog(
@@ -320,7 +324,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               Column(
                 children: _samples.map((p) => ListTile(
                       title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
-                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${p['buahTidakDipanen']}"),
+                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${p['buahTidakDipanen']}")
                     )).toList(),
               ),
             const SizedBox(height: 16),
