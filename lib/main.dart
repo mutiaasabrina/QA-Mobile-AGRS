@@ -139,9 +139,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       value: dropdownSelections[key],
       onChanged: (val) => setState(() {
         dropdownSelections[key] = val;
-        if (val != null) {
-          dropdownCounters.update("$label: $val", (v) => v + 1, ifAbsent: () => 1);
-        }
       }),
       items: options.map((opt) => DropdownMenuItem(value: opt, child: Text(opt))).toList(),
     );
@@ -163,8 +160,10 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         "lfTinggal": _lfTinggalController.text,
         "tphTinggal": _tphTinggalController.text,
         "buahTinggal": _buahTinggalController.text,
+        "dropdowns": Map<String, String?>.from(dropdownSelections),
       });
       _clearPokokForm();
+      dropdownSelections.clear();
     });
   }
 
@@ -194,6 +193,17 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Lengkapi semua data form blok.")));
       return;
+    }
+
+    // Hitung ringkasan dropdown dari semua sample
+    dropdownCounters.clear();
+    for (var s in _samples) {
+      final drop = s['dropdowns'] as Map<String, String?>?;
+      drop?.forEach((key, val) {
+        if (val != null) {
+          dropdownCounters.update('$key: $val', (v) => v + 1, ifAbsent: () => 1);
+        }
+      });
     }
 
     int totalDipanen = _samples.where((s) => s['dipanen'] == true).length;
@@ -276,22 +286,22 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
             TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (pr,pk,lp,pp)")),
             const Divider(),
-            _buildDropdown("Kondisi Circle", ["Baik", "Semak", "Anak Sawit", "Sampah"], "circle"),
-            _buildDropdown("Kondisi Path", ["Baik", "Tidak Baik"], "path"),
-            _buildDropdown("Kondisi TPH", ["Baik", "Tidak Baik"], "tph"),
-            _buildDropdown("Lalang", ["Ada", "Tidak Ada"], "lalang"),
-            _buildDropdown("Anak Kayu", ["Ada", "Tidak Ada"], "anakKayu"),
-            _buildDropdown("Perumpung", ["Ada", "Tidak Ada"], "perumpung"),
-            _buildDropdown("Purun Tikus", ["Ada", "Tidak Ada"], "purunTikus"),
-            _buildDropdown("Pakis Udang", ["Ada", "Tidak Ada"], "pakisUdang"),
-            _buildDropdown("Titi Panen", ["Ada", "Tidak Ada"], "titiPanen"),
-            _buildDropdown("Jalan dan Jembatan", ["Baik", "Sedang", "Jelek"], "jalanJembatan"),
-            _buildDropdown("Pruning", ["Baik", "Over", "Sengkleh", "Under"], "pruning"),
-            _buildDropdown("Susunan Pelepah", ["Rapi", "Tidak Rapi"], "susunanPelepah"),
-            _buildDropdown("Serangan Tikus", ["Ada", "Tidak Ada"], "tikus"),
-            _buildDropdown("Serangan Rayap", ["Ada", "Tidak Ada"], "rayap"),
-            _buildDropdown("Thirathaba", ["Ada", "Tidak Ada"], "thirathaba"),
-            _buildDropdown("UPDPKS", ["Ada", "Tidak Ada"], "updpks"),
+            _buildDropdown("Kondisi Circle", ["Baik", "Semak", "Anak Sawit", "Sampah"], "Kondisi Circle"),
+            _buildDropdown("Kondisi Path", ["Baik", "Tidak Baik"], "Kondisi Path"),
+            _buildDropdown("Kondisi TPH", ["Baik", "Tidak Baik"], "Kondisi TPH"),
+            _buildDropdown("Lalang", ["Ada", "Tidak Ada"], "Lalang"),
+            _buildDropdown("Anak Kayu", ["Ada", "Tidak Ada"], "Anak Kayu"),
+            _buildDropdown("Perumpung", ["Ada", "Tidak Ada"], "Perumpung"),
+            _buildDropdown("Purun Tikus", ["Ada", "Tidak Ada"], "Purun Tikus"),
+            _buildDropdown("Pakis Udang", ["Ada", "Tidak Ada"], "Pakis Udang"),
+            _buildDropdown("Titi Panen", ["Ada", "Tidak Ada"], "Titi Panen"),
+            _buildDropdown("Jalan dan Jembatan", ["Baik", "Sedang", "Jelek"], "Jalan dan Jembatan"),
+            _buildDropdown("Pruning", ["Baik", "Over", "Sengkleh", "Under"], "Pruning"),
+            _buildDropdown("Susunan Pelepah", ["Rapi", "Tidak Rapi"], "Susunan Pelepah"),
+            _buildDropdown("Serangan Tikus", ["Ada", "Tidak Ada"], "Serangan Tikus"),
+            _buildDropdown("Serangan Rayap", ["Ada", "Tidak Ada"], "Serangan Rayap"),
+            _buildDropdown("Thirathaba", ["Ada", "Tidak Ada"], "Thirathaba"),
+            _buildDropdown("UPDPKS", ["Ada", "Tidak Ada"], "UPDPKS"),
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
