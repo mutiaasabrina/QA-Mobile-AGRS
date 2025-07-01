@@ -130,15 +130,19 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _tphTinggalController = TextEditingController();
   final _buahTinggalController = TextEditingController();
 
-  String? _dropdownValue(String? current, String? val) => setState(() => current = val) as String?;
-
   final Map<String, String?> dropdownSelections = {};
+  final Map<String, int> dropdownCounters = {};
 
   Widget _buildDropdown(String label, List<String> options, String key) {
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(labelText: label),
       value: dropdownSelections[key],
-      onChanged: (val) => setState(() => dropdownSelections[key] = val),
+      onChanged: (val) => setState(() {
+        dropdownSelections[key] = val;
+        if (val != null) {
+          dropdownCounters.update("$label: $val", (v) => v + 1, ifAbsent: () => 1);
+        }
+      }),
       items: options.map((opt) => DropdownMenuItem(value: opt, child: Text(opt))).toList(),
     );
   }
@@ -192,30 +196,37 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       return;
     }
 
-    print("== Form QA Produksi & Perawatan ==");
-    print("Tanggal Periksa: $_tanggalPeriksa");
-    print("Nama Petugas: ${_namaPetugasController.text}");
-    print("Kode Blok: ${_kodeBlokController.text}");
-    print("Divisi: ${_divisiController.text}");
-    print("Kebun: ${_kebunController.text}");
-    print("Rotasi: ${_rotasiController.text} hari");
+    int totalDipanen = _samples.where((s) => s['dipanen'] == true).length;
+    int totalBuahDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahDipanen'] ?? '0')!);
+    int totalBuahTidakDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTidakDipanen'] ?? '0')!);
+    int totalLfTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['lfTinggal'] ?? '0')!);
+    int totalTphTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['tphTinggal'] ?? '0')!);
+    int totalBuahTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTinggal'] ?? '0')!);
 
-    for (var p in _samples) {
-      print("----");
-      print("Baris ke: ${p['baris']}, Pokok ke: ${p['pokok']}");
-      print("Pkk dipanen: ${p['dipanen'] ? '√' : '✗'}");
-      print("Buah di Panen: ${p['buahDipanen']} Mtg/Bsk");
-      print("Buah Tdk di Panen: ${p['buahTidakDipanen']} Mtg/Bsk");
-      print("LF Tinggal: ${p['lfTinggal']}");
-      print("LF Tinggal di TPH: ${p['tphTinggal']}");
-      print("Buah Tinggal: ${p['buahTinggal']}");
-    }
+    StringBuffer result = StringBuffer();
+    result.writeln("Tanggal Periksa: $_tanggalPeriksa");
+    result.writeln("Nama Petugas: ${_namaPetugasController.text}");
+    result.writeln("Kode Blok: ${_kodeBlokController.text}");
+    result.writeln("Divisi: ${_divisiController.text}");
+    result.writeln("Kebun: ${_kebunController.text}");
+    result.writeln("Rotasi: ${_rotasiController.text} hari\n");
+    result.writeln("Jumlah Pokok Sample: ${_samples.length}");
+    result.writeln("Pkk dipanen: $totalDipanen");
+    result.writeln("Buah di Panen: $totalBuahDipanen Mtg/Bsk");
+    result.writeln("Buah Tdk di Panen: $totalBuahTidakDipanen Mtg/Bsk");
+    result.writeln("LF Tinggal: $totalLfTinggal");
+    result.writeln("LF Tinggal di TPH: $totalTphTinggal");
+    result.writeln("Buah Tinggal: $totalBuahTinggal\n");
+    result.writeln("== Ringkasan Kondisi ==");
+    dropdownCounters.forEach((key, val) {
+      result.writeln("$key: $val");
+    });
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Berhasil"),
-        content: const Text("Data berhasil disimpan."),
+        title: const Text("Ringkasan Data"),
+        content: SingleChildScrollView(child: Text(result.toString())),
         actions: [
           TextButton(
             onPressed: () {
@@ -299,7 +310,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               Column(
                 children: _samples.map((p) => ListTile(
                       title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
-                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${p['buahTidakDipanen']}")
+                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${p['buahTidakDipanen']}"),
                     )).toList(),
               ),
             const SizedBox(height: 16),
