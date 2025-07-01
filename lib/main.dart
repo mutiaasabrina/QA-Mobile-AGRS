@@ -69,21 +69,9 @@ class MenuPage extends StatelessWidget {
               foregroundColor: Colors.white,
               padding: const EdgeInsets.all(16),
             ),
-            child: const Text("QA Produksi"),
+            child: const Text("QA Produksi dan Perawatan"),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const QAProduksiPage()));
-            },
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.all(16),
-            ),
-            child: const Text("QA Perawatan"),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Coming Soon!")));
             },
           ),
           const SizedBox(height: 16),
@@ -142,6 +130,19 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _tphTinggalController = TextEditingController();
   final _buahTinggalController = TextEditingController();
 
+  String? _dropdownValue(String? current, String? val) => setState(() => current = val) as String?;
+
+  final Map<String, String?> dropdownSelections = {};
+
+  Widget _buildDropdown(String label, List<String> options, String key) {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(labelText: label),
+      value: dropdownSelections[key],
+      onChanged: (val) => setState(() => dropdownSelections[key] = val),
+      items: options.map((opt) => DropdownMenuItem(value: opt, child: Text(opt))).toList(),
+    );
+  }
+
   void _savePokokSample() {
     if (_barisController.text.isEmpty || _pokokController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Baris & Pokok harus diisi.")));
@@ -176,7 +177,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
 
   void _saveAll() {
     if (_samples.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Minimal 1 pokok sample harus diisi.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Minimal 1 pokok sample harus diisi.")));
       return;
     }
 
@@ -185,11 +187,12 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         _divisiController.text.isEmpty ||
         _kebunController.text.isEmpty ||
         _rotasiController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data form blok.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Lengkapi semua data form blok.")));
       return;
     }
 
-    print("== Form QA Produksi ==");
+    print("== Form QA Produksi & Perawatan ==");
     print("Tanggal Periksa: $_tanggalPeriksa");
     print("Nama Petugas: ${_namaPetugasController.text}");
     print("Kode Blok: ${_kodeBlokController.text}");
@@ -204,7 +207,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       print("Buah di Panen: ${p['buahDipanen']} Mtg/Bsk");
       print("Buah Tdk di Panen: ${p['buahTidakDipanen']} Mtg/Bsk");
       print("LF Tinggal: ${p['lfTinggal']}");
-      print("TPH Tinggal: ${p['tphTinggal']}");
+      print("LF Tinggal di TPH: ${p['tphTinggal']}");
       print("Buah Tinggal: ${p['buahTinggal']}");
     }
 
@@ -229,7 +232,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("QA Produksi")),
+      appBar: AppBar(title: const Text("QA Produksi & Perawatan")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -259,9 +262,26 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             TextField(controller: _buahDipanenController, decoration: const InputDecoration(labelText: "Buah di Panen (Mtg/Bsk)")),
             TextField(controller: _buahTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Tidak di Panen (Mtg/Bsk)")),
             TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (pr,pk,lp,pp)")),
-            TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "TPH Tinggal")),
+            TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
             TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (pr,pk,lp,pp)")),
-            const SizedBox(height: 8),
+            const Divider(),
+            _buildDropdown("Kondisi Circle", ["Baik", "Semak", "Anak Sawit", "Sampah"], "circle"),
+            _buildDropdown("Kondisi Path", ["Baik", "Tidak Baik"], "path"),
+            _buildDropdown("Kondisi TPH", ["Baik", "Tidak Baik"], "tph"),
+            _buildDropdown("Lalang", ["Ada", "Tidak Ada"], "lalang"),
+            _buildDropdown("Anak Kayu", ["Ada", "Tidak Ada"], "anakKayu"),
+            _buildDropdown("Perumpung", ["Ada", "Tidak Ada"], "perumpung"),
+            _buildDropdown("Purun Tikus", ["Ada", "Tidak Ada"], "purunTikus"),
+            _buildDropdown("Pakis Udang", ["Ada", "Tidak Ada"], "pakisUdang"),
+            _buildDropdown("Titi Panen", ["Ada", "Tidak Ada"], "titiPanen"),
+            _buildDropdown("Jalan dan Jembatan", ["Baik", "Sedang", "Jelek"], "jalanJembatan"),
+            _buildDropdown("Pruning", ["Baik", "Over", "Sengkleh", "Under"], "pruning"),
+            _buildDropdown("Susunan Pelepah", ["Rapi", "Tidak Rapi"], "susunanPelepah"),
+            _buildDropdown("Serangan Tikus", ["Ada", "Tidak Ada"], "tikus"),
+            _buildDropdown("Serangan Rayap", ["Ada", "Tidak Ada"], "rayap"),
+            _buildDropdown("Thirathaba", ["Ada", "Tidak Ada"], "thirathaba"),
+            _buildDropdown("UPDPKS", ["Ada", "Tidak Ada"], "updpks"),
+            const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
               onPressed: _savePokokSample,
@@ -279,7 +299,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               Column(
                 children: _samples.map((p) => ListTile(
                       title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
-                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${p['buahTidakDipanen']}"),
+                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${p['buahTidakDipanen']}")
                     )).toList(),
               ),
             const SizedBox(height: 16),
