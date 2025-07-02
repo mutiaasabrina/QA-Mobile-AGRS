@@ -116,6 +116,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _rotasiController = TextEditingController();
 
   final List<Map<String, dynamic>> _samples = [];
+  bool get isLocked => _samples.isNotEmpty;
   final String _tanggalPeriksa = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
   final _barisController = TextEditingController();
@@ -215,7 +216,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
 
     dropdownCounters.clear();
     Map<String, Set<String>> dropdownOptions = {
-      "Kondisi Circle": {"Baik", "Semak", "Anak Sawit", "Sampah"},
+      "Kondisi Circle": {"Baik", "Semak", "Dominan Anak Sawit", "Dominan Sampah (Berondolan Busuk)"},
       "Kondisi Path": {"Baik", "Tidak Baik"},
       "Kondisi TPH": {"Baik", "Tidak Baik"},
       "Lalang": {"Ada", "Tidak Ada"},
@@ -284,6 +285,11 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         actions: [
           TextButton(
             onPressed: () {
+              setState(() {
+                _samples.clear();
+                _pokokCounter = 1;
+                dropdownSelections.clear();
+              });
               Navigator.of(context).popUntil((route) => route.isFirst);
               Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()));
             },
@@ -309,29 +315,39 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kebun"),
               value: selectedKebun,
-              onChanged: (val) => setState(() {
-                selectedKebun = val;
-                selectedDivisi = null;
-                selectedBlok = null;
-              }),
+              onChanged: isLocked ? null : (val) => setState(() {
+                setState(() {
+                  selectedKebun = val;
+                  selectedDivisi = null;
+                  selectedBlok = null;
+                });
+                
+              }),              
               items: kebunOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Divisi"),
               value: selectedDivisi,
-              onChanged: (val) => setState(() {
-                selectedDivisi = val;
+              onChanged: isLocked ? null : (val) => setState(() {
+                setState(() {
+                  selectedDivisi = val;
                 selectedBlok = null;
+                });
+    
               }),
               items: divisiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kode Blok"),
               value: selectedBlok,
-              onChanged: (val) => setState(() => selectedBlok = val),
+              onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
               items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
-            TextField(controller: _rotasiController, decoration: const InputDecoration(labelText: "Rotasi (hari)")),
+            TextField(
+              controller: _rotasiController,
+              decoration: const InputDecoration(labelText: "Rotasi (hari)"),
+              enabled: !isLocked,
+            ),
             const Divider(),
             const Text("Masukkan Pokok Sample", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             TextField(controller: _barisController, decoration: const InputDecoration(labelText: "Baris ke-")),
