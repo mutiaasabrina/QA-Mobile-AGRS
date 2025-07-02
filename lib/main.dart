@@ -122,7 +122,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   int pokokCounter = 1;
   bool _dipanen = false;
   final _buahDipanenController = TextEditingController();
-  final _buahTidakDipanenController = TextEditingController();
+  final _buahMatangTidakDipanenController = TextEditingController();
+  final _buahBusukTidakDipanenController = TextEditingController();
   final _lfTinggalController = TextEditingController();
   final _tphTinggalController = TextEditingController();
   final _buahTinggalController = TextEditingController();
@@ -182,7 +183,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         "pokok": _pokokCounter.toString(),
         "dipanen": _dipanen,
         "buahDipanen": _buahDipanenController.text,
-        "buahTidakDipanen": _buahTidakDipanenController.text,
+        "buahMatangTidakDipanen": _buahMatangTidakDipanenController.text,
+        "buahBusukTidakDipanen": _buahBusukTidakDipanenController.text,
         "lfTinggal": _lfTinggalController.text,
         "tphTinggal": _tphTinggalController.text,
         "buahTinggal": _buahTinggalController.text,
@@ -198,7 +200,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     _barisController.clear();
     _dipanen = false;
     _buahDipanenController.clear();
-    _buahTidakDipanenController.clear();
+    _buahMatangTidakDipanenController.clear();
+    _buahBusukTidakDipanenController.clear();
     _lfTinggalController.clear();
     _tphTinggalController.clear();
     _buahTinggalController.clear();
@@ -241,7 +244,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
 
     int totalDipanen = _samples.where((s) => s['dipanen'] == true).length;
     int totalBuahDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahDipanen'] ?? '0')!);
-    int totalBuahTidakDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTidakDipanen'] ?? '0')!);
+    int totalBuahMatangTidakDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahMatangTidakDipanen'] ?? '0')!);
+    int totalBuahBusukTidakDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahBusukTidakDipanen'] ?? '0')!);
     int totalLfTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['lfTinggal'] ?? '0')!);
     int totalTphTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['tphTinggal'] ?? '0')!);
     int totalBuahTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTinggal'] ?? '0')!);
@@ -255,8 +259,9 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     result.writeln("Rotasi: ${_rotasiController.text} hari\n");
     result.writeln("Jumlah Pokok Sample: ${_samples.length}");
     result.writeln("Pkk dipanen: $totalDipanen");
-    result.writeln("Buah di Panen: $totalBuahDipanen Mtg/Bsk");
-    result.writeln("Buah Tdk di Panen: $totalBuahTidakDipanen Mtg/Bsk");
+    result.writeln("Buah di Panen: $totalBuahDipanen Jjg");
+    result.writeln("Buah Matang Tdk di Panen: $totalBuahMatangTidakDipanen Jjg");
+    result.writeln("Buah Busuk Tdk di Panen: $totalBuahBusukTidakDipanen Jjg");
     result.writeln("LF Tinggal: $totalLfTinggal");
     result.writeln("LF Tinggal di TPH: $totalTphTinggal");
     result.writeln("Buah Tinggal: $totalBuahTinggal\n");
@@ -274,7 +279,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Ringkasan Data"),
+        title: const Text("Data Overview"),
         content: SingleChildScrollView(child: Text(result.toString())),
         actions: [
           TextButton(
@@ -337,12 +342,13 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               ],
             ),
             TextField(controller: _buahDipanenController, decoration: const InputDecoration(labelText: "Buah di Panen (Mtg/Bsk)")),
-            TextField(controller: _buahTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Tidak di Panen (Mtg/Bsk)")),
+            TextField(controller: _buahMatangTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Matang Tidak di Panen (Jjg)")),
+            TextField(controller: _buahBusukTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Busuk Tidak di Panen (Jjg)")),
             TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (pr,pk,lp,pp)")),
             TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
             TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (pr,pk,lp,pp)")),
             const Divider(),
-            _buildDropdown("Kondisi Circle", ["Baik", "Semak", "Anak Sawit", "Sampah"], "Kondisi Circle"),
+            _buildDropdown("Kondisi Circle", ["Baik", "Semak", "Dominan Anak Sawit", "Dominan Sampah (Berondolan Busuk)"], "Kondisi Circle"),
             _buildDropdown("Kondisi Path", ["Baik", "Tidak Baik"], "Kondisi Path"),
             _buildDropdown("Kondisi TPH", ["Baik", "Tidak Baik"], "Kondisi TPH"),
             _buildDropdown("Lalang", ["Ada", "Tidak Ada"], "Lalang"),
