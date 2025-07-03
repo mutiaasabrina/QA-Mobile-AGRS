@@ -22,22 +22,76 @@ class QADatabase {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
-  Future _createDB(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE qa_samples (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        tanggal TEXT,
-        nama_petugas TEXT,
-        kebun TEXT,
-        divisi TEXT,
-        blok TEXT,
-        rotasi INTEGER,
-        jumlah_pokok INTEGER,
-        summary TEXT,
-        is_synced INTEGER
-      )
-    ''');
-  }
+ Future _createDB(Database db, int version) async {
+  await db.execute('''
+    CREATE TABLE qa_samples (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tanggal TEXT,
+      nama_petugas TEXT,
+      kebun TEXT,
+      divisi TEXT,
+      blok TEXT,
+      rotasi INTEGER,
+      jumlah_pokok INTEGER,
+      pkk_dipanen INTEGER,
+      buah_dipanen INTEGER,
+      buah_matang_tidak_dipanen INTEGER,
+      buah_busuk_tidak_dipanen INTEGER,
+      lf_tinggal INTEGER,
+      lf_tinggal_tph INTEGER,
+      buah_tinggal INTEGER,
+
+      kondisi_circle_baik INTEGER,
+      kondisi_circle_semak INTEGER,
+      kondisi_circle_dominan_anak_sawit INTEGER,
+      kondisi_circle_dominan_sampah INTEGER,
+
+      kondisi_path_baik INTEGER,
+      kondisi_path_tidak_baik INTEGER,
+
+      kondisi_tph_baik INTEGER,
+      kondisi_tph_tidak_baik INTEGER,
+
+      lalang_ada INTEGER,
+      lalang_tidak_ada INTEGER,
+
+      anak_kayu_ada INTEGER,
+      perumpung_ada INTEGER,
+      perumpung_tidak_ada INTEGER,
+      purun_tikus_ada INTEGER,
+      purun_tikus_tidak_ada INTEGER,
+      pakis_udang_ada INTEGER,
+      pakis_udang_tidak_ada INTEGER,
+      titi_panen_ada INTEGER,
+      titi_panen_tidak_ada INTEGER,
+
+      jalan_dan_jembatan_baik INTEGER,
+      jalan_dan_jembatan_sedang INTEGER,
+      jalan_dan_jembatan_jelek INTEGER,
+
+      pruning_baik INTEGER,
+      pruning_over INTEGER,
+      pruning_sengkleh INTEGER,
+      pruning_under INTEGER,
+
+      susunan_pelepah_rapi INTEGER,
+      susunan_pelepah_tidak_rapi INTEGER,
+
+      serangan_tikus_ada INTEGER,
+      serangan_tikus_tidak_ada INTEGER,
+      serangan_rayap_ada INTEGER,
+      serangan_rayap_tidak_ada INTEGER,
+      thirathaba_ada INTEGER,
+      thirathaba_tidak_ada INTEGER,
+      updpks_ada INTEGER,
+      updpks_tidak_ada INTEGER,
+
+      is_synced INTEGER,
+      timestamp_sync TEXT
+    )
+  ''');
+}
+
 
   Future<int> insertQA(Map<String, dynamic> data) async {
     final db = await instance.database;

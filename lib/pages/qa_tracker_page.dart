@@ -45,16 +45,51 @@ class _QATrackerPageState extends State<QATrackerPage> {
                     title: Text("${qa['kebun']} - ${qa['divisi']} - ${qa['blok']}"),
                     subtitle: Text("Rotasi: ${qa['rotasi']} hari\nPokok: ${qa['jumlah_pokok']}"),
                     trailing: isSynced
-                        ? const Icon(Icons.check_circle, color: Colors.green)
-                        : ElevatedButton(
-                            child: const Text("Sync"),
-                            onPressed: () {
-                              // TODO: Sync ke spreadsheet
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                  content: Text("Fitur sync coming soon!")));
-                            },
-                          ),
-                  ),
+    ? const Icon(Icons.check_circle, color: Colors.green)
+    : Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton(
+            child: const Text("Sync"),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Fitur sync coming soon!"))
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Hapus Data"),
+                  content: const Text("Yakin ingin menghapus data ini?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text("Batal"),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text("Hapus"),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                final db = await QADatabase.instance.database;
+                await db.delete('qa_samples', where: 'id = ?', whereArgs: [qa['id']]);
+                _loadQAData(); // Refresh list setelah hapus
+              }
+            },
+          ),
+        ],
+      ),
+
+                ),
                 );
               },
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:qa_agronomy/database/qa_database.dart';
 import '../utils/constants.dart';
 import 'menu_page.dart';
 
@@ -107,7 +108,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     _buahTinggalController.clear();
   }
 
-  void _saveAll() {
+  void _saveAll() async {
     if (_samples.isEmpty || selectedKebun == null || selectedDivisi == null || selectedBlok == null || _namaPetugasController.text.isEmpty || _rotasiController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
       return;
@@ -175,8 +176,72 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         result.writeln("  - $opt: $count");
       }
     });
+    // Hitung semua kolom dropdown
+    Map<String, dynamic> dropdownCounts = {};
+    dropdownCounters.forEach((key, value){
+      dropdownCounts[key.replaceAll(': ', '_')] = value;
+    });
 
-    showDialog(
+    // Gabung data jadi satu Map
+    final qaData = {
+      'tanggal': _tanggalPeriksa,
+      'nama_petugas': _namaPetugasController.text,
+      'kebun': selectedKebun,
+      'divisi': selectedDivisi,
+      'blok': selectedBlok,
+      'rotasi': int.tryParse(_rotasiController.text) ?? 0,
+      'jumlah_pokok': _samples.length,
+      'pkk_dipanen': totalDipanen,
+      'buah_dipanen': totalBuahDipanen,
+      'buah_matang_tidak_dipanen': totalBuahMatangTidakDipanen,
+      'buah_busuk_tidak_dipanen': totalBuahBusukTidakDipanen,
+      'lf_tinggal': totalLfTinggal,
+      'lf_tinggal_tph': totalTphTinggal,
+      'buah_tinggal': totalBuahTinggal,
+      'is_synced': 0,
+      'timestamp_sync': null,
+
+      // Ini bagian dropdown counter
+      'kondisi_circle_baik': dropdownCounters['Kondisi Circle: Baik'] ?? 0,
+      'kondisi_circle_semak': dropdownCounters['Kondisi Circle: Semak'] ?? 0,
+      'kondisi_circle_dominan_anak_sawit': dropdownCounters['Kondisi Circle: Dominan Anak Sawit'] ?? 0,
+      'kondisi_circle_dominan_sampah': dropdownCounters['Kondisi Circle: Dominan Sampah (Berondolan Busuk)'] ?? 0,
+      'kondisi_path_baik': dropdownCounters['Kondisi Path: Baik'] ?? 0,
+      'kondisi_path_tidak_baik': dropdownCounters['Kondisi Path: Tidak Baik'] ?? 0,
+      'kondisi_tph_baik': dropdownCounters['Kondisi TPH: Baik'] ?? 0,
+      'kondisi_tph_tidak_baik': dropdownCounters['Kondisi TPH: Tidak Baik'] ?? 0,
+      'lalang_ada': dropdownCounters['Lalang: Ada'] ?? 0,
+      'lalang_tidak_ada': dropdownCounters['Lalang: Tidak Ada'] ?? 0,
+      'anak_kayu_ada': dropdownCounters['Anak Kayu: Ada'] ?? 0,
+      'perumpung_ada': dropdownCounters['Perumpung: Ada'] ?? 0,
+      'perumpung_tidak_ada': dropdownCounters['Perumpung: Tidak Ada'] ?? 0,
+      'purun_tikus_ada': dropdownCounters['Purun Tikus: Ada'] ?? 0,
+      'purun_tikus_tidak_ada': dropdownCounters['Purun Tikus: Tidak Ada'] ?? 0,
+      'pakis_udang_ada': dropdownCounters['Pakis Udang: Ada'] ?? 0,
+      'pakis_udang_tidak_ada': dropdownCounters['Pakis Udang: Tidak Ada'] ?? 0,
+      'titi_panen_ada': dropdownCounters['Titi Panen: Ada'] ?? 0,
+      'titi_panen_tidak_ada': dropdownCounters['Titi Panen: Tidak Ada'] ?? 0,
+      'jalan_dan_jembatan_baik': dropdownCounters['Jalan dan Jembatan: Baik'] ?? 0,
+      'jalan_dan_jembatan_sedang': dropdownCounters['Jalan dan Jembatan: Sedang'] ?? 0,
+      'jalan_dan_jembatan_jelek': dropdownCounters['Jalan dan Jembatan: Jelek'] ?? 0,
+      'pruning_baik': dropdownCounters['Pruning: Baik'] ?? 0,
+      'pruning_over': dropdownCounters['Pruning: Over'] ?? 0,
+      'pruning_sengkleh': dropdownCounters['Pruning: Sengkleh'] ?? 0,
+      'pruning_under': dropdownCounters['Pruning: Under'] ?? 0,
+      'susunan_pelepah_rapi': dropdownCounters['Susunan Pelepah: Rapi'] ?? 0,
+      'susunan_pelepah_tidak_rapi': dropdownCounters['Susunan Pelepah: Tidak Rapi'] ?? 0,
+      'serangan_tikus_ada': dropdownCounters['Serangan Tikus: Ada'] ?? 0,
+      'serangan_tikus_tidak_ada': dropdownCounters['Serangan Tikus: Tidak Ada'] ?? 0,
+      'serangan_rayap_ada': dropdownCounters['Serangan Rayap: Ada'] ?? 0,
+      'serangan_rayap_tidak_ada': dropdownCounters['Serangan Rayap: Tidak Ada'] ?? 0,
+      'thirathaba_ada': dropdownCounters['Thirathaba: Ada'] ?? 0,
+      'thirathaba_tidak_ada': dropdownCounters['Thirathaba: Tidak Ada'] ?? 0,
+      'updpks_ada': dropdownCounters['UPDPKS: Ada'] ?? 0,
+      'updpks_tidak_ada': dropdownCounters['UPDPKS: Tidak Ada'] ?? 0,
+    };
+    await QADatabase.instance.insertQA(qaData);
+
+     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Data Overview"),
@@ -297,7 +362,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               Column(
                 children: _samples.map((p) => ListTile(
                       title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
-                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${p['buahTidakDipanen']}"),
+                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${int.tryParse(p['buahMatangTidakDipanen'] ?? '0')! + int.tryParse(p['buahBusukTidakDipanen'] ?? '0')!}"),
                     )).toList(),
               ),
             const SizedBox(height: 16),
