@@ -56,6 +56,7 @@ class QADatabase {
       lalang_tidak_ada INTEGER,
 
       anak_kayu_ada INTEGER,
+      anak_kayu_tidak_ada INTEGER,
       perumpung_ada INTEGER,
       perumpung_tidak_ada INTEGER,
       purun_tikus_ada INTEGER,
