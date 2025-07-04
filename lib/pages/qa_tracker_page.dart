@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database.dart';
+import 'package:qa_agronomy/gsheet_service.dart';
 
 class QATrackerPage extends StatefulWidget {
   const QATrackerPage({super.key});
@@ -128,10 +129,15 @@ class _QATrackerPageState extends State<QATrackerPage> {
                             children: [
                               ElevatedButton(
                                 child: const Text("Sync"),
-                                onPressed: () {
+                                onPressed: () async {
+                                  final gsheet = await GSheetService.init();
+                                  await gsheet.insertQA(qa);
+                                  await QADatabase.instance.updateSyncStatus(qa['id'], true);
+
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Fitur sync coming soon!")),
+                                    const SnackBar(content: Text("Berhasil Sinkronisasi Data ke Spreadsheet!")),
                                   );
+                                  _loadQAData(); // Refresh
                                 },
                               ),
                               const SizedBox(width: 8),
