@@ -213,6 +213,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'lalang_ada': dropdownCounters['Lalang: Ada'] ?? 0,
       'lalang_tidak_ada': dropdownCounters['Lalang: Tidak Ada'] ?? 0,
       'anak_kayu_ada': dropdownCounters['Anak Kayu: Ada'] ?? 0,
+      'anak_kayu_tidak_ada': dropdownCounters['Anak Kayu: Tidak Ada'] ?? 0,
       'perumpung_ada': dropdownCounters['Perumpung: Ada'] ?? 0,
       'perumpung_tidak_ada': dropdownCounters['Perumpung: Tidak Ada'] ?? 0,
       'purun_tikus_ada': dropdownCounters['Purun Tikus: Ada'] ?? 0,
