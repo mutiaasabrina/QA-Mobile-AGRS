@@ -130,15 +130,29 @@ class _QATrackerPageState extends State<QATrackerPage> {
                               ElevatedButton(
                                 child: const Text("Sync"),
                                 onPressed: () async {
-                                  final gsheet = await GSheetService.init();
-                                  await gsheet.insertQA(qa);
-                                  await QADatabase.instance.updateSyncStatus(qa['id'], true);
+                                  try {
+                                    final gsheet = await GSheetService.init();
+                                    await gsheet.insertQA(qa);
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Berhasil Sinkronisasi Data ke Spreadsheet!")),
-                                  );
-                                  _loadQAData(); // Refresh
-                                },
+                                    final nowFormatted = DateFormat('dd MMM yyyy HH:mm').format(DateTime.now());
+
+                                    await QADatabase.instance.updateSyncStatusWithTimestamp(
+                                      qa['id'],
+                                      true,
+                                      nowFormatted,
+                                    );
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Berhasil Sinkronisasi Data ke Spreadsheet!")),
+                                    );
+                                    _loadQAData(); // Refresh
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text("Gagal Sync: $e")),
+                                    );
+                                  }
+                                }, // Refresh
+                                
                               ),
                               const SizedBox(width: 8),
                               IconButton(

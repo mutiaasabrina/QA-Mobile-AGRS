@@ -57,12 +57,16 @@ class QADatabase {
 
       anak_kayu_ada INTEGER,
       anak_kayu_tidak_ada INTEGER,
+
       perumpung_ada INTEGER,
       perumpung_tidak_ada INTEGER,
+
       purun_tikus_ada INTEGER,
       purun_tikus_tidak_ada INTEGER,
+
       pakis_udang_ada INTEGER,
       pakis_udang_tidak_ada INTEGER,
+
       titi_panen_ada INTEGER,
       titi_panen_tidak_ada INTEGER,
 
@@ -94,7 +98,7 @@ class QADatabase {
 }
 
 
-  Future<int> insertQA(Map<String, dynamic> data) async {
+ Future<int> insertQA(Map<String, dynamic> data) async {
     final db = await instance.database;
     return await db.insert('qa_samples', data);
   }
@@ -123,11 +127,15 @@ class QADatabase {
     );
   }
 
-  Future<void> updateSyncStatus(int id, bool synced) async {
+  // ✅ Versi baru: dengan timestamp custom (format cantik)
+  Future<void> updateSyncStatusWithTimestamp(int id, bool synced, String timestamp) async {
     final db = await instance.database;
     await db.update(
       'qa_samples',
-      {'is_synced': synced ? 1 : 0},
+      {
+        'is_synced': synced ? 1 : 0,
+        'timestamp_sync': synced ? timestamp : null,
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
