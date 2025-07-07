@@ -68,7 +68,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       onChanged: (val) => setState(() {
         dropdownSelections[key] = val;
       }),
-      items: options.map((opt) => DropdownMenuItem(value: opt, child: Text(opt))).toList(),
+      items: options.map((opt) => DropdownMenuItem(value: opt, child: Text(opt, overflow: TextOverflow.ellipsis, softWrap: false, style: const TextStyle(fontSize: 14),))).toList(),
     );
   }
 
@@ -124,8 +124,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       "Perumpung": {"Ada", "Tidak Ada"},
       "Purun Tikus": {"Ada", "Tidak Ada"},
       "Pakis Udang": {"Ada", "Tidak Ada"},
-      "Titi Panen": {"Ada", "Tidak Ada"},
-      "Jalan dan Jembatan": {"Baik", "Sedang", "Jelek"},
+      "Titi Panen": {"Rasio Standar, Permanen, Kondisi Baik", "Rasio Standar, Semi Permanen, Kondisi Baik", "Rasio Kurang Standar, Semi Permanen, Kondisi Baik", "Rasio Kurang Standar, Permanen, Kondisi Rusak", "Tidak Ada Sama Sekali"},
+      "Jalan dan Jembatan": {"Jalan Rata (Tidak Lubang/Rel), Jembatan Permanen", "Jalan Kondisi Sedang, Jembatan Permanen", "Jalan Rusak Sebagian, Jembatan Rusak Sebagian", "Jalanan Dominan Rusak, Jembatan Rusak", "Jalan Rusak Parah, Jembatan Rusak Parah"},
       "Pruning": {"Baik", "Over", "Sengkleh", "Under"},
       "Susunan Pelepah": {"Rapi", "Tidak Rapi"},
       "Serangan Tikus": {"Ada", "Tidak Ada"},
@@ -220,11 +220,16 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'purun_tikus_tidak_ada': dropdownCounters['Purun Tikus: Tidak Ada'] ?? 0,
       'pakis_udang_ada': dropdownCounters['Pakis Udang: Ada'] ?? 0,
       'pakis_udang_tidak_ada': dropdownCounters['Pakis Udang: Tidak Ada'] ?? 0,
-      'titi_panen_ada': dropdownCounters['Titi Panen: Ada'] ?? 0,
-      'titi_panen_tidak_ada': dropdownCounters['Titi Panen: Tidak Ada'] ?? 0,
-      'jalan_dan_jembatan_baik': dropdownCounters['Jalan dan Jembatan: Baik'] ?? 0,
-      'jalan_dan_jembatan_sedang': dropdownCounters['Jalan dan Jembatan: Sedang'] ?? 0,
-      'jalan_dan_jembatan_jelek': dropdownCounters['Jalan dan Jembatan: Jelek'] ?? 0,
+      'titi_panen_kondisi_standar_permanen_baik': dropdownCounters['Titi Panen: Rasio Standar, Permanen, Kondisi Baik'] ?? 0,
+      'titi_panen_kondisi_standar_semi_permanen_baik': dropdownCounters['Titi Panen: Rasio Standar, Semi Permanen, Kondisi Baik'] ?? 0,
+      'titi_panen_kondisi_kurang_standar_semi_permanen_baik': dropdownCounters['Titi Panen: Rasio Kurang Standar, Semi Permanen, Kondisi Baik'] ?? 0,
+      'titi_panen_kondisi_kurang_standar_semi_permanen_rusak': dropdownCounters['Titi Panen: Rasio Kurang Standar, Semi Permanen, Kondisi Rusak'] ?? 0,
+      'titi_panen_kondisi_tidak_ada': dropdownCounters['Titi Panen: Tidak Ada Sama Sekali'] ?? 0,
+      'jalan_jembatan_rata_permanen': dropdownCounters['Jalan dan Jembatan: Jalan Rata (Tidak Lubang/Rel), Jembatan Permanen'] ?? 0,
+      'jalan_jembatan_sedang_permanen': dropdownCounters['Jalan dan Jembatan: Jalan Kondisi Sedang, Jembatan Permanen'] ?? 0,
+      'jalan_jembatan_rusak_sebagian': dropdownCounters['Jalan dan Jembatan: Jalan Rusak Sebagian, Jembatan Rusak Sebagian'] ?? 0,
+      'jalan_jembatan_dominan_rusak': dropdownCounters['Jalan dan Jembatan: Jalan Dominan Rusak, Jembatan Rusak'] ?? 0,
+      'jalan_jembatan_parah': dropdownCounters['Jalan dan Jembatan: Jalan Rusak Parah, Jembatan Rusak Parah'] ?? 0,
       'pruning_baik': dropdownCounters['Pruning: Baik'] ?? 0,
       'pruning_over': dropdownCounters['Pruning: Over'] ?? 0,
       'pruning_sengkleh': dropdownCounters['Pruning: Sengkleh'] ?? 0,
@@ -337,8 +342,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             _buildDropdown("Perumpung", ["Ada", "Tidak Ada"], "Perumpung"),
             _buildDropdown("Purun Tikus", ["Ada", "Tidak Ada"], "Purun Tikus"),
             _buildDropdown("Pakis Udang", ["Ada", "Tidak Ada"], "Pakis Udang"),
-            _buildDropdown("Titi Panen", ["Ada", "Tidak Ada"], "Titi Panen"),
-            _buildDropdown("Jalan dan Jembatan", ["Baik", "Sedang", "Jelek"], "Jalan dan Jembatan"),
+            _buildDropdown("Titi Panen", ["Rasio Standar, Permanen, Kondisi Baik", "Rasio Standar, Semi Permanen, Kondisi Baik", "Rasio Kurang Standar, Semi Permanen, Kondisi Baik", "Rasio Kurang Standar, Semi Permanen, Kondisi Rusak", "Tidak Ada Sama Sekali"], "Titi Panen"),
+            _buildDropdown("Jalan dan Jembatan", ["Jalan Rata (Tidak Lubang/Rel), Jembatan Permanen", "Jalan Kondisi Sedang, Jembatan Permanen", "Jalan Rusak Sebagian, Jembatan Rusak Sebagian", "Jalan Dominan Rusak, Jembatan Rusak", "Jalan Rusak Parah, Jembatan Rusak Parah"], "Jalan dan Jembatan"),
             _buildDropdown("Pruning", ["Baik", "Over", "Sengkleh", "Under"], "Pruning"),
             _buildDropdown("Susunan Pelepah", ["Rapi", "Tidak Rapi"], "Susunan Pelepah"),
             _buildDropdown("Serangan Tikus", ["Ada", "Tidak Ada"], "Serangan Tikus"),
@@ -363,7 +368,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               Column(
                 children: _samples.map((p) => ListTile(
                       title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
-                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${int.tryParse(p['buahMatangTidakDipanen'] ?? '0')! + int.tryParse(p['buahBusukTidakDipanen'] ?? '0')!}"),
+                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${(int.tryParse(p['buahMatangTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahBusukTidakDipanen'] ?? '0') ?? 0)}"),
                     )).toList(),
               ),
             const SizedBox(height: 16),

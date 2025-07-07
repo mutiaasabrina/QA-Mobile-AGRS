@@ -67,12 +67,17 @@ class QADatabase {
       pakis_udang_ada INTEGER,
       pakis_udang_tidak_ada INTEGER,
 
-      titi_panen_ada INTEGER,
-      titi_panen_tidak_ada INTEGER,
+      titi_panen_kondisi_standar_permanen_baik INTEGER,
+      titi_panen_kondisi_standar_semi_permanen_baik INTEGER,
+      titi_panen_kondisi_kurang_standar_semi_permanen_baik INTEGER,
+      titi_panen_kondisi_kurang_standar_semi_permanen_rusak INTEGER,
+      titi_panen_kondisi_tidak_ada INTEGER,
 
-      jalan_dan_jembatan_baik INTEGER,
-      jalan_dan_jembatan_sedang INTEGER,
-      jalan_dan_jembatan_jelek INTEGER,
+      jalan_jembatan_rata_permanen INTEGER,
+      jalan_jembatan_sedang_permanen INTEGER,
+      jalan_jembatan_rusak_sebagian INTEGER,
+      jalan_jembatan_dominan_rusak INTEGER,
+      jalan_jembatan_parah INTEGER,
 
       pruning_baik INTEGER,
       pruning_over INTEGER,

@@ -71,12 +71,17 @@ class GSheetService {
     'pakis_udang_ada',
     'pakis_udang_tidak_ada',
 
-    'titi_panen_ada',
-    'titi_panen_tidak_ada',
+    'titi_panen_kondisi_standar_permanen_baik',
+    'titi_panen_kondisi_standar_semi_permanen_baik',
+    'titi_panen_kondisi_kurang_standar_semi_permanen_baik',
+    'titi_panen_kondisi_kurang_standar_semi_permanen_rusak',
+    'titi_panen_kondisi_tidak_ada',
 
-    'jalan_dan_jembatan_baik',
-    'jalan_dan_jembatan_sedang',
-    'jalan_dan_jembatan_jelek',
+    'jalan_jembatan_rata_permanen',
+    'jalan_jembatan_sedang_permanen',
+    'jalan_jembatan_rusak_sebagian',
+    'jalan_jembatan_dominan_rusak',
+    'jalan_jembatan_parah',
 
     'pruning_baik',
     'pruning_over',
