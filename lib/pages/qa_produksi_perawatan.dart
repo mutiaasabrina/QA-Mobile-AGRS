@@ -164,8 +164,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     result.writeln("Buah Matang Tdk di Panen: $totalBuahMatangTidakDipanen Jjg");
     result.writeln("Buah Busuk Tdk di Panen: $totalBuahBusukTidakDipanen Jjg");
     result.writeln("LF Tinggal: $totalLfTinggal");
-    result.writeln("LF Tinggal di TPH: $totalTphTinggal");
-    result.writeln("Buah Tinggal: $totalBuahTinggal\n");
+    result.writeln("LF Tinggal (Pr,PP,TPH): $totalTphTinggal");
+    result.writeln("Buah Tinggal (Pr,PP,TPH): $totalBuahTinggal\n");
     result.writeln("== Ringkasan Kondisi ==");
 
     dropdownOptions.forEach((label, options) {
