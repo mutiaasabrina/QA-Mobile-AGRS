@@ -22,6 +22,8 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   final String _tanggalPeriksa = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final String _tanggalPemupukan = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+  final Map<String, Map<String, dynamic>> _alatTaburData = {};
+
   String? selectedKebun;
   String? selectedDivisi;
   String? selectedBlok;
@@ -38,11 +40,15 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   String? selectedCaraAplikasi;
   String? selectedDosisUjiPetik;
 
+  String get _tenagaTaburKey => "${_tenagaTaburController.text.trim()}|${selectedBlok ??''}|$_tanggalPemupukan";
+
   bool _ujiPetik = false;
 
   final List<Map<String, dynamic>> _samples = [];
 
   bool get isLocked => _samples.isNotEmpty;
+
+  bool get isAlatTaburLocked => _alatTaburData.containsKey(_tenagaTaburKey);
 
   final List<String> kebunOptions = ['Inti', 'Plasma'];
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
@@ -104,39 +110,55 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   final List<String> dosisUjiOptions = ['Sesuai', 'Tidak Sesuai'];
 
   void _saveSample() {
-    if (_barisController.text.isEmpty ||
-    selectedLubangPocket == null ||
-    selectedPokokTerpupuk == null ||
-    selectedKondisiPiringan == null ||
-    selectedCaraAplikasi == null ||
-    (_ujiPetik && (selectedDosisUjiPetik == null || _jumlahSampleUjiPetikController.text.isEmpty))) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Lengkapi semua data pokok sample.")));
-      return;
+  if (_barisController.text.isEmpty ||
+      selectedLubangPocket == null ||
+      selectedPokokTerpupuk == null ||
+      selectedKondisiPiringan == null ||
+      selectedCaraAplikasi == null ||
+      (_ujiPetik && (selectedDosisUjiPetik == null || _jumlahSampleUjiPetikController.text.isEmpty))) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Lengkapi semua data pokok sample.")));
+    return;
+  }
+
+  setState(() {
+    _samples.add({
+      'baris': _barisController.text,
+      'lubangPocket': selectedLubangPocket,
+      'pokokTerpupuk': selectedPokokTerpupuk,
+      'kondisiPiringan': selectedKondisiPiringan,
+      'caraAplikasi': selectedCaraAplikasi,
+      'ujiPetik': _ujiPetik,
+      'jumlahSample': _ujiPetik ? _jumlahSampleUjiPetikController.text : '-',
+      'dosisAlatTabur': _ujiPetik ? selectedDosisUjiPetik : '-',
+      'tenagaTabur': _tenagaTaburController.text,
+    });
+
+    _barisController.clear();
+    selectedLubangPocket = null;
+    selectedPokokTerpupuk = null;
+    selectedKondisiPiringan = null;
+    selectedCaraAplikasi = null;
+    selectedDosisUjiPetik = null;
+    _jumlahSampleUjiPetikController.clear();
+    _ujiPetik = false;
+
+    // ✅ Simpan data alat tabur kalau belum pernah
+    if (!_alatTaburData.containsKey(_tenagaTaburKey)) {
+      _alatTaburData[_tenagaTaburKey] = {
+        'jumlah': _jumlahAlatTaburController.text,
+        'keseragaman': selectedKeseragaman,
+      };
     }
 
-    setState(() {
-      _samples.add({
-        'baris': _barisController.text,
-        'lubangPocket': selectedLubangPocket,
-        'pokokTerpupuk': selectedPokokTerpupuk,
-        'kondisiPiringan': selectedKondisiPiringan,
-        'caraAplikasi': selectedCaraAplikasi,
-        'ujiPetik': _ujiPetik,
-        'jumlahSample': _ujiPetik ? _jumlahSampleUjiPetikController.text : '-',
-        'dosisAlatTabur': _ujiPetik ? selectedDosisUjiPetik : '-',
-      });
-
-      _barisController.clear();
-      selectedLubangPocket = null;
-      selectedPokokTerpupuk = null;
-      selectedKondisiPiringan = null;
-      selectedCaraAplikasi = null;
-      selectedDosisUjiPetik = null;
-      _jumlahSampleUjiPetikController.clear();
-      _ujiPetik = false;
-    });
-  }
+    // ✅ Auto isi jika data sudah ada (kalau kamu edit tenaga ke yang lama)
+    final alatTabur = _alatTaburData[_tenagaTaburKey];
+    if (alatTabur != null) {
+      _jumlahAlatTaburController.text = alatTabur['jumlah'];
+      selectedKeseragaman = alatTabur['keseragaman'];
+    }
+  });
+}
 
   void _saveAll() {
     // Coming Soon: Simpan ke database + pindah ke tracker
@@ -182,18 +204,35 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
               items: jenisPupukOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis/Pokok"), enabled: !isLocked),
-            TextField(controller: _tenagaTaburController, decoration: const InputDecoration(labelText: "Nama Tenaga Tabur")),
+            TextField(
+                  controller: _tenagaTaburController,
+                  decoration: const InputDecoration(labelText: "Nama Tenaga Tabur"),
+                  onChanged: (_) {
+                    final alatTabur = _alatTaburData[_tenagaTaburKey];
+                    if (alatTabur != null) {
+                      setState(() {
+                        _jumlahAlatTaburController.text = alatTabur['jumlah'];
+                        selectedKeseragaman = alatTabur['keseragaman'];
+                      });
+                    } else {
+                      setState(() {
+                        _jumlahAlatTaburController.clear();
+                        selectedKeseragaman = null;
+                      });
+                    }
+                  },
+                ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "APD Pekerja"),
               value: selectedAPD,
               onChanged: isLocked ? null : (val) => setState(() => selectedAPD = val),
               items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
-            TextField(controller: _jumlahAlatTaburController, decoration: const InputDecoration(labelText: "Jumlah Alat Tabur"), keyboardType: TextInputType.number),
+            TextField(controller: _jumlahAlatTaburController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur", hintText: isAlatTaburLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !isAlatTaburLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Keseragaman Alat Tabur"),
               value: selectedKeseragaman,
-              onChanged: isLocked ? null : (val) => setState(() => selectedKeseragaman = val),
+              onChanged: isAlatTaburLocked ? null : (val) => setState(() => selectedKeseragaman = val),
               items: keseragamanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
