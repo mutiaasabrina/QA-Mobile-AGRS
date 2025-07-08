@@ -49,6 +49,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   bool get isLocked => _samples.isNotEmpty;
 
   bool get isAlatTaburLocked => _alatTaburData.containsKey(_tenagaTaburKey);
+  bool get isAPDLocked => isAlatTaburLocked;
 
   final List<String> kebunOptions = ['Inti', 'Plasma'];
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
@@ -148,6 +149,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       _alatTaburData[_tenagaTaburKey] = {
         'jumlah': _jumlahAlatTaburController.text,
         'keseragaman': selectedKeseragaman,
+        'apd': selectedAPD,
       };
     }
 
@@ -156,6 +158,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     if (alatTabur != null) {
       _jumlahAlatTaburController.text = alatTabur['jumlah'];
       selectedKeseragaman = alatTabur['keseragaman'];
+      selectedAPD = alatTabur['apd'];
     }
   });
 }
@@ -213,6 +216,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
                       setState(() {
                         _jumlahAlatTaburController.text = alatTabur['jumlah'];
                         selectedKeseragaman = alatTabur['keseragaman'];
+                        selectedAPD = alatTabur['apd'];
                       });
                     } else {
                       setState(() {
@@ -225,7 +229,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "APD Pekerja"),
               value: selectedAPD,
-              onChanged: isLocked ? null : (val) => setState(() => selectedAPD = val),
+              onChanged: isAPDLocked ? null : (val) => setState(() => selectedAPD = val),
               items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             TextField(controller: _jumlahAlatTaburController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur", hintText: isAlatTaburLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !isAlatTaburLocked,),
