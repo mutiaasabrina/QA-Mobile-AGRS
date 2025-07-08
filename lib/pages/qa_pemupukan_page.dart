@@ -299,9 +299,10 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
               ),
             ],
             const SizedBox(height: 12),
-            ElevatedButton(onPressed: _saveSample, child: const Text("Save Pokok Sample")),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save Pokok Sample")),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _saveAll, child: const Text("Save All (Coming Soon)")),
+            ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All (Coming Soon)")),
             const Divider(),
             const Text("Daftar Sample"),
             ..._samples.map((s) => ListTile(
