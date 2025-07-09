@@ -18,6 +18,9 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   final _jumlahAlatTaburController = TextEditingController();
   final _jumlahSampleUjiPetikController = TextEditingController();
   final _barisController = TextEditingController();
+  List<TextEditingController> _dosisSampleControllers =[];
+  String dosisUjiPetikResult ="";
+
 
   final String _tanggalPeriksa = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final String _tanggalPemupukan = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -38,7 +41,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   String? selectedPokokTerpupuk;
   String? selectedKondisiPiringan;
   String? selectedCaraAplikasi;
-  String? selectedDosisUjiPetik;
+ // String? selectedDosisUjiPetik;
 
   String get _tenagaTaburKey => "${_tenagaTaburController.text.trim()}|${selectedBlok ??''}|$_tanggalPemupukan";
 
@@ -116,7 +119,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       selectedPokokTerpupuk == null ||
       selectedKondisiPiringan == null ||
       selectedCaraAplikasi == null ||
-      (_ujiPetik && (selectedDosisUjiPetik == null || _jumlahSampleUjiPetikController.text.isEmpty))) {
+      (_ujiPetik && (_jumlahSampleUjiPetikController.text.isEmpty || _dosisSampleControllers.any((c)=> c.text.isEmpty)))) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Lengkapi semua data pokok sample.")));
     return;
@@ -131,7 +134,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       'caraAplikasi': selectedCaraAplikasi,
       'ujiPetik': _ujiPetik,
       'jumlahSample': _ujiPetik ? _jumlahSampleUjiPetikController.text : '-',
-      'dosisAlatTabur': _ujiPetik ? selectedDosisUjiPetik : '-',
+      'dosisAlatTabur': _ujiPetik ? dosisUjiPetikResult : '-',
       'tenagaTabur': _tenagaTaburController.text,
     });
 
@@ -140,9 +143,10 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     selectedPokokTerpupuk = null;
     selectedKondisiPiringan = null;
     selectedCaraAplikasi = null;
-    selectedDosisUjiPetik = null;
+    //selectedDosisUjiPetik = null;
     _jumlahSampleUjiPetikController.clear();
     _ujiPetik = false;
+    dosisUjiPetikResult ="";
 
     // ✅ Simpan data alat tabur kalau belum pernah
     if (!_alatTaburData.containsKey(_tenagaTaburKey)) {
@@ -168,6 +172,41 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Fitur simpan semua (Save All) coming soon.")),
     );
+  }
+
+  void _updateDosisSamples(){
+    final int jumlah = int.tryParse(_jumlahSampleUjiPetikController.text)??0;
+    _dosisSampleControllers = List.generate(jumlah, (_) => TextEditingController());
+    dosisUjiPetikResult =""; //Reset
+  }
+  
+  void _calculateDosisUjiPetik(){
+    if (_dosisController.text.isEmpty) return;
+
+    final double targetKg = double.tryParse(_dosisController.text)??0;
+    final double targetGram = targetKg * 1000;
+    final double total = _dosisSampleControllers.fold<double>(
+      0,
+      (sum, c) => sum + (double.tryParse(c.text)??0),
+    );
+    final selisih = (total - targetGram).abs();
+    setState(() {
+      dosisUjiPetikResult = selisih <= 50? "Sesuai": "Tidak Sesuai";
+    });
+  }
+
+  @override
+  void dispose() {
+    for (var c in _dosisSampleControllers) {
+      c.dispose();
+    }
+    _namaPetugasController.dispose();
+    _tenagaTaburController.dispose();
+    _dosisController.dispose();
+    _jumlahAlatTaburController.dispose();
+    _jumlahSampleUjiPetikController.dispose();
+    _barisController.dispose();
+    super.dispose();
   }
 
   @override
@@ -287,17 +326,46 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             SwitchListTile(
               title: const Text("Apakah melakukan uji petik?"),
               value: _ujiPetik,
-              onChanged: (val) => setState(() => _ujiPetik = val),
+              onChanged: (val) {
+                setState(() {
+                  _ujiPetik = val;
+                  if (!val){
+                    _dosisSampleControllers.clear();
+                    dosisUjiPetikResult="";
+                  }
+                });
+              },
             ),
             if (_ujiPetik) ...[
-              TextField(controller: _jumlahSampleUjiPetikController, decoration: const InputDecoration(labelText: "Jumlah sample uji petik")),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: "Dosis Alat Tabur"),
-                value: selectedDosisUjiPetik,
-                onChanged: (val) => setState(() => selectedDosisUjiPetik = val),
-                items: dosisUjiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-              ),
-            ],
+                TextField(
+                  controller: _jumlahSampleUjiPetikController,
+                  decoration: const InputDecoration(labelText: "Jumlah sample uji petik"),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) {
+                    setState(() {
+                      _updateDosisSamples();
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                ..._dosisSampleControllers.asMap().entries.map((entry) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: TextField(
+                    controller: entry.value,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: "Dosis Sample ${entry.key + 1} (gram)",
+                    ),
+                    onChanged: (_) => _calculateDosisUjiPetik(),
+                  ),
+                )),
+                const SizedBox(height: 8),
+                Text(
+                  "Dosis Alat Tabur: $dosisUjiPetikResult",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+              
             const SizedBox(height: 12),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save Pokok Sample")),
@@ -311,7 +379,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             ))
           ],
         ),
-     ),
+),
 );
 }
 }
