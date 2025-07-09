@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database.dart';
 import '../utils/constants.dart';
 import 'menu_page.dart';
+import 'qa_pemupukan_summary.dart';
 
 class QAPemupukanPage extends StatefulWidget {
   const QAPemupukanPage({super.key});
@@ -168,11 +169,81 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
 }
 
   void _saveAll() {
-    // Coming Soon: Simpan ke database + pindah ke tracker
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Fitur simpan semua (Save All) coming soon.")),
-    );
+  // Kelompokkan sample per tenaga tabur
+  final Map<String, List<Map<String, dynamic>>> perTenaga = {};
+  for (final sample in _samples) {
+    final key = sample['tenagaTabur'];
+    perTenaga.putIfAbsent(key, () => []).add(sample);
   }
+
+  final List<TenagaTaburSummary> tenagaList = perTenaga.entries.map((entry) {
+    final nama = entry.key;
+    final list = entry.value;
+    int countSample = list.length;
+
+    Map<String, int> countBy(String field) {
+      final Map<String, int> count = {};
+      for (final s in list) {
+        final val = s[field] ?? '-';
+        count[val] = (count[val] ?? 0) + 1;
+      }
+      return count;
+    }
+
+    final alatTabur = _alatTaburData.entries.firstWhere((e) => e.key.startsWith(nama)).value;
+
+    return TenagaTaburSummary(
+      nama: nama,
+      jumlahSample: countSample,
+      jumlahAlatTabur: alatTabur['jumlah'],
+      apd: alatTabur['apd'],
+      keseragaman: alatTabur['keseragaman'],
+      pocket: countBy('lubangPocket'),
+      pokokTerpupuk: countBy('pokokTerpupuk'),
+      piringan: countBy('kondisiPiringan'),
+      caraAplikasi: countBy('caraAplikasi'),
+      dosis: countBy('dosisAlatTabur'),
+    );
+  }).toList();
+
+  final summary = QAPemupukanSummary(
+    tanggalPeriksa: _tanggalPeriksa,
+    namaPetugas: _namaPetugasController.text,
+    kebun: selectedKebun ?? '',
+    divisi: selectedDivisi ?? '',
+    blok: selectedBlok ?? '',
+    tanggalPemupukan: _tanggalPemupukan,
+    jenisPupuk: selectedJenisPupuk ?? '',
+    dosis: _dosisController.text,
+    tenagaPemupuk: selectedTenagaPemupuk ?? '',
+    supervisi: selectedSupervisi ?? '',
+    fisikPupuk: selectedFisikPupuk ?? '',
+    tenagaTaburList: tenagaList,
+  );
+
+  final ringkasan = generateRingkasanText(summary);
+
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("Ringkasan QA Pemupukan"),
+      content: SingleChildScrollView(child: Text(ringkasan)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Batal"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+            // TODO: Simpan ke DB lokal + pindah ke tracker
+          },
+          child: const Text("Simpan & Lanjut"),
+        ),
+      ],
+),
+);
+}
 
   void _updateDosisSamples(){
     final int jumlah = int.tryParse(_jumlahSampleUjiPetikController.text)??0;
