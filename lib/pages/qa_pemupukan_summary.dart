@@ -39,6 +39,9 @@ class QAPemupukanSummary {
   final String supervisi;
   final String fisikPupuk;
   final List<TenagaTaburSummary> tenagaTaburList;
+  int getTotalSample(){
+    return tenagaTaburList.fold(0,(sum, e)=> sum +e.jumlahSample);
+  }
 
   QAPemupukanSummary({
     required this.tanggalPeriksa,
@@ -70,6 +73,7 @@ String generateRingkasanText(QAPemupukanSummary data) {
   buffer.writeln("Tenaga Pemupuk: ${data.tenagaPemupuk}");
   buffer.writeln("Supervisi: ${data.supervisi}");
   buffer.writeln("Fisik Pupuk: ${data.fisikPupuk}");
+  buffer.writeln("Total Poko Sample: ${data.getTotalSample()}");
 
   for (final t in data.tenagaTaburList) {
     buffer.writeln("\nTenaga Tabur: ${t.nama}");
@@ -79,8 +83,11 @@ String generateRingkasanText(QAPemupukanSummary data) {
     buffer.writeln("Keseragaman: ${t.keseragaman}");
 
     void addMap(String title, Map<String, int> map) {
-      buffer.writeln("  🔹 $title:");
+      buffer.writeln("🔹 $title:");
       map.forEach((key, value) {
+        if (key.isEmpty || key == "-") {
+          return;
+        }
         buffer.writeln("     - $key: $value");
       });
     }

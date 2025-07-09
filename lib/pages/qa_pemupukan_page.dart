@@ -400,9 +400,15 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
               onChanged: (val) {
                 setState(() {
                   _ujiPetik = val;
-                  if (!val){
-                    _dosisSampleControllers.clear();
-                    dosisUjiPetikResult="";
+
+                  for (final c in _dosisSampleControllers){
+                    c.dispose();
+                  }
+                  _dosisSampleControllers.clear();
+                  dosisUjiPetikResult="";
+                  if (val){
+                    final jumlah = int.tryParse(_jumlahSampleUjiPetikController.text)??0;
+                    _dosisSampleControllers = List.generate(jumlah, (_)=>TextEditingController());
                   }
                 });
               },
