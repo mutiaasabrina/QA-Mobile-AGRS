@@ -73,7 +73,7 @@ String generateRingkasanText(QAPemupukanSummary data) {
   buffer.writeln("Tenaga Pemupuk: ${data.tenagaPemupuk}");
   buffer.writeln("Supervisi: ${data.supervisi}");
   buffer.writeln("Fisik Pupuk: ${data.fisikPupuk}");
-  buffer.writeln("Total Poko Sample: ${data.getTotalSample()}");
+  buffer.writeln("Total Pokok Sample: ${data.getTotalSample()}");
 
   for (final t in data.tenagaTaburList) {
     buffer.writeln("\nTenaga Tabur: ${t.nama}");

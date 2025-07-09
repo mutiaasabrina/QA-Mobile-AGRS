@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:qa_agronomy/database/qa_database.dart';
 import '../utils/constants.dart';
 import 'menu_page.dart';
 import 'qa_pemupukan_summary.dart';
+import 'package:qa_agronomy/database/qa_database_pemupukan.dart';
+
+
 
 class QAPemupukanPage extends StatefulWidget {
   const QAPemupukanPage({super.key});
@@ -234,11 +236,34 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
           child: const Text("Batal"),
         ),
         ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-            // TODO: Simpan ke DB lokal + pindah ke tracker
-          },
-          child: const Text("Simpan & Lanjut"),
+          onPressed: () async {
+          Navigator.pop(context);
+
+          final totalSample = tenagaList.fold<int>(0, (sum, t) => sum + t.jumlahSample);
+
+          await QADatabasePemupukan.instance.insertQA({
+            'tanggal': summary.tanggalPeriksa,
+            'nama_petugas': summary.namaPetugas,
+            'kebun': summary.kebun,
+            'divisi': summary.divisi,
+            'blok': summary.blok,
+            'tanggal_pemupukan': summary.tanggalPemupukan,
+            'jenis_pupuk': summary.jenisPupuk,
+            'dosis': summary.dosis,
+            'tenaga_pemupuk': summary.tenagaPemupuk,
+            'supervisi': summary.supervisi,
+            'fisik_pupuk': summary.fisikPupuk,
+            'jumlah_pokok': totalSample,
+            'ringkasan': ringkasan,
+            'is_synced': 0,
+            'timestamp_sync': null,
+          });
+
+          // Pindah ke halaman tracker (coming soon)
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()));
+        },
+          child: const Text("Ok"),
         ),
       ],
 ),
@@ -447,7 +472,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save Pokok Sample")),
             const SizedBox(height: 16),
-            ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All (Coming Soon)")),
+            ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All")),
             const Divider(),
             const Text("Daftar Sample"),
             ..._samples.map((s) => ListTile(
