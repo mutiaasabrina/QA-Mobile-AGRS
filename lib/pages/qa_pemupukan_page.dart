@@ -240,6 +240,28 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
           Navigator.pop(context);
 
           final totalSample = tenagaList.fold<int>(0, (sum, t) => sum + t.jumlahSample);
+          int totalAlatTabur = _alatTaburData.length;
+          int totalTenagaKerja = perTenaga.length;
+          int totalUjiPetikAktif = _samples.where((s) => s['ujiPetik'] == true).length;
+          int totalUjiPetikNonAktif = _samples.where((s) => s['ujiPetik'] == false).length;
+          int totalDosisSesuai = _samples.where((s) => s['dosisAlatTabur'] == 'Sesuai').length;
+          int totalDosisTidakSesuai = _samples.where((s) => s['dosisAlatTabur'] == 'Tidak Sesuai').length;
+          int totalPokokTerpupuk = _samples.where((s) => s['pokokTerpupuk'] == 'Terpupuk').length;
+          int totalPokokTidakTerpupuk = _samples.where((s) => s['pokokTerpupuk'] == 'Tidak Terpupuk').length;
+          int totalPocketStandar = _samples.where((s) => s['lubangPocket'] == 'Standar').length;
+          int totalPocketTidakStandar = _samples.where((s) => s['lubangPocket'] == 'Tidak Standar').length;
+          int totalGawanganBaik = _samples.where((s) => s['kondisiPiringan'] == 'Baik').length;
+          int totalGawanganSemak = _samples.where((s) => s['kondisiPiringan'] == 'Ancak Semak atau Ada Gulma').length;
+          int totalAplikasiStandar = _samples.where((s) => s['caraAplikasi'] == 'Standar').length;
+          int totalAplikasiTidakStandar = _samples.where((s) => s['caraAplikasi'] == 'Tidak Standar').length;
+          Map<String, int> apdCount = {};
+          for (var tabur in _alatTaburData.values) {
+            final apd = tabur['apd'];
+            if (apd != null) apdCount[apd] = (apdCount[apd] ?? 0) + 1;
+          }
+          String mostCommonAPD = apdCount.entries.isEmpty ? '' : (apdCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).first.key;
+
+          String mostCommonFisikPupuk = selectedFisikPupuk ?? '';
 
           await QADatabasePemupukan.instance.insertQA({
             'tanggal': summary.tanggalPeriksa,
@@ -252,8 +274,23 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             'dosis': summary.dosis,
             'tenaga_pemupuk': summary.tenagaPemupuk,
             'supervisi': summary.supervisi,
-            'fisik_pupuk': summary.fisikPupuk,
+            'fisik_pupuk': mostCommonFisikPupuk,
             'jumlah_pokok': totalSample,
+            'total_alat_tabur': totalAlatTabur,
+            'total_tenaga_kerja': totalTenagaKerja,
+            'total_uji_petik_aktif': totalUjiPetikAktif,
+            'total_uji_petik_nonaktif': totalUjiPetikNonAktif,
+            'total_dosis_sesuai': totalDosisSesuai,
+            'total_dosis_tidak_sesuai': totalDosisTidakSesuai,
+            'pokok_terpupuk': totalPokokTerpupuk,
+            'pokok_tidak_terpupuk': totalPokokTidakTerpupuk,
+            'lubang_pocket_standar': totalPocketStandar,
+            'lubang_pocket_tidak_standar': totalPocketTidakStandar,
+            'gawangan_baik': totalGawanganBaik,
+            'gawangan_semak': totalGawanganSemak,
+            'cara_aplikasi_standar': totalAplikasiStandar,
+            'cara_aplikasi_tidak_standar': totalAplikasiTidakStandar,
+            'apd_pekerja': mostCommonAPD,
             'ringkasan': ringkasan,
             'is_synced': 0,
             'timestamp_sync': null,

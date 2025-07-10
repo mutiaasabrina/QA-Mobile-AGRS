@@ -33,8 +33,27 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   String? selectedKebun;
   String? selectedBlok;
 
+  String? selectedBeneficialPlant;
+  String? selectedPeilscale;
+
   final Map<String, String?> dropdownSelections = {};
   final Map<String, int> dropdownCounters = {};
+
+ final List<String> beneficialPlantOptions = [
+    'Semua ruas jalan terdapat tanaman rasio 10m2/ha',
+    'Salah satu MR atau CR saja, populasi sesuai rasio',
+    'Salah satu MR atau CR saja, populasi < rasio',
+    'Salah satu MR atau CR, jarang dan tidak terawat',
+    'Tidak dijumpai tanaman sama sekali'
+  ];
+
+  final List<String> peilscaleOptions = [
+    '> -30cm, kondisi baik, update',
+    '-30cm sampai -20cm , kondisi sedang, update',
+    '-20cm sampai -10cm, kondisi sedang, update',
+    '-10cm sampai 0cm, kondisi rusak, update',
+    '>0cm, kondisi rusak, tidak update'
+  ];
 
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
   final List<String> kebunOptions = ['Inti', 'Plasma'];
@@ -113,6 +132,37 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
       return;
     }
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Pertanyaan Tambahan"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: "Beneficial Plant"),
+              isExpanded: true,
+              value: selectedBeneficialPlant,
+              onChanged: (val) => setState(() => selectedBeneficialPlant = val),
+              items: beneficialPlantOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
+            ),
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: "Peilscale"),
+               isExpanded: true,
+              value: selectedPeilscale,
+              onChanged: (val) => setState(() => selectedPeilscale = val),
+              items: peilscaleOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Lanjut"),
+          ),
+        ],
+      ),
+    );
 
     dropdownCounters.clear();
     Map<String, Set<String>> dropdownOptions = {
@@ -167,6 +217,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     result.writeln("LF Tinggal (Pr,PP,TPH): $totalTphTinggal");
     result.writeln("Buah Tinggal (Pr,PP,TPH): $totalBuahTinggal\n");
     result.writeln("== Ringkasan Kondisi ==");
+    result.writeln("Beneficial Plant: $selectedBeneficialPlant");
+    result.writeln("Peilscale: $selectedPeilscale");
 
     dropdownOptions.forEach((label, options) {
       result.writeln("$label:");
@@ -202,6 +254,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'timestamp_sync': null,
 
       // Ini bagian dropdown counter
+      'beneficial_plant': selectedBeneficialPlant,
+      'peilscale': selectedPeilscale,
       'kondisi_circle_baik': dropdownCounters['Kondisi Circle: Baik'] ?? 0,
       'kondisi_circle_semak': dropdownCounters['Kondisi Circle: Semak'] ?? 0,
       'kondisi_circle_dominan_anak_sawit': dropdownCounters['Kondisi Circle: Dominan Anak Sawit'] ?? 0,

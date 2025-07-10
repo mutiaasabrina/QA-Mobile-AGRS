@@ -41,6 +41,9 @@ class QADatabase {
       lf_tinggal_tph INTEGER,
       buah_tinggal INTEGER,
 
+      beneficial_plant TEXT,
+      peilscale TEXT,
+
       kondisi_circle_baik INTEGER,
       kondisi_circle_semak INTEGER,
       kondisi_circle_dominan_anak_sawit INTEGER,

@@ -5,7 +5,8 @@ import 'package:flutter/services.dart' show rootBundle;
 
 class GSheetService {
   static const _spreadsheetId = '1I0dkJq30JSM-sUaGUhd0eZiAdeuVjI7Ls4rNLWd6bbE';
-  static const _sheetName = 'Testing';
+  static const _sheetNameProduksiPerawatan = 'Testing';
+  static const _sheetNamePemupukan = 'Testing Pemupukan';
 
   Worksheet? _sheet;
 
@@ -18,7 +19,7 @@ class GSheetService {
     final jsonCredentials = json.decode(jsonString);
     final gsheets = GSheets(jsonCredentials);
     final spreadsheet = await gsheets.spreadsheet(_spreadsheetId);
-    final sheet = await spreadsheet.worksheetByTitle(_sheetName);
+    final sheet = await spreadsheet.worksheetByTitle(_sheetNameProduksiPerawatan);
 
     final service = GSheetService._();
     service._sheet = sheet;
@@ -44,6 +45,9 @@ class GSheetService {
     'lf_tinggal',
     'lf_tinggal_tph',
     'buah_tinggal',
+
+    'beneficial_plant',
+    'peilscale',
 
     'kondisi_circle_baik',
     'kondisi_circle_semak',
@@ -107,4 +111,48 @@ class GSheetService {
   final values = orderedKeys.map((key) => data[key]?.toString() ?? '').toList();
   await _sheet!.values.appendRow(values);
 }
+Future<void> insertQAPemupukan(Map<String, dynamic> data) async {
+  final spreadsheet = await GSheets(json.decode(await rootBundle.loadString(
+    'assets/credentials/enginewaktuaplikasipemupukan-03e33861bae9.json'))).spreadsheet(_spreadsheetId);
+  final sheet = await spreadsheet.worksheetByTitle(_sheetNamePemupukan);
+  if (sheet == null) return;
+
+  final orderedKeys = [
+    'id',
+    'tanggal',
+    'nama_petugas',
+    'kebun',
+    'divisi',
+    'blok',
+    'tanggal_pemupukan',
+    'jenis_pupuk',
+    'dosis',
+    'tenaga_pemupuk',
+    'supervisi',
+    'fisik_pupuk',
+    'jumlah_pokok',
+    'total_alat_tabur',
+    'total_tenaga_kerja',
+    'total_uji_petik_aktif',
+    'total_uji_petik_nonaktif',
+    'total_dosis_sesuai',
+    'total_dosis_tidak_sesuai',
+    'pokok_terpupuk',
+    'pokok_tidak_terpupuk',
+    'lubang_pocket_standar',
+    'lubang_pocket_tidak_standar',
+    'gawangan_baik',
+    'gawangan_semak',
+    'cara_aplikasi_standar',
+    'cara_aplikasi_tidak_standar',
+    'apd_pekerja',
+    'ringkasan',
+    'is_synced',
+    'timestamp_sync',
+  ];
+
+  final values = orderedKeys.map((k) => data[k]?.toString() ?? '').toList();
+  await sheet.values.appendRow(values);
 }
+}
+

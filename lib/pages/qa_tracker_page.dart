@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_produksi_perawatan.dart';
 import 'package:qa_agronomy/database/qa_database_pemupukan.dart';
 import 'package:qa_agronomy/gsheet_service.dart';
+import 'package:sqflite/sqflite.dart';
 
 class QATrackerPage extends StatefulWidget {
   const QATrackerPage({super.key});
@@ -70,13 +71,15 @@ class _QATrackerPageState extends State<QATrackerPage> {
           : await QADatabasePemupukan.instance.database;
 
       final updatedQA = (await db.query(
-        'qa_samples',
-        where: 'id = ?',
+        isProduksi?'qa_samples':'qa_pemupukan_samples',
+        where: 'id =?',
         whereArgs: [qa['id']],
       )).first;
-
-      await gsheet.insertQA(updatedQA);
-
+      if(isProduksi){
+        await gsheet.insertQA(updatedQA);
+      }else{
+        await gsheet.insertQAPemupukan(updatedQA);
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Berhasil Sinkronisasi Data ke Spreadsheet!")),
       );
@@ -89,7 +92,7 @@ class _QATrackerPageState extends State<QATrackerPage> {
     }
   }
 
-  Future<void> _deleteQA(Map<String, dynamic> qa, {required bool isProduksi}) async {
+  Future<void> _deleteQA(Map<String, dynamic> qa, {required String tableName, required Database db}) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -103,63 +106,68 @@ class _QATrackerPageState extends State<QATrackerPage> {
     );
 
     if (confirm == true) {
-      final db = isProduksi
-          ? await QADatabase.instance.database
-          : await QADatabasePemupukan.instance.database;
-
-      await db.delete('qa_samples', where: 'id = ?', whereArgs: [qa['id']]);
+      await db.delete(tableName, where: 'id = ?', whereArgs: [qa['id']]);
       _loadQAData();
     }
   }
 
-  Widget _buildListSection(String title, List<Map<String, dynamic>> list, {required bool isProduksi}) {
-    if (list.isEmpty) return const SizedBox.shrink();
+Widget _buildListSection(
+  String title,
+  List<Map<String, dynamic>> list, {
+  required bool isProduksi,
+  required String tableName,
+  required Future<Database> Function() getDb,
+}) {
+  if (list.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        ),
-        const SizedBox(height: 8),
-        ...list.map((qa) {
-          final isSynced = qa['is_synced'] == 1;
-          final timestamp = qa['timestamp_sync'] ?? '-';
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SizedBox(height: 16),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      ),
+      const SizedBox(height: 8),
+      ...list.map((qa) {
+        final isSynced = qa['is_synced'] == 1;
+        final timestamp = qa['timestamp_sync'] ?? '-';
 
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            child: ListTile(
-              title: Text("${qa['kebun']} - ${qa['divisi']} - ${qa['blok']}"),
-              subtitle: Text(
-                isProduksi
-                    ? "Rotasi: ${qa['rotasi']} hari\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp"
-                    : "Jenis Pupuk: ${qa['jenis_pupuk']}\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp",
-              ),
-              trailing: isSynced
-                  ? const Icon(Icons.check_circle, color: Colors.green)
-                  : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ElevatedButton(
-                          child: const Text("Sync"),
-                          onPressed: () => _syncToGSheet(qa, isProduksi: isProduksi),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteQA(qa, isProduksi: isProduksi),
-                        ),
-                      ],
-                    ),
-              onTap: () => _showDetailDialog(qa),
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: ListTile(
+            title: Text("${qa['kebun']} - ${qa['divisi']} - ${qa['blok']}"),
+            subtitle: Text(
+              isProduksi
+                  ? "Rotasi: ${qa['rotasi']} hari\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp"
+                  : "Jenis Pupuk: ${qa['jenis_pupuk']}\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp",
             ),
-          );
-        }),
-      ],
-    );
-  }
+            trailing: isSynced
+                ? const Icon(Icons.check_circle, color: Colors.green)
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        child: const Text("Sync"),
+                        onPressed: () => _syncToGSheet(qa, isProduksi: isProduksi),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          final db = await getDb();
+                          _deleteQA(qa, tableName: tableName, db: db);
+                        },
+                      ),
+                    ],
+                  ),
+            onTap: () => _showDetailDialog(qa),
+          ),
+        );
+      }),
+    ],
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -173,8 +181,20 @@ class _QATrackerPageState extends State<QATrackerPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildListSection("Produksi & Perawatan", _qaListProduksiPerawatan, isProduksi: true),
-                  _buildListSection("Pemupukan", _qaListPemupukan, isProduksi: false),
+                  _buildListSection(
+                    "Produksi & Perawatan",
+                    _qaListProduksiPerawatan,
+                    isProduksi: true,
+                    tableName: 'qa_samples',
+                    getDb: () => QADatabase.instance.database,
+                  ),
+                  _buildListSection(
+                    "Pemupukan",
+                    _qaListPemupukan,
+                    isProduksi: false,
+                    tableName: 'qa_pemupukan_samples',
+                    getDb: () => QADatabasePemupukan.instance.database,
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),

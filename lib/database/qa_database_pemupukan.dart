@@ -38,9 +38,24 @@ class QADatabasePemupukan {
         supervisi TEXT,
         fisik_pupuk TEXT,
         jumlah_pokok INTEGER,
+        total_alat_tabur INTEGER,
+        total_tenaga_kerja INTEGER,
+        total_uji_petik_aktif INTEGER,
+        total_uji_petik_nonaktif INTEGER,
+        total_dosis_sesuai INTEGER,
+        total_dosis_tidak_sesuai INTEGER,
+        pokok_terpupuk INTEGER,
+        pokok_tidak_terpupuk INTEGER,
+        lubang_pocket_standar INTEGER,
+        lubang_pocket_tidak_standar INTEGER,
+        gawangan_baik INTEGER,
+        gawangan_semak INTEGER,
+        cara_aplikasi_standar INTEGER,
+        cara_aplikasi_tidak_standar INTEGER,
+        apd_pekerja TEXT,
         ringkasan TEXT,
         is_synced INTEGER,
-        timestamp_sync TEXT
+        timestamp_sync TEXT
       )
     ''');
   }
