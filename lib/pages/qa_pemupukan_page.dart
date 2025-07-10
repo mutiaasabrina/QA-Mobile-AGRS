@@ -240,7 +240,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
           Navigator.pop(context);
 
           final totalSample = tenagaList.fold<int>(0, (sum, t) => sum + t.jumlahSample);
-          int totalAlatTabur = _alatTaburData.length;
+          final totalAlatTabur = _alatTaburData.values.fold<int>(0, (sum, e)=> sum + int.tryParse(e['jumlah']??'0')!);
           int totalTenagaKerja = perTenaga.length;
           int totalUjiPetikAktif = _samples.where((s) => s['ujiPetik'] == true).length;
           int totalUjiPetikNonAktif = _samples.where((s) => s['ujiPetik'] == false).length;

@@ -55,7 +55,7 @@ class QADatabasePemupukan {
         apd_pekerja TEXT,
         ringkasan TEXT,
         is_synced INTEGER,
-        timestamp_sync TEXT
+        timestamp_sync TEXT
       )
     ''');
   }
