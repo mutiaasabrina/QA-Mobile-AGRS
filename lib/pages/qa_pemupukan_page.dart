@@ -21,6 +21,8 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   final _jumlahAlatTaburController = TextEditingController();
   final _jumlahSampleUjiPetikController = TextEditingController();
   final _barisController = TextEditingController();
+  final _alatTaburSeragamController = TextEditingController();
+  final _alatTaburTidakSeragamController = TextEditingController();
   List<TextEditingController> _dosisSampleControllers =[];
   String dosisUjiPetikResult ="";
 
@@ -35,7 +37,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   String? selectedBlok;
   String? selectedJenisPupuk;
   String? selectedAPD;
-  String? selectedKeseragaman;
   String? selectedTenagaPemupuk;
   String? selectedSupervisi;
   String? selectedFisikPupuk;
@@ -88,7 +89,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     'Lengkap', 'Kurang dari 1 item', 'Kurang dari 2 item',
     'Kurang dari 3 item', 'Tidak ada APD'
   ];
-  final List<String> keseragamanOptions = ['Seragam', 'Tidak Seragam'];
   final List<String> tenagaPemupukOptions = [
     'Organisasi tetap, training rutin',
     'Organisasi tetap, training tidak rutin',
@@ -155,8 +155,9 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     if (!_alatTaburData.containsKey(_tenagaTaburKey)) {
       _alatTaburData[_tenagaTaburKey] = {
         'jumlah': _jumlahAlatTaburController.text,
-        'keseragaman': selectedKeseragaman,
         'apd': selectedAPD,
+        'seragam': _alatTaburSeragamController.text,
+        'tidakSeragam': _alatTaburTidakSeragamController.text,
       };
     }
 
@@ -164,7 +165,8 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     final alatTabur = _alatTaburData[_tenagaTaburKey];
     if (alatTabur != null) {
       _jumlahAlatTaburController.text = alatTabur['jumlah'];
-      selectedKeseragaman = alatTabur['keseragaman'];
+      _alatTaburSeragamController.text = alatTabur['seragam'];
+      _alatTaburTidakSeragamController.text = alatTabur['tidakSeragam'];
       selectedAPD = alatTabur['apd'];
     }
   });
@@ -199,7 +201,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       jumlahSample: countSample,
       jumlahAlatTabur: alatTabur['jumlah'],
       apd: alatTabur['apd'],
-      keseragaman: alatTabur['keseragaman'],
       pocket: countBy('lubangPocket'),
       pokokTerpupuk: countBy('pokokTerpupuk'),
       piringan: countBy('kondisiPiringan'),
@@ -241,6 +242,8 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
 
           final totalSample = tenagaList.fold<int>(0, (sum, t) => sum + t.jumlahSample);
           final totalAlatTabur = _alatTaburData.values.fold<int>(0, (sum, e)=> sum + int.tryParse(e['jumlah']??'0')!);
+          final totalSeragam = _alatTaburData.values.fold<int>(0, (sum, e)=> sum + int.tryParse(e['seragam']??'0')!);
+          final totalTidakSeragam = _alatTaburData.values.fold<int>(0, (sum, e)=> sum + int.tryParse(e['tidakSeragam']??'0')!);
           int totalTenagaKerja = perTenaga.length;
           int totalUjiPetikAktif = _samples.where((s) => s['ujiPetik'] == true).length;
           int totalUjiPetikNonAktif = _samples.where((s) => s['ujiPetik'] == false).length;
@@ -277,6 +280,8 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             'fisik_pupuk': mostCommonFisikPupuk,
             'jumlah_pokok': totalSample,
             'total_alat_tabur': totalAlatTabur,
+            'alat_tabur_seragam': totalSeragam,
+            'alat_tabur_tidak_seragam': totalTidakSeragam,
             'total_tenaga_kerja': totalTenagaKerja,
             'total_uji_petik_aktif': totalUjiPetikAktif,
             'total_uji_petik_nonaktif': totalUjiPetikNonAktif,
@@ -337,6 +342,8 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     _tenagaTaburController.dispose();
     _dosisController.dispose();
     _jumlahAlatTaburController.dispose();
+    _alatTaburSeragamController.dispose();
+    _alatTaburTidakSeragamController..dispose();
     _jumlahSampleUjiPetikController.dispose();
     _barisController.dispose();
     super.dispose();
@@ -387,13 +394,15 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
                     if (alatTabur != null) {
                       setState(() {
                         _jumlahAlatTaburController.text = alatTabur['jumlah'];
-                        selectedKeseragaman = alatTabur['keseragaman'];
+                        _alatTaburSeragamController.text = alatTabur['seragam'];
+                        _alatTaburTidakSeragamController.text = alatTabur['tidakSeragam'];
                         selectedAPD = alatTabur['apd'];
                       });
                     } else {
                       setState(() {
                         _jumlahAlatTaburController.clear();
-                        selectedKeseragaman = null;
+                        _alatTaburSeragamController.clear();
+                        _alatTaburTidakSeragamController.clear();
                       });
                     }
                   },
@@ -405,12 +414,8 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
               items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             TextField(controller: _jumlahAlatTaburController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur", hintText: isAlatTaburLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !isAlatTaburLocked,),
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: "Keseragaman Alat Tabur"),
-              value: selectedKeseragaman,
-              onChanged: isAlatTaburLocked ? null : (val) => setState(() => selectedKeseragaman = val),
-              items: keseragamanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-            ),
+            TextField(controller: _alatTaburSeragamController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur Seragam", hintText: isAlatTaburLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !isAlatTaburLocked,),
+            TextField(controller: _alatTaburTidakSeragamController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur Tidak Seragam", hintText: isAlatTaburLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !isAlatTaburLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Tenaga Pemupuk"),
               value: selectedTenagaPemupuk,

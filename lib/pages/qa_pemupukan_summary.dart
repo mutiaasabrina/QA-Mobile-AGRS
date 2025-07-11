@@ -5,7 +5,6 @@ class TenagaTaburSummary {
   final int jumlahSample;
   final String jumlahAlatTabur;
   final String apd;
-  final String keseragaman;
   final Map<String, int> pocket;
   final Map<String, int> pokokTerpupuk;
   final Map<String, int> piringan;
@@ -17,7 +16,6 @@ class TenagaTaburSummary {
     required this.jumlahSample,
     required this.jumlahAlatTabur,
     required this.apd,
-    required this.keseragaman,
     required this.pocket,
     required this.pokokTerpupuk,
     required this.piringan,
@@ -80,7 +78,7 @@ String generateRingkasanText(QAPemupukanSummary data) {
     buffer.writeln("Jumlah Sample: ${t.jumlahSample}");
     buffer.writeln("Alat Tabur: ${t.jumlahAlatTabur}");
     buffer.writeln("APD: ${t.apd}");
-    buffer.writeln("Keseragaman: ${t.keseragaman}");
+
 
     void addMap(String title, Map<String, int> map) {
       buffer.writeln("🔹 $title:");

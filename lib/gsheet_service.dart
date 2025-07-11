@@ -132,6 +132,8 @@ Future<void> insertQAPemupukan(Map<String, dynamic> data) async {
     'fisik_pupuk',
     'jumlah_pokok',
     'total_alat_tabur',
+    'alat_tabur_seragam',
+    'alat_tabur_tidak_seragam',
     'total_tenaga_kerja',
     'total_uji_petik_aktif',
     'total_uji_petik_nonaktif',

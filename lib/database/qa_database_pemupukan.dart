@@ -39,6 +39,8 @@ class QADatabasePemupukan {
         fisik_pupuk TEXT,
         jumlah_pokok INTEGER,
         total_alat_tabur INTEGER,
+        alat_tabur_seragam INTEGER,
+        alat_tabur_tidak_seragam INTEGER,
         total_tenaga_kerja INTEGER,
         total_uji_petik_aktif INTEGER,
         total_uji_petik_nonaktif INTEGER,
