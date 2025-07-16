@@ -257,12 +257,26 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
           int totalGawanganSemak = _samples.where((s) => s['kondisiPiringan'] == 'Ancak Semak atau Ada Gulma').length;
           int totalAplikasiStandar = _samples.where((s) => s['caraAplikasi'] == 'Standar').length;
           int totalAplikasiTidakStandar = _samples.where((s) => s['caraAplikasi'] == 'Tidak Standar').length;
-          Map<String, int> apdCount = {};
-          for (var tabur in _alatTaburData.values) {
+          const List<String> apdRank = [
+            'Lengkap',
+            'Kurang dari 1 item',
+            'Kurang dari 2 item',
+            'Kurang dari 3 item',
+            'Tidak ada APD',
+          ];
+          String worstApd ='';
+          int worstIndex = -1;
+
+          for (var tabur in _alatTaburData.values){
             final apd = tabur['apd'];
-            if (apd != null) apdCount[apd] = (apdCount[apd] ?? 0) + 1;
+            if (apd == null)continue;
+
+            final idx = apdRank.indexOf(apd);
+            if(idx > worstIndex){
+              worstIndex = idx;
+              worstApd = apd;
+            }
           }
-          String mostCommonAPD = apdCount.entries.isEmpty ? '' : (apdCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).first.key;
 
           String mostCommonFisikPupuk = selectedFisikPupuk ?? '';
 
@@ -295,7 +309,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             'gawangan_semak': totalGawanganSemak,
             'cara_aplikasi_standar': totalAplikasiStandar,
             'cara_aplikasi_tidak_standar': totalAplikasiTidakStandar,
-            'apd_pekerja': mostCommonAPD,
+            'apd_pekerja': worstApd,
             'ringkasan': ringkasan,
             'is_synced': 0,
             'timestamp_sync': null,

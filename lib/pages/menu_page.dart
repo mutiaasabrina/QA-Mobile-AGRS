@@ -3,6 +3,7 @@ import '../utils/constants.dart';
 import 'qa_produksi_perawatan.dart';
 import 'qa_tracker_page.dart';
 import 'qa_pemupukan_page.dart';
+import 'qa_chemist_menu_page.dart';
 
 class MenuPage extends StatelessWidget {
   const MenuPage({super.key});
@@ -46,7 +47,7 @@ class MenuPage extends StatelessWidget {
             ),
             child: const Text("QA Chemist"),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Coming Soon!")));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const QAChemistMenuPage()));
             },
           ),
           const SizedBox(height: 16),
