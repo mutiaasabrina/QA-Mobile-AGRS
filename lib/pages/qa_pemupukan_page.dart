@@ -315,7 +315,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             'timestamp_sync': null,
           });
 
-          // Pindah ke halaman tracker (coming soon)
+          
           Navigator.of(context).popUntil((route) => route.isFirst);
           Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()));
         },
@@ -357,7 +357,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     _dosisController.dispose();
     _jumlahAlatTaburController.dispose();
     _alatTaburSeragamController.dispose();
-    _alatTaburTidakSeragamController..dispose();
+    _alatTaburTidakSeragamController.dispose();
     _jumlahSampleUjiPetikController.dispose();
     _barisController.dispose();
     super.dispose();
@@ -526,7 +526,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
               
             const SizedBox(height: 12),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save Pokok Sample")),
+              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save & Tambah Pokok Sample")),
             const SizedBox(height: 16),
             ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All")),
             const Divider(),

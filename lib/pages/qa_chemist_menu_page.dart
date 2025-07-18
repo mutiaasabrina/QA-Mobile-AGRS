@@ -22,7 +22,7 @@ class QAChemistMenuPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const InputQAChemistPage()),
+                MaterialPageRoute(builder: (_) => const QAChemistPage()),
               );
             },
             child: const Text("Input QA Chemist"),
