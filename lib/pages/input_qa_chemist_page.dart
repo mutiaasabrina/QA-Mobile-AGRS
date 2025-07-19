@@ -9,14 +9,16 @@ class QAChemistPage extends StatefulWidget {
   State<QAChemistPage> createState() => _QAChemistPageState();
 }
 
-class _QAChemistPageState extends State<QAChemistPage> {
+class _QAChemistPageState extends State<QAChemistPage> {  
+  final String _tanggalPemeriksaan = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  final String _tanggalSemprot = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final _namaPetugasController = TextEditingController();
   final _luasanController = TextEditingController();
   final _barisController = TextEditingController();
+  final _jenisChemist = TextEditingController();
   final _jumlahSampleUjiPetikController = TextEditingController();
   List<TextEditingController> _volumeSampleControllers = [];
-
-  final String _tanggalPemeriksaan = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  final _namaPetugasSemprotController = TextEditingController();
 
   String? selectedEstate;
   String? selectedDivisi;
@@ -29,9 +31,14 @@ class _QAChemistPageState extends State<QAChemistPage> {
   String? selectedPerkakas;
   String? selectedPeletakan;
   String? selectedAPD;
+  String? selectedAlatSemprot;
+  String? selectedKeseragamanNozel;
   String? selectedPokokTersemprot;
 
+   String get _tenagaSemprotKey => "${_namaPetugasSemprotController.text.trim()}|${selectedBlok ??''}|$_tanggalSemprot";
+
   final List<Map<String, dynamic>> _pokokSamples = [];
+  bool get isLocked => _pokokSamples.isNotEmpty;
 
   bool _ujiPetik = false;
   String dosisKnapsack = "";
@@ -39,11 +46,19 @@ class _QAChemistPageState extends State<QAChemistPage> {
 
   final List<String> estateOptions = ['Inti', 'Plasma'];
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
-  final List<String> chemistOptions = ['Chemist CPT', 'Chemist Gawangan', 'Chemist CPT + Gawangan'];
+  final List<String> chemistType = ['Chemist CPT', 'Chemist Gawangan', 'Chemist CPT + Gawangan'];
   final List<String> apdOptions = [
     'Lengkap', 'Kurang dari 1 item', 'Kurang dari 2 item', 'Kurang dari 3 item', 'Tidak ada APD'
   ];
-  final List<String> yesNoOptions = ['Ya', 'Tidak'];
+  final List<String> bahanHerbisidaOptions = ['Sesuai sasaran, sesuai kebutuhan', 'Kurang sesuai sasaran, Sesuai kebutuhan', 'Sesuai gulma sasaran, tidak sesuai kebutuhan', 'Kurang sesuai gulma sasaran, tidak sesuai kebutuhan', 'Tidak Sesuai Gulma sasaran, Jumlah tidak sesuai'];
+  final List<String> programGulmaOptions = ['Terdapat RKB/RKH, Sesuai program Rotasi', 'Terdapat RKB/RKH,  kurang Sesuai program Rotasi', 'Terdapat RKB/RKH,  Tidak sesuai program Rotasi', 'Tidak terdapat RKB/RKH, Sesuai program Rotasi', 'Tidak terdapat RKB/RKH, Tidak Sesuai program Rotasi'];
+  final List<String> kartuOptions = ['Kartu lengkap dan Update', 'Kartu lengkap, Terlambat 1 Hari', 'Kartu lengkap, Terlambat > 2 Hari', 'Kartu tidak lengkap, terlambat 1 hari', 'Kartu dan Monitoring tidak ada'];
+  final List<String> kalibrasiOptions = ['Rutin dan Tercatat', 'Rutin dan tidak tercatat', 'Kurang rutin, tercatat', 'Tidak Rutin, tercatat', 'Tidak Pernah'];
+  final List<String> perkakasOptions = ['Gelas ukur terkalibrasi, Toolkit lengkap', 'Gelas ukur terkalibrasi, Toolkit tidak lengkap', 'Gelas ukur tidak terkalibrasi, Toolkit  lengkap', 'Gelas ukur tidak terkalibrasi, Toolkit  tidak lengkap', 'Tidak membawa keduanya'];
+  final List<String> peletakanOptions = ['Semua alat, tercatat', 'Semua alat, tidak tercatat', 'Sebagian alat saja dan tercatat', 'Sebagian alat saja, tidak tercatat', 'Tidak ada gudang dan pencatatan'];
+  final List<String> keseragamanNozel = ['Seragam', 'Tidak Seragam'];
+  final List<String> alatSemprot = ['Baik dan Lancar', 'Tidak Baik'];
+
   final List<String> pokokOptions = ['Tersemprot', 'Tidak Tersemprot'];
 
   final Map<String, List<String>> blokOptions = {
@@ -104,76 +119,71 @@ class _QAChemistPageState extends State<QAChemistPage> {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("Tanggal Pemeriksaan: $_tanggalPemeriksaan"),
+          Text("Tanggal Semprot: $_tanggalSemprot"),
           TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas")),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Estate"),
             value: selectedEstate,
-            onChanged: (val) => setState(() => selectedEstate = val),
+            onChanged: isLocked ? null : (val) => setState(() => selectedEstate = val),
             items: estateOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Divisi"),
             value: selectedDivisi,
-            onChanged: (val) => setState(() => selectedDivisi = val),
+            onChanged: isLocked ? null : (val) => setState(() => selectedDivisi = val),
             items: divisiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Blok"),
             value: selectedBlok,
-            onChanged: (val) => setState(() => selectedBlok = val),
+            onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
             items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
-          TextField(controller: _luasanController, decoration: const InputDecoration(labelText: "Luasan (Ha)")),
+          TextField(controller: _luasanController, decoration: const InputDecoration(labelText: "Luasan (Ha)"), enabled: !isLocked,),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Chemist"),
             value: selectedChemist,
-            onChanged: (val) => setState(() => selectedChemist = val),
-            items: chemistOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            onChanged: isLocked ? null : (val) => setState(() => selectedChemist = val),
+            items: chemistType.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
+          TextField(controller: _jenisChemist, decoration: const InputDecoration(labelText: "Jenis Chemist yang digunakan"), enabled: !isLocked,),
           TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis / Knapsack (liter/ha)"), keyboardType: TextInputType.number),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Bahan Herbisida"),
             value: selectedBahanHerbisida,
-            onChanged: (val) => setState(() => selectedBahanHerbisida = val),
-            items: ['ADA', 'TIDAK'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            onChanged: isLocked ? null : (val) => setState(() => selectedBahanHerbisida = val),
+            items: bahanHerbisidaOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 12),))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Program Pengendalian Gulma"),
             value: selectedProgramGulma,
-            onChanged: (val) => setState(() => selectedProgramGulma = val),
-            items: ['Sesuai', 'Tidak Sesuai'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            onChanged: isLocked ? null : (val) => setState(() => selectedProgramGulma = val),
+            items: programGulmaOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 12),))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Kartu Pengambilan dan Pencampuran"),
             value: selectedKartu,
-            onChanged: (val) => setState(() => selectedKartu = val),
-            items: yesNoOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            onChanged: isLocked ? null : (val) => setState(() => selectedKartu = val),
+            items: kartuOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Kalibrasi Alat & Nozel"),
             value: selectedKalibrasi,
-            onChanged: (val) => setState(() => selectedKalibrasi = val),
-            items: yesNoOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            onChanged: isLocked ? null : (val) => setState(() => selectedKalibrasi = val),
+            items: kalibrasiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Gelas Ukur & Perkakas"),
             value: selectedPerkakas,
-            onChanged: (val) => setState(() => selectedPerkakas = val),
-            items: yesNoOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            onChanged: isLocked ? null : (val) => setState(() => selectedPerkakas = val),
+            items: perkakasOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 14),))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Peletakan Alat Semprot"),
             value: selectedPeletakan,
-            onChanged: (val) => setState(() => selectedPeletakan = val),
+            onChanged: isLocked ? null : (val) => setState(() => selectedPeletakan = val),
             items: ['Sesuai', 'Tidak Sesuai'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: "APD Pekerja"),
-            value: selectedAPD,
-            onChanged: (val) => setState(() => selectedAPD = val),
-            items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-          ),
-
           const Divider(),
           const Text("Input Sample Uji Petik", style: TextStyle(fontWeight: FontWeight.bold)),
           SwitchListTile(
@@ -218,11 +228,26 @@ class _QAChemistPageState extends State<QAChemistPage> {
             decoration: const InputDecoration(labelText: "Baris ke-"),
             keyboardType: TextInputType.number,
           ),
+          TextField(
+            controller: _namaPetugasSemprotController, decoration: const InputDecoration(labelText: "Nama Petugas Semprot"),
+          ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Pokok Tersemprot"),
             value: selectedPokokTersemprot,
             onChanged: (val) => setState(() => selectedPokokTersemprot = val),
             items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          ),
+          DropdownButtonFormField<String>(
+            decoration: const InputDecoration(labelText: "Kondisi Alat Semprot"),
+            value: selectedAlatSemprot,
+            onChanged: (val) => setState(() => selectedAlatSemprot = val),
+            items: alatSemprot.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          ),
+          DropdownButtonFormField<String>(
+            decoration: const InputDecoration(labelText: "Keseragaman Nozel"),
+            value: selectedKeseragamanNozel,
+            onChanged: (val) => setState(() => selectedKeseragamanNozel = val),
+            items: keseragamanNozel.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "APD Pekerja"),
@@ -233,14 +258,16 @@ class _QAChemistPageState extends State<QAChemistPage> {
           const SizedBox(height: 8),
           ElevatedButton(
             onPressed: () {
-              if (_barisController.text.isNotEmpty && selectedPokokTersemprot != null && selectedAPD != null) {
+              if (_barisController.text.isNotEmpty && _namaPetugasSemprotController.text.isNotEmpty && selectedPokokTersemprot != null && selectedAPD != null) {
                 setState(() {
                   _pokokSamples.add({
                     'baris': _barisController.text,
+                    'nama_petugas': _namaPetugasSemprotController.text,
                     'tersemprot': selectedPokokTersemprot,
                     'apd': selectedAPD,
                   });
                   _barisController.clear();
+                  _namaPetugasSemprotController.clear();
                   selectedPokokTersemprot = null;
                   selectedAPD = null;
                 });
