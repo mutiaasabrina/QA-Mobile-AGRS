@@ -182,9 +182,44 @@ class _QAChemistPageState extends State<QAChemistPage> {
             decoration: const InputDecoration(labelText: "Peletakan Alat Semprot"),
             value: selectedPeletakan,
             onChanged: isLocked ? null : (val) => setState(() => selectedPeletakan = val),
-            items: ['Sesuai', 'Tidak Sesuai'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            items: peletakanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 14),))).toList(),
           ),
+          
           const Divider(),
+          const Text("Input Pokok Sample", style: TextStyle(fontWeight: FontWeight.bold)),
+          TextField(
+            controller: _barisController,
+            decoration: const InputDecoration(labelText: "Baris ke-"),
+            keyboardType: TextInputType.number,
+          ),
+          TextField(
+            controller: _namaPetugasSemprotController, decoration: const InputDecoration(labelText: "Nama Petugas Semprot"),
+          ),
+          DropdownButtonFormField<String>(
+            decoration: const InputDecoration(labelText: "Pokok Tersemprot"),
+            value: selectedPokokTersemprot,
+            onChanged: (val) => setState(() => selectedPokokTersemprot = val),
+            items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          ),
+          DropdownButtonFormField<String>(
+            decoration: const InputDecoration(labelText: "Kondisi Alat Semprot"),
+            value: selectedAlatSemprot,
+            onChanged: (val) => setState(() => selectedAlatSemprot = val),
+            items: alatSemprot.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          ),
+          DropdownButtonFormField<String>(
+            decoration: const InputDecoration(labelText: "Keseragaman Nozel"),
+            value: selectedKeseragamanNozel,
+            onChanged: (val) => setState(() => selectedKeseragamanNozel = val),
+            items: keseragamanNozel.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          ),
+          DropdownButtonFormField<String>(
+            decoration: const InputDecoration(labelText: "APD Pekerja"),
+            value: selectedAPD,
+            onChanged: (val) => setState(() => selectedAPD = val),
+            items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          ),
+           const Divider(),
           const Text("Input Sample Uji Petik", style: TextStyle(fontWeight: FontWeight.bold)),
           SwitchListTile(
             title: const Text("Apakah melakukan uji petik?"),
@@ -220,41 +255,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
             const SizedBox(height: 8),
             Text("Hasil Uji Petik: $dosisKnapsack", style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
-
-          const Divider(),
-          const Text("Input Pokok Sample", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextField(
-            controller: _barisController,
-            decoration: const InputDecoration(labelText: "Baris ke-"),
-            keyboardType: TextInputType.number,
-          ),
-          TextField(
-            controller: _namaPetugasSemprotController, decoration: const InputDecoration(labelText: "Nama Petugas Semprot"),
-          ),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: "Pokok Tersemprot"),
-            value: selectedPokokTersemprot,
-            onChanged: (val) => setState(() => selectedPokokTersemprot = val),
-            items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-          ),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: "Kondisi Alat Semprot"),
-            value: selectedAlatSemprot,
-            onChanged: (val) => setState(() => selectedAlatSemprot = val),
-            items: alatSemprot.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-          ),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: "Keseragaman Nozel"),
-            value: selectedKeseragamanNozel,
-            onChanged: (val) => setState(() => selectedKeseragamanNozel = val),
-            items: keseragamanNozel.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-          ),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: "APD Pekerja"),
-            value: selectedAPD,
-            onChanged: (val) => setState(() => selectedAPD = val),
-            items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-          ),
           const SizedBox(height: 8),
           ElevatedButton(
             onPressed: () {
