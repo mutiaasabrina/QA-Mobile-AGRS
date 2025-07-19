@@ -147,7 +147,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
             items: chemistType.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           TextField(controller: _jenisChemist, decoration: const InputDecoration(labelText: "Jenis Chemist yang digunakan"), enabled: !isLocked,),
-          TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis / Knapsack (liter/ha)"), keyboardType: TextInputType.number),
+          TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis / Knapsack (liter/ha)"), keyboardType: TextInputType.number, enabled: !isLocked,),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Bahan Herbisida"),
             value: selectedBahanHerbisida,
@@ -184,7 +184,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
             onChanged: isLocked ? null : (val) => setState(() => selectedPeletakan = val),
             items: peletakanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 14),))).toList(),
           ),
-          
+
           const Divider(),
           const Text("Input Pokok Sample", style: TextStyle(fontWeight: FontWeight.bold)),
           TextField(
