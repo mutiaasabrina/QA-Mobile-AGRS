@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/constants.dart';
+import 'menu_page.dart';
+import 'qa_chemist_summary.dart';
+import 'package:qa_agronomy/database/qa_database_chemist.dart';
 
 class QAChemistPage extends StatefulWidget {
   const QAChemistPage({super.key});
@@ -39,12 +42,11 @@ class _QAChemistPageState extends State<QAChemistPage> {
   String get _tenagaSemprotKey => "${_namaPetugasSemprotController.text.trim()}|${selectedBlok ??''}|$_tanggalSemprot";
   bool get isAlatSemprotLocked => _alatSemprotData.containsKey(_tenagaSemprotKey);
 
-  
-
   final List<Map<String, dynamic>> _pokokSamples = [];
   bool get isLocked => _pokokSamples.isNotEmpty;
 
   bool _ujiPetik = false;
+  int totalUjiPetik = 0;
   String dosisKnapsack = "";
   final _dosisController = TextEditingController();
 
@@ -88,20 +90,21 @@ class _QAChemistPageState extends State<QAChemistPage> {
 
   void _updateVolumeSampleControllers() {
     final int jumlah = int.tryParse(_jumlahSampleUjiPetikController.text) ?? 0;
-    _volumeSampleControllers = List.generate(jumlah, (index) => TextEditingController());
+    _volumeSampleControllers = List.generate(jumlah, (_) => TextEditingController());
     dosisKnapsack = "";
   }
 
   void _calculateDosisUjiPetik() {
     if (_dosisController.text.isEmpty) return;
-    final double target = double.tryParse(_dosisController.text) ?? 0;
+    final double targetLiter = double.tryParse(_dosisController.text) ?? 0;
+    final double targetMililiter = targetLiter*1000;
     final double total = _volumeSampleControllers.fold(0.0, (sum, c) => sum + (double.tryParse(c.text) ?? 0));
-    final double rata2 = total / (_volumeSampleControllers.length == 0 ? 1 : _volumeSampleControllers.length);
-    final selisih = (rata2 - target).abs();
+    final selisih = (total - targetMililiter).abs();
     setState(() {
       dosisKnapsack = selisih <= 5 ? 'Sesuai' : 'Tidak Sesuai';
     });
   }
+
     @override
   void dispose() {
     _namaPetugasController.dispose();
@@ -113,6 +116,218 @@ class _QAChemistPageState extends State<QAChemistPage> {
       c.dispose();
     }
     super.dispose();
+  }
+
+  void _saveSample() {
+    if (_barisController.text.isNotEmpty &&
+        _namaPetugasSemprotController.text.isNotEmpty &&
+        selectedPokokTersemprot != null &&
+        selectedAPD != null) {
+      setState(() {
+        _pokokSamples.add({
+          'baris': _barisController.text,
+          'nama_petugas': _namaPetugasSemprotController.text,
+          'tersemprot': selectedPokokTersemprot,
+          'kondisiAlat': selectedAlatSemprot,
+          'keseragamanNozel': selectedKeseragamanNozel,
+          'apd': selectedAPD,
+          'ujiPetik': _ujiPetik,
+          'hasilUjiPetik': _ujiPetik ? dosisKnapsack : '-',
+
+        });
+
+        if (!_alatSemprotData.containsKey(_tenagaSemprotKey)) {
+          _alatSemprotData[_tenagaSemprotKey] = {
+            'apd': selectedAPD,
+            'kondisiAlat': selectedAlatSemprot,
+            'keseragamanNozel': selectedKeseragamanNozel,
+          };
+        }
+
+        // ✅ Auto isi jika data sudah ada (kalau kamu edit tenaga ke yang lama)
+        final alatchemist = _alatSemprotData[_tenagaSemprotKey];
+        if (alatchemist != null) {
+          selectedAPD = alatchemist['apd'];
+          selectedAlatSemprot = alatchemist['kondisiAlat'];
+          selectedKeseragamanNozel = alatchemist['keseragamanNozel'];
+        }
+
+        _barisController.clear();
+        _namaPetugasSemprotController.clear();
+        selectedPokokTersemprot = null;
+        selectedAlatSemprot = null;
+        selectedKeseragamanNozel = null;
+        selectedAPD = null;
+        _ujiPetik = false;
+        dosisKnapsack = "";
+        _jumlahSampleUjiPetikController.clear();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Sample berhasil ditambahkan")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Lengkapi semua data sample")),
+      );
+    }
+  }
+  
+  void _saveAll() {
+    // Kelompokkan sample per tenaga semprot
+    final Map<String, List<Map<String, dynamic>>> perTenaga = {};
+    for (final sample in _pokokSamples) {
+      final key = sample['nama_petugas'];
+      perTenaga.putIfAbsent(key, () => []).add(sample);
+    }
+
+    final List<TenagaSemprotSummary> tenagaList = perTenaga.entries.map((entry) {
+      final nama = entry.key;
+      final list = entry.value;
+      int countSample = list.length;
+
+      Map<String, int> countBy(String field) {
+        final Map<String, int> count = {};
+        for (final s in list) {
+          final val = s[field] ?? '-';
+          count[val] = (count[val] ?? 0) + 1;
+        }
+        return count;
+      }
+
+      final alatTabur = _alatSemprotData.entries
+          .firstWhere((e) => e.key.startsWith(nama))
+          .value;
+
+      return TenagaSemprotSummary(
+        nama: nama,
+        jumlahSample: countSample,
+        pokokTersemprot: countBy('tersemprot'),
+        kondisiAlat: alatTabur['kondisiAlat'],
+        keseragamanNozel: alatTabur['keseragamanNozel'],
+        apd: alatTabur['apd'],
+        ujiPetik: countBy('hasilUjiPetik')
+      );
+    }).toList();
+    
+    final totalUjiPetik = _pokokSamples.where((s) => s['ujiPetik'] == true).length;
+
+    final summary = QAChemistSummary(
+      tanggalPeriksa: _tanggalPemeriksaan,
+      namaPetugas: _namaPetugasController.text,
+      kebun: selectedEstate ?? '',
+      divisi: selectedDivisi ?? '',
+      blok: selectedBlok ?? '',
+      tanggalPenyemprotan: _tanggalSemprot,
+      luasan: _luasanController.text,
+      chemist: selectedChemist ?? '',
+      jenisChemist: _jenisChemist.text,
+      dosis: _dosisController.text,
+      bahanHerbisida: selectedBahanHerbisida ?? '',
+      programPengendalianGulma: selectedProgramGulma ?? '',
+      kartuPengambilanPencampuran: selectedKartu ?? '',
+      kalibrasiAlatNozel: selectedKalibrasi ?? '',
+      gelasUkurPerkakas: selectedPerkakas ?? '',
+      peletakanAlatSemprot: selectedPeletakan ?? '',
+      totalUjiPetik: totalUjiPetik,
+      tenagaSemprotList: tenagaList,
+    );
+
+    final ringkasan = generateRingkasanText(summary);
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Ringkasan QA Chemist"),
+        content: SingleChildScrollView(child: Text(ringkasan)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              final totalSample = tenagaList.fold<int>(0, (sum, t) => sum + t.jumlahSample,);
+              int totalTenagaKerja = perTenaga.length;
+              int totalUjiPetikAktif = _pokokSamples.where((s) => s['ujiPetik'] == true).length;
+              int totalUjiPetikNonAktif = _pokokSamples.where((s) => s['ujiPetik'] == false).length;
+              int totalHasilUjiPetikSesuai = _pokokSamples.where((s) => s['hasilUjiPetik'] == 'Sesuai').length;
+              int totalHasilUjiPetikTidakSesuai = _pokokSamples.where((s) => s['hasilUjiPetik'] == 'Tidak Sesuai').length;
+              int totalPokokTersemprot = _pokokSamples.where((s) => s['tersemprot'] == 'Tersemprot').length;
+              int totalPokokTidakTersemprot = _pokokSamples.where((s) => s['tersemprot'] == 'Tidak Tersemprot').length;
+              int totalAlatSemprotBaik = _pokokSamples.where((s) => s['kondisiAlat'] == 'Baik dan Lancar').length;
+              int totalAlatSemprotTidakLayak = _pokokSamples.where((s) => s['kondisiAlat'] == 'Tidak Baik').length;
+              int totalNozelSeragam = _pokokSamples.where((s) => s['keseragamanNozel'] == 'Seragam').length;
+              int totalNozelTidakSeragam = _pokokSamples.where((s) => s['keseragamanNozel'] == 'Tidak Seragam').length;
+              const List<String> apdRank = [
+                'Lengkap',
+                'Kurang dari 1 item',
+                'Kurang dari 2 item',
+                'Kurang dari 3 item',
+                'Tidak ada APD',
+              ];
+              String worstApd = '';
+              int worstIndex = -1;
+
+              for (var tabur in _alatSemprotData.values) {
+                final apd = tabur['apd'];
+                if (apd == null) continue;
+
+                final idx = apdRank.indexOf(apd);
+                if (idx > worstIndex) {
+                  worstIndex = idx;
+                  worstApd = apd;
+                }
+              }
+
+              await QADatabaseChemist.instance.insertQA({
+                'tanggal': summary.tanggalPeriksa,
+                'nama_petugas': summary.namaPetugas,
+                'kebun': summary.kebun,
+                'divisi': summary.divisi,
+                'blok': summary.blok,
+                'tanggal_semprot': summary.tanggalPenyemprotan,
+                'luas': summary.luasan,
+                'chemist': summary.chemist,
+                'jenis_chemist': summary.jenisChemist,
+                'dosis_knapsack': summary.dosis,
+                'bahan_herbisida': summary.bahanHerbisida,
+                'program_pengendalian_gulma': summary.programPengendalianGulma,
+                'kartu_pengambilan_pencampuran': summary.kartuPengambilanPencampuran,
+                'kalibrasi_alat_nozel': summary.kalibrasiAlatNozel,
+                'gelas_ukur_perkakas': summary.gelasUkurPerkakas,
+                'peletakan_alat_semprot': summary.peletakanAlatSemprot,
+                'jumlah_pokok': totalSample,
+                'total_tenaga_kerja': totalTenagaKerja,
+                'total_uji_petik_aktif': totalUjiPetikAktif,
+                'total_uji_petik_nonaktif': totalUjiPetikNonAktif,
+                'total_uji_petik_sesuai': totalHasilUjiPetikSesuai,
+                'total_uji_petik__tidak_sesuai': totalHasilUjiPetikTidakSesuai,
+                'total_pokok_tersemprot': totalPokokTersemprot,
+                'total_pokok__tidak_tersemprot': totalPokokTidakTersemprot,
+                'total_alat_semprot_baik': totalAlatSemprotBaik,
+                'total_alat_semprot__tidak_layak': totalAlatSemprotTidakLayak,
+                'total_nozel_seragam': totalNozelSeragam,
+                'total_nozel_tidak_seragam': totalNozelTidakSeragam,
+                'apd_pekerja': worstApd,
+                'ringkasan': ringkasan,
+                'is_synced': 0,
+                'timestamp_sync': null,
+              });
+
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MenuPage()),
+              );
+            },
+            child: const Text("Ok"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -204,8 +419,8 @@ class _QAChemistPageState extends State<QAChemistPage> {
                     if (alatchemist != null) {
                       setState(() {
                          selectedAPD = alatchemist['apd'];
-                         selectedAlatSemprot = alatchemist['kondisi_alat'];
-                         selectedKeseragamanNozel = alatchemist['keseragaman_nozel'];
+                         selectedAlatSemprot = alatchemist['kondisiAlat'];
+                         selectedKeseragamanNozel = alatchemist['keseragamanNozel'];
                       });
                     } else {
                       setState(() {
@@ -276,48 +491,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
           ],
           const SizedBox(height: 8),
           ElevatedButton(
-            onPressed: () {
-              if (_barisController.text.isNotEmpty && _namaPetugasSemprotController.text.isNotEmpty && selectedPokokTersemprot != null && selectedAPD != null) {
-                setState(() {
-                  _pokokSamples.add({
-                    'baris': _barisController.text,
-                    'nama_petugas': _namaPetugasSemprotController.text,
-                    'tersemprot': selectedPokokTersemprot,
-                    'apd': selectedAPD,
-                    'kondisi_alat': selectedAlatSemprot,
-                    'keseragaman_nozel': selectedKeseragamanNozel,
-                  });
-
-                  if (!_alatSemprotData.containsKey(_tenagaSemprotKey)) {
-                    _alatSemprotData[_tenagaSemprotKey] = {
-                      'apd': selectedAPD,
-                      'kondisi_alat': selectedAlatSemprot,
-                      'keseragaman_nozel': selectedKeseragamanNozel,
-                    };
-                  }
-
-                  // ✅ Auto isi jika data sudah ada (kalau kamu edit tenaga ke yang lama)
-                  final alatchemist = _alatSemprotData[_tenagaSemprotKey];
-                  if (alatchemist != null) {
-                    selectedAPD = alatchemist['apd'];
-                    selectedAlatSemprot = alatchemist['kondisi_alat'];
-                    selectedKeseragamanNozel = alatchemist['keseragaman_nozel'];
-                  }
-
-                  _barisController.clear();
-                  _namaPetugasSemprotController.clear();
-                  selectedPokokTersemprot = null;
-                  selectedAPD = null;
-                  selectedAlatSemprot = null;
-                  selectedKeseragamanNozel = null;
-                });
-              
-               
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Sample berhasil ditambahkan")));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data sample")));
-              }
-            },
+            onPressed: _saveSample,
             style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
             child: const Text("Save Sample"),
           ),
@@ -326,12 +500,15 @@ class _QAChemistPageState extends State<QAChemistPage> {
             const Text("Daftar Sample:", style: TextStyle(fontWeight: FontWeight.bold)),
             ..._pokokSamples.map((s) => ListTile(
               title: Text("Baris ${s['baris']} - ${s['nama_petugas']}"),
-              subtitle: Text("Tersemprot: ${s['tersemprot']}, APD: ${s['apd']}, Alat: ${s['kondisi_alat']}, Nozel: ${s['keseragaman_nozel']}"),
+              subtitle: Text("Tersemprot: ${s['tersemprot']}, APD: ${s['apd']}, Alat: ${s['kondisiAlat']}, Nozel: ${s['keseragamanNozel']}"),
           )),
           ],
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
+
+              _saveAll();
+
               // TODO: simpan semua data form + sample ke DB
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data disimpan")));
             },
