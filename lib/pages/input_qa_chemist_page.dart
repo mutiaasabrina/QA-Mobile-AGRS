@@ -35,7 +35,11 @@ class _QAChemistPageState extends State<QAChemistPage> {
   String? selectedKeseragamanNozel;
   String? selectedPokokTersemprot;
 
-   String get _tenagaSemprotKey => "${_namaPetugasSemprotController.text.trim()}|${selectedBlok ??''}|$_tanggalSemprot";
+  final Map<String, Map<String, dynamic>> _alatSemprotData = {};
+  String get _tenagaSemprotKey => "${_namaPetugasSemprotController.text.trim()}|${selectedBlok ??''}|$_tanggalSemprot";
+  bool get isAlatSemprotLocked => _alatSemprotData.containsKey(_tenagaSemprotKey);
+
+  
 
   final List<Map<String, dynamic>> _pokokSamples = [];
   bool get isLocked => _pokokSamples.isNotEmpty;
@@ -193,8 +197,23 @@ class _QAChemistPageState extends State<QAChemistPage> {
             keyboardType: TextInputType.number,
           ),
           TextField(
-            controller: _namaPetugasSemprotController, decoration: const InputDecoration(labelText: "Nama Petugas Semprot"),
-          ),
+                  controller: _namaPetugasSemprotController,
+                  decoration: const InputDecoration(labelText: "Nama Tenaga Semprot"),
+                  onChanged: (_) {
+                    final alatchemist = _alatSemprotData[_tenagaSemprotKey];
+                    if (alatchemist != null) {
+                      setState(() {
+                         selectedAPD = alatchemist['apd'];
+                         selectedAlatSemprot = alatchemist['kondisi_alat'];
+                         selectedKeseragamanNozel = alatchemist['keseragaman_nozel'];
+                      });
+                    } else {
+                      setState(() {
+                        
+                      });
+                    }
+                  },
+                ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Pokok Tersemprot"),
             value: selectedPokokTersemprot,
@@ -204,19 +223,19 @@ class _QAChemistPageState extends State<QAChemistPage> {
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Kondisi Alat Semprot"),
             value: selectedAlatSemprot,
-            onChanged: (val) => setState(() => selectedAlatSemprot = val),
+            onChanged: isAlatSemprotLocked ? null : (val) => setState(() => selectedAlatSemprot = val),
             items: alatSemprot.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Keseragaman Nozel"),
             value: selectedKeseragamanNozel,
-            onChanged: (val) => setState(() => selectedKeseragamanNozel = val),
+            onChanged: isAlatSemprotLocked ? null : (val) => setState(() => selectedKeseragamanNozel = val),
             items: keseragamanNozel.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "APD Pekerja"),
             value: selectedAPD,
-            onChanged: (val) => setState(() => selectedAPD = val),
+            onChanged: isAlatSemprotLocked ? null : (val) => setState(() => selectedAPD = val),
             items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
            const Divider(),
@@ -265,19 +284,51 @@ class _QAChemistPageState extends State<QAChemistPage> {
                     'nama_petugas': _namaPetugasSemprotController.text,
                     'tersemprot': selectedPokokTersemprot,
                     'apd': selectedAPD,
+                    'kondisi_alat': selectedAlatSemprot,
+                    'keseragaman_nozel': selectedKeseragamanNozel,
                   });
+
+                  if (!_alatSemprotData.containsKey(_tenagaSemprotKey)) {
+                    _alatSemprotData[_tenagaSemprotKey] = {
+                      'apd': selectedAPD,
+                      'kondisi_alat': selectedAlatSemprot,
+                      'keseragaman_nozel': selectedKeseragamanNozel,
+                    };
+                  }
+
+                  // ✅ Auto isi jika data sudah ada (kalau kamu edit tenaga ke yang lama)
+                  final alatchemist = _alatSemprotData[_tenagaSemprotKey];
+                  if (alatchemist != null) {
+                    selectedAPD = alatchemist['apd'];
+                    selectedAlatSemprot = alatchemist['kondisi_alat'];
+                    selectedKeseragamanNozel = alatchemist['keseragaman_nozel'];
+                  }
+
                   _barisController.clear();
                   _namaPetugasSemprotController.clear();
                   selectedPokokTersemprot = null;
                   selectedAPD = null;
+                  selectedAlatSemprot = null;
+                  selectedKeseragamanNozel = null;
                 });
+              
+               
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Sample berhasil ditambahkan")));
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data sample")));
               }
             },
+            style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
             child: const Text("Save Sample"),
           ),
+          if (_pokokSamples.isNotEmpty) ...[
+            const Divider(),
+            const Text("Daftar Sample:", style: TextStyle(fontWeight: FontWeight.bold)),
+            ..._pokokSamples.map((s) => ListTile(
+              title: Text("Baris ${s['baris']} - ${s['nama_petugas']}"),
+              subtitle: Text("Tersemprot: ${s['tersemprot']}, APD: ${s['apd']}, Alat: ${s['kondisi_alat']}, Nozel: ${s['keseragaman_nozel']}"),
+          )),
+          ],
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
