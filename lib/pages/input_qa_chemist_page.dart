@@ -509,7 +509,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
 
               _saveAll();
 
-              // TODO: simpan semua data form + sample ke DB
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data disimpan")));
             },
             style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),

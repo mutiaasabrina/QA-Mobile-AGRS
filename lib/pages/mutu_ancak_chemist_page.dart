@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_chemist.dart';
+import 'input_mutu_ancak_chemist_page.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MutuAncakChemistPage extends StatefulWidget {
@@ -11,7 +11,6 @@ class MutuAncakChemistPage extends StatefulWidget {
 }
 
 class _MutuAncakChemistPageState extends State<MutuAncakChemistPage> {
-  final String _today = DateFormat('yyyy-MM-dd').format(DateTime.now());
   List<Map<String, dynamic>> _qaListChemist = [];
 
   @override
@@ -21,15 +20,7 @@ class _MutuAncakChemistPageState extends State<MutuAncakChemistPage> {
   }
 
   Future<void> _loadQAData() async {
-    final waktuSekarang = DateTime.now();
-    final tambah10Menit = waktuSekarang.add(Duration(minutes: 10));
-    final tambah14Hari = waktuSekarang.add(Duration(days: 14));
-
-    final tanggalSekarang = DateFormat('yyyy-MM-dd').format(waktuSekarang);
-    final tanggalTambah10Menit = DateFormat('yyyy-MM-dd').format(tambah10Menit);
-    final tanggalTambah14Hari = DateFormat('yyyy-MM-dd').format(tambah14Hari);
-
-    final chemist = await QADatabaseChemist.instance.getAllQAHariIni(tanggalTambah10Menit);
+    final chemist = await QADatabaseChemist.instance.getUnsyncedQAOrderedByDate();
 
     setState(() {
       _qaListChemist = chemist;
@@ -37,24 +28,41 @@ class _MutuAncakChemistPageState extends State<MutuAncakChemistPage> {
   }
 
   void _showDetailDialog(Map<String, dynamic> qa) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Detail QA"),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: qa.entries.map((e) => Text("${e.key}: ${e.value}")).toList(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Tutup"),
-          ),
-        ],
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InputMutuAncakChemistPage(qa: qa),
       ),
     );
+
+    // final DateTime tanggalPeriksa = DateFormat('yyyy-MM-dd').parse(qa["tanggal"]);
+    // if (tanggalPeriksa.difference(DateTime.now()).inDays < 14) 
+    // {
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) => AlertDialog(
+    //       title: const Text("Peringatan"),
+    //       content: SingleChildScrollView(
+    //         child: Text("Belum dapat melakukan mutu ancak, karena QA Chemist di bawah 14 hari."),
+    //       ),
+    //       actions: [
+    //         TextButton(
+    //           onPressed: () => Navigator.pop(context),
+    //           child: const Text("Tutup"),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    // }
+    // else {
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (context) => InputMutuAncakChemistPage(qa: qa),
+    //     ),
+    //   );
+    // }
   }
   
 Widget _buildListSection(
@@ -83,7 +91,7 @@ Widget _buildListSection(
           child: ListTile(
             title: Text("${qa['kebun']} - ${qa['divisi']} - ${qa['blok']}"),
             subtitle: Text(
-              "Chemist: ${qa['chemist']}\nJenis Chemist: ${qa['jenis_chemist']}\nSync to tracker: $timestamp"
+              "Chemist: ${qa['chemist']}\nJenis Chemist: ${qa['jenis_chemist']}\nTanggal Periksa: ${qa['tanggal']}"
             ),
             trailing: isSynced
                 ? const Icon(Icons.check_circle, color: Colors.green)

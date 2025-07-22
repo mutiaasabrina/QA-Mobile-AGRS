@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_produksi_perawatan.dart';
 import 'package:qa_agronomy/database/qa_database_pemupukan.dart';
+import 'package:qa_agronomy/database/input_mutu_ancak_database_chemist.dart';
 import 'package:qa_agronomy/gsheet_service.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -16,6 +17,7 @@ class _QATrackerPageState extends State<QATrackerPage> {
   final String _today = DateFormat('yyyy-MM-dd').format(DateTime.now());
   List<Map<String, dynamic>> _qaListProduksiPerawatan = [];
   List<Map<String, dynamic>> _qaListPemupukan = [];
+  List<Map<String, dynamic>> _qaListChemist = [];
 
   @override
   void initState() {
@@ -27,10 +29,12 @@ class _QATrackerPageState extends State<QATrackerPage> {
     final tanggal = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final produksi = await QADatabase.instance.getAllQAHariIni(tanggal);
     final pupuk = await QADatabasePemupukan.instance.getAllQAHariIni(tanggal);
+    final chemist = await QADatabaseChemistGulmaAncak.instance.getAllQABasedTanggalMutuAncak(tanggal);
 
     setState(() {
       _qaListProduksiPerawatan = produksi;
       _qaListPemupukan = pupuk;
+      _qaListChemist = chemist;
     });
   }
 
@@ -55,31 +59,49 @@ class _QATrackerPageState extends State<QATrackerPage> {
     );
   }
 
-  Future<void> _syncToGSheet(Map<String, dynamic> qa, {required bool isProduksi}) async {
+  Future<void> _syncToGSheet(Map<String, dynamic> qa, {required String title}) async {
     try {
       final gsheet = await GSheetService.init();
       final nowFormatted = DateFormat('dd MMM yyyy HH:mm').format(DateTime.now());
 
-      if (isProduksi) {
+      if (title == "Produksi & Perawatan") {
         await QADatabase.instance.updateSyncStatusWithTimestamp(qa['id'], true, nowFormatted);
-      } else {
-        await QADatabasePemupukan.instance.updateSyncStatusWithTimestamp(qa['id'], true, nowFormatted);
-      }
+        final db = await QADatabase.instance.database;
 
-      final db = isProduksi
-          ? await QADatabase.instance.database
-          : await QADatabasePemupukan.instance.database;
+        final updatedQA = (await db.query(
+          'qa_samples',
+          where: 'id =?',
+          whereArgs: [qa['id']],
+        )).first;
 
-      final updatedQA = (await db.query(
-        isProduksi?'qa_samples':'qa_pemupukan_samples',
-        where: 'id =?',
-        whereArgs: [qa['id']],
-      )).first;
-      if(isProduksi){
         await gsheet.insertQA(updatedQA);
-      }else{
+
+      } else if (title == "Pemupukan") {
+        await QADatabasePemupukan.instance.updateSyncStatusWithTimestamp(qa['id'], true, nowFormatted);
+        final db = await QADatabasePemupukan.instance.database;
+
+        final updatedQA = (await db.query(
+          'qa_pemupukan_samples',
+          where: 'id =?',
+          whereArgs: [qa['id']],
+        )).first;
+
         await gsheet.insertQAPemupukan(updatedQA);
+
+      } else if (title == "Chemist") {
+        await QADatabaseChemistGulmaAncak.instance.updateSyncStatusWithTimestamp(qa['id'], true, nowFormatted);
+        final db = await QADatabaseChemistGulmaAncak.instance.database;
+
+        final updatedQA = (await db.query(
+          'qa_chemist_mutu_ancak_samples',
+          where: 'id =?',
+          whereArgs: [qa['id']],
+        )).first;
+
+        await gsheet.insertQAChemist(updatedQA);
+
       }
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Berhasil Sinkronisasi Data ke Spreadsheet!")),
       );
@@ -114,7 +136,6 @@ class _QATrackerPageState extends State<QATrackerPage> {
 Widget _buildListSection(
   String title,
   List<Map<String, dynamic>> list, {
-  required bool isProduksi,
   required String tableName,
   required Future<Database> Function() getDb,
 }) {
@@ -136,12 +157,18 @@ Widget _buildListSection(
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: ListTile(
-            title: Text("${qa['kebun']} - ${qa['divisi']} - ${qa['blok']}"),
-            subtitle: Text(
-              isProduksi
-                  ? "Rotasi: ${qa['rotasi']} hari\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp"
-                  : "Jenis Pupuk: ${qa['jenis_pupuk']}\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp",
-            ),
+              title: Text("${qa['kebun']} - ${qa['divisi']} - ${qa['blok']}"),
+              subtitle: Text(() {
+                if (title == 'Produksi & Perawatan') {
+                  return "Rotasi: ${qa['rotasi']} hari\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp";
+                } else if (title == 'Pemupukan') {
+                  return "Jenis Pupuk: ${qa['jenis_pupuk']}\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp";
+                } else if (title == 'Chemist') {
+                  return "Jenis Chemist: ${qa['jenis_chemist']}\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp";;
+                } else {
+                  return "";
+                }
+              }()),
             trailing: isSynced
                 ? const Icon(Icons.check_circle, color: Colors.green)
                 : Row(
@@ -149,7 +176,7 @@ Widget _buildListSection(
                     children: [
                       ElevatedButton(
                         child: const Text("Sync"),
-                        onPressed: () => _syncToGSheet(qa, isProduksi: isProduksi),
+                        onPressed: () => _syncToGSheet(qa, title: title),
                       ),
                       const SizedBox(width: 8),
                       IconButton(
@@ -171,7 +198,7 @@ Widget _buildListSection(
 
   @override
   Widget build(BuildContext context) {
-    final isAllEmpty = _qaListProduksiPerawatan.isEmpty && _qaListPemupukan.isEmpty;
+    final isAllEmpty = _qaListProduksiPerawatan.isEmpty && _qaListPemupukan.isEmpty && _qaListChemist.isEmpty;
 
     return Scaffold(
       appBar: AppBar(title: const Text("Tracking QA Hari Ini")),
@@ -184,16 +211,20 @@ Widget _buildListSection(
                   _buildListSection(
                     "Produksi & Perawatan",
                     _qaListProduksiPerawatan,
-                    isProduksi: true,
                     tableName: 'qa_samples',
                     getDb: () => QADatabase.instance.database,
                   ),
                   _buildListSection(
                     "Pemupukan",
                     _qaListPemupukan,
-                    isProduksi: false,
                     tableName: 'qa_pemupukan_samples',
                     getDb: () => QADatabasePemupukan.instance.database,
+                  ),
+                  _buildListSection(
+                    "Chemist",
+                    _qaListChemist,
+                    tableName: 'qa_chemist_mutu_ancak_samples',
+                    getDb: () => QADatabaseChemistGulmaAncak.instance.database,
                   ),
                   const SizedBox(height: 24),
                 ],
