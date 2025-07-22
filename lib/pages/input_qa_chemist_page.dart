@@ -101,7 +101,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
     final double total = _volumeSampleControllers.fold(0.0, (sum, c) => sum + (double.tryParse(c.text) ?? 0));
     final selisih = (total - targetMililiter).abs();
     setState(() {
-      dosisKnapsack = selisih <= 5 ? 'Sesuai' : 'Tidak Sesuai';
+      dosisKnapsack = selisih == targetMililiter? 'Sesuai' : 'Tidak Sesuai';
     });
   }
 
@@ -174,6 +174,10 @@ class _QAChemistPageState extends State<QAChemistPage> {
   }
   
   void _saveAll() {
+  if (_pokokSamples.isEmpty || selectedEstate == null || selectedDivisi == null || selectedBlok == null || _namaPetugasController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+    return;
+  }
     // Kelompokkan sample per tenaga semprot
     final Map<String, List<Map<String, dynamic>>> perTenaga = {};
     for (final sample in _pokokSamples) {

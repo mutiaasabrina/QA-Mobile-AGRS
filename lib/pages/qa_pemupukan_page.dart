@@ -173,6 +173,10 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
 }
 
   void _saveAll() {
+  if (_samples.isEmpty || selectedKebun == null || selectedDivisi == null || selectedBlok == null || _namaPetugasController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+    return;
+  }
   // Kelompokkan sample per tenaga tabur
   final Map<String, List<Map<String, dynamic>>> perTenaga = {};
   for (final sample in _samples) {
@@ -332,20 +336,25 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     dosisUjiPetikResult =""; //Reset
   }
   
-  void _calculateDosisUjiPetik(){
+  void _calculateDosisUjiPetik() {
     if (_dosisController.text.isEmpty) return;
 
-    final double targetKg = double.tryParse(_dosisController.text)??0;
+    final double targetKg = double.tryParse(_dosisController.text) ?? 0;
     final double targetGram = targetKg * 1000;
+
     final double total = _dosisSampleControllers.fold<double>(
       0,
-      (sum, c) => sum + (double.tryParse(c.text)??0),
+      (sum, c) => sum + (double.tryParse(c.text) ?? 0),
     );
-    final selisih = (total - targetGram).abs();
+
+    final double selisih = (total - targetGram).abs();
+    final double toleransi = targetGram * 0.05; // 5% toleransi
+
     setState(() {
-      dosisUjiPetikResult = selisih <= 50? "Sesuai": "Tidak Sesuai";
+      dosisUjiPetikResult = selisih <= toleransi ? "Sesuai" : "Tidak Sesuai";
     });
   }
+
 
   @override
   void dispose() {
@@ -497,7 +506,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             if (_ujiPetik) ...[
                 TextField(
                   controller: _jumlahSampleUjiPetikController,
-                  decoration: const InputDecoration(labelText: "Jumlah sample uji petik"),
+                  decoration: const InputDecoration(labelText: "Jumlah titik pocket/pokok (Minimal 4)"),
                   keyboardType: TextInputType.number,
                   onChanged: (_) {
                     setState(() {
@@ -512,7 +521,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
                     controller: entry.value,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: "Dosis Sample ${entry.key + 1} (gram)",
+                      labelText: "Dosis pupuk titik pocket ${entry.key + 1} (gram)",
                     ),
                     onChanged: (_) => _calculateDosisUjiPetik(),
                   ),
