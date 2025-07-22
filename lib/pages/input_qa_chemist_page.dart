@@ -39,7 +39,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
   String? selectedPokokTersemprot;
 
   final Map<String, Map<String, dynamic>> _alatSemprotData = {};
-  String get _tenagaSemprotKey => "${_namaPetugasSemprotController.text.trim()}|${selectedBlok ??''}|$_tanggalSemprot";
+  String get _tenagaSemprotKey => "${_namaPetugasSemprotController.text.trim().toLowerCase()}|${selectedBlok ??''}|$_tanggalSemprot";
   bool get isAlatSemprotLocked => _alatSemprotData.containsKey(_tenagaSemprotKey);
 
   final List<Map<String, dynamic>> _pokokSamples = [];
@@ -126,7 +126,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
       setState(() {
         _pokokSamples.add({
           'baris': _barisController.text,
-          'nama_petugas': _namaPetugasSemprotController.text,
+          'nama_petugas': _namaPetugasSemprotController.text.toLowerCase(),
           'tersemprot': selectedPokokTersemprot,
           'kondisiAlat': selectedAlatSemprot,
           'keseragamanNozel': selectedKeseragamanNozel,
@@ -177,7 +177,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
     // Kelompokkan sample per tenaga semprot
     final Map<String, List<Map<String, dynamic>>> perTenaga = {};
     for (final sample in _pokokSamples) {
-      final key = sample['nama_petugas'];
+      final key = sample['nama_petugas'].toString().toLowerCase();
       perTenaga.putIfAbsent(key, () => []).add(sample);
     }
 
@@ -195,17 +195,17 @@ class _QAChemistPageState extends State<QAChemistPage> {
         return count;
       }
 
-      final alatTabur = _alatSemprotData.entries
-          .firstWhere((e) => e.key.startsWith(nama))
+      final _alatSemprot = _alatSemprotData.entries
+          .firstWhere((e) => e.key.startsWith(nama.toLowerCase()))
           .value;
 
       return TenagaSemprotSummary(
-        nama: nama,
+        nama: nama.toLowerCase(),
         jumlahSample: countSample,
         pokokTersemprot: countBy('tersemprot'),
-        kondisiAlat: alatTabur['kondisiAlat'],
-        keseragamanNozel: alatTabur['keseragamanNozel'],
-        apd: alatTabur['apd'],
+        kondisiAlat: _alatSemprot['kondisiAlat'],
+        keseragamanNozel: _alatSemprot['keseragamanNozel'],
+        apd: _alatSemprot['apd'],
         ujiPetik: countBy('hasilUjiPetik')
       );
     }).toList();
@@ -257,10 +257,11 @@ class _QAChemistPageState extends State<QAChemistPage> {
               int totalHasilUjiPetikTidakSesuai = _pokokSamples.where((s) => s['hasilUjiPetik'] == 'Tidak Sesuai').length;
               int totalPokokTersemprot = _pokokSamples.where((s) => s['tersemprot'] == 'Tersemprot').length;
               int totalPokokTidakTersemprot = _pokokSamples.where((s) => s['tersemprot'] == 'Tidak Tersemprot').length;
-              int totalAlatSemprotBaik = _pokokSamples.where((s) => s['kondisiAlat'] == 'Baik dan Lancar').length;
-              int totalAlatSemprotTidakLayak = _pokokSamples.where((s) => s['kondisiAlat'] == 'Tidak Baik').length;
-              int totalNozelSeragam = _pokokSamples.where((s) => s['keseragamanNozel'] == 'Seragam').length;
-              int totalNozelTidakSeragam = _pokokSamples.where((s) => s['keseragamanNozel'] == 'Tidak Seragam').length;
+              int totalAlatSemprotBaik = _alatSemprotData.values.where((s) => s['kondisiAlat'] == 'Baik dan Lancar').length;
+              int totalAlatSemprotTidakLayak = _alatSemprotData.values.where((s) => s['kondisiAlat'] == 'Tidak Baik').length;
+              int totalNozelSeragam = _alatSemprotData.values.where((s) => s['keseragamanNozel'] == 'Seragam').length;
+              int totalNozelTidakSeragam = _alatSemprotData.values.where((s) => s['keseragamanNozel'] == 'Tidak Seragam').length;
+
               const List<String> apdRank = [
                 'Lengkap',
                 'Kurang dari 1 item',

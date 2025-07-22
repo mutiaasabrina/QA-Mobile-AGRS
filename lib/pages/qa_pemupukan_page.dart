@@ -47,7 +47,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   String? selectedCaraAplikasi;
  // String? selectedDosisUjiPetik;
 
-  String get _tenagaTaburKey => "${_tenagaTaburController.text.trim()}|${selectedBlok ??''}|$_tanggalPemupukan";
+  String get _tenagaTaburKey => "${_tenagaTaburController.text.trim().toLowerCase()}|${selectedBlok ??''}|$_tanggalPemupukan";
 
   bool _ujiPetik = false;
 
@@ -138,7 +138,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       'ujiPetik': _ujiPetik,
       'jumlahSample': _ujiPetik ? _jumlahSampleUjiPetikController.text : '-',
       'dosisAlatTabur': _ujiPetik ? dosisUjiPetikResult : '-',
-      'tenagaTabur': _tenagaTaburController.text,
+      'tenagaTabur': _tenagaTaburController.text.toLowerCase(),
     });
 
     _barisController.clear();
@@ -176,7 +176,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   // Kelompokkan sample per tenaga tabur
   final Map<String, List<Map<String, dynamic>>> perTenaga = {};
   for (final sample in _samples) {
-    final key = sample['tenagaTabur'];
+    final key = sample['tenagaTabur'].toLowerCase();
     perTenaga.putIfAbsent(key, () => []).add(sample);
   }
 
@@ -194,10 +194,10 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       return count;
     }
 
-    final alatTabur = _alatTaburData.entries.firstWhere((e) => e.key.startsWith(nama)).value;
+    final alatTabur = _alatTaburData.entries.firstWhere((e) => e.key.startsWith(nama.toLowerCase())).value;
 
     return TenagaTaburSummary(
-      nama: nama,
+      nama: nama.toLowerCase(),
       jumlahSample: countSample,
       jumlahAlatTabur: alatTabur['jumlah'],
       apd: alatTabur['apd'],

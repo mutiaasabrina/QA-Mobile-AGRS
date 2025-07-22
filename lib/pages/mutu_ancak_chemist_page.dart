@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_chemist.dart';
 import 'input_mutu_ancak_chemist_page.dart';
 import 'package:sqflite/sqflite.dart';
@@ -28,41 +29,33 @@ class _MutuAncakChemistPageState extends State<MutuAncakChemistPage> {
   }
 
   void _showDetailDialog(Map<String, dynamic> qa) {
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => InputMutuAncakChemistPage(qa: qa),
-      ),
-    );
-
-    // final DateTime tanggalPeriksa = DateFormat('yyyy-MM-dd').parse(qa["tanggal"]);
-    // if (tanggalPeriksa.difference(DateTime.now()).inDays < 14) 
-    // {
-    //   showDialog(
-    //     context: context,
-    //     builder: (context) => AlertDialog(
-    //       title: const Text("Peringatan"),
-    //       content: SingleChildScrollView(
-    //         child: Text("Belum dapat melakukan mutu ancak, karena QA Chemist di bawah 14 hari."),
-    //       ),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () => Navigator.pop(context),
-    //           child: const Text("Tutup"),
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    // }
-    // else {
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (context) => InputMutuAncakChemistPage(qa: qa),
-    //     ),
-    //   );
-    // }
+    final DateTime tanggalPeriksa = DateFormat('yyyy-MM-dd').parse(qa["tanggal"]);
+    if (tanggalPeriksa.difference(DateTime.now()).inDays < 14) 
+    {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Peringatan"),
+          content: SingleChildScrollView(
+            child: Text("Belum dapat melakukan mutu ancak, karena QA Chemist di bawah 14 hari."),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Tutup"),
+            ),
+          ],
+        ),
+      );
+    }
+    else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => InputMutuAncakChemistPage(qa: qa),
+        ),
+      );
+    }
   }
   
 Widget _buildListSection(
