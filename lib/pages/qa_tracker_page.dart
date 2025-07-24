@@ -38,6 +38,14 @@ class _QATrackerPageState extends State<QATrackerPage> {
     });
   }
 
+String _formatKey(String key) {
+    List<String> parts = key.split('_');
+    for (int i = 0; i < parts.length; i++) {
+      parts[i] = parts[i].replaceRange(0, 1, parts[i][0].toUpperCase());
+    }
+    return parts.join(' ');
+  }
+
   void _showDetailDialog(Map<String, dynamic> qa) {
     showDialog(
       context: context,
@@ -46,7 +54,10 @@ class _QATrackerPageState extends State<QATrackerPage> {
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: qa.entries.map((e) => Text("${e.key}: ${e.value}")).toList(),
+            children: qa.entries.map((e) {
+              String formattedKey = _formatKey(e.key);
+              return Text("$formattedKey: ${e.value}");
+            }).toList(),
           ),
         ),
         actions: [
