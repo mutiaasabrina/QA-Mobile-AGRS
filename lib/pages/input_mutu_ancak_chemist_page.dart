@@ -171,7 +171,8 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 'total_gulma_path_mati': totalGulmaPathMati,
                 'total_gulma_tph_mati': totalGulmaTPHMati,
                 'total_gulma_gawangan_mati': totalGulmaGawanganMati,
-                'ringkasan': ringkasan,
+                'ringkasan_chemist': qaData['ringkasan_chemist'],
+                'ringkasan_mutu_ancak': ringkasan,
                 'is_synced': 0,
                 'timestamp_sync': null,
               });

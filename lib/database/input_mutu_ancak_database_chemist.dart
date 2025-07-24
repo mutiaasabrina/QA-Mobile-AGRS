@@ -62,7 +62,8 @@ class QADatabaseChemistGulmaAncak {
         total_gulma_path_mati INTEGER,
         total_gulma_tph_mati INTEGER,
         total_gulma_gawangan_mati INTEGER,
-        ringkasan TEXT,
+        ringkasan_chemist TEXT,
+        ringkasan_mutu_ancak TEXT,
         is_synced INTEGER,
         timestamp_sync TEXT
       )

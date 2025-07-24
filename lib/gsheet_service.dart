@@ -200,7 +200,8 @@ class GSheetService {
       'total_gulma_path_mati',
       'total_gulma_tph_mati',
       'total_gulma_gawangan_mati',
-      'ringkasan',
+      'ringkasan_chemist',
+      'ringkasan_mutu_ancak',
       'is_synced',
       'timestamp_sync',
     ];

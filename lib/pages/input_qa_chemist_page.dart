@@ -317,7 +317,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
                 'total_nozel_seragam': totalNozelSeragam,
                 'total_nozel_tidak_seragam': totalNozelTidakSeragam,
                 'apd_pekerja': worstApd,
-                'ringkasan': ringkasan,
+                'ringkasan_chemist': ringkasan,
                 'is_synced': 0,
                 'timestamp_sync': null,
               });
