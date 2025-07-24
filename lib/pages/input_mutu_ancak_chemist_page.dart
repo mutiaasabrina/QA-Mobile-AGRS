@@ -165,6 +165,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 'total_nozel_seragam': qaData['total_nozel_seragam'],
                 'total_nozel_tidak_seragam': qaData['total_nozel_tidak_seragam'],
                 'apd_pekerja': qaData['apd_pekerja'],
+                'daftar_tenaga_semprot': qaData['daftar_tenaga_semprot'],
                 'tanggal_mutu_ancak': tanggalPemeriksaanMutuAncak,
                 'jumlah_pokok_gulma': totalSampleGulma,
                 'total_gulma_circle_mati': totalGulmaCircleMati,

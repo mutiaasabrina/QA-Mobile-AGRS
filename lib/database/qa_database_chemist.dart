@@ -58,6 +58,7 @@ class QADatabaseChemist {
         total_nozel_seragam INTEGER,
         total_nozel_tidak_seragam INTEGER,
         apd_pekerja TEXT,
+        daftar_tenaga_semprot TEXT,
         ringkasan_chemist TEXT,
         is_synced INTEGER,
         timestamp_sync TEXT

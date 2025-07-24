@@ -55,6 +55,7 @@ class QADatabasePemupukan {
         cara_aplikasi_standar INTEGER,
         cara_aplikasi_tidak_standar INTEGER,
         apd_pekerja TEXT,
+        daftar_tenaga_tabur TEXT,
         ringkasan TEXT,
         is_synced INTEGER,
         timestamp_sync TEXT

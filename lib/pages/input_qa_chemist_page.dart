@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
 import '../utils/constants.dart';
 import 'menu_page.dart';
 import 'qa_chemist_summary.dart';
@@ -44,6 +45,8 @@ class _QAChemistPageState extends State<QAChemistPage> {
 
   final List<Map<String, dynamic>> _pokokSamples = [];
   bool get isLocked => _pokokSamples.isNotEmpty;
+
+  final List<Map<String, dynamic>> _tenagaSemprot = [];
 
   bool _ujiPetik = false;
   int totalUjiPetik = 0;
@@ -126,7 +129,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
       setState(() {
         _pokokSamples.add({
           'baris': _barisController.text,
-          'nama_petugas': _namaPetugasSemprotController.text.toLowerCase(),
+          'tenagaSemprot': _namaPetugasSemprotController.text.toLowerCase(),
           'tersemprot': selectedPokokTersemprot,
           'kondisiAlat': selectedAlatSemprot,
           'keseragamanNozel': selectedKeseragamanNozel,
@@ -135,6 +138,14 @@ class _QAChemistPageState extends State<QAChemistPage> {
           'hasilUjiPetik': _ujiPetik ? dosisKnapsack : '-',
 
         });
+
+      if(!_tenagaSemprot.any((item) => item['tenagaSemprot'] == _namaPetugasSemprotController.text.toLowerCase())) {
+        _tenagaSemprot.add({
+          'tenagaSemprot': _namaPetugasSemprotController.text.toLowerCase(),
+          'kondisiAlat': selectedAlatSemprot,
+          'keseragamanNozel': selectedKeseragamanNozel,
+        });
+      }
 
         if (!_alatSemprotData.containsKey(_tenagaSemprotKey)) {
           _alatSemprotData[_tenagaSemprotKey] = {
@@ -181,7 +192,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
     // Kelompokkan sample per tenaga semprot
     final Map<String, List<Map<String, dynamic>>> perTenaga = {};
     for (final sample in _pokokSamples) {
-      final key = sample['nama_petugas'].toString().toLowerCase();
+      final key = sample['tenagaSemprot'].toString().toLowerCase();
       perTenaga.putIfAbsent(key, () => []).add(sample);
     }
 
@@ -287,6 +298,8 @@ class _QAChemistPageState extends State<QAChemistPage> {
                 }
               }
 
+              String tenagaSemprotString = json.encode(_tenagaSemprot);
+
               await QADatabaseChemist.instance.insertQA({
                 'tanggal': summary.tanggalPeriksa,
                 'nama_petugas': summary.namaPetugas,
@@ -317,6 +330,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
                 'total_nozel_seragam': totalNozelSeragam,
                 'total_nozel_tidak_seragam': totalNozelTidakSeragam,
                 'apd_pekerja': worstApd,
+                'daftar_tenaga_semprot': tenagaSemprotString,
                 'ringkasan_chemist': ringkasan,
                 'is_synced': 0,
                 'timestamp_sync': null,
@@ -504,7 +518,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
             const Divider(),
             const Text("Daftar Sample:", style: TextStyle(fontWeight: FontWeight.bold)),
             ..._pokokSamples.map((s) => ListTile(
-              title: Text("Baris ${s['baris']} - ${s['nama_petugas']}"),
+              title: Text("Baris ${s['baris']} - ${s['tenagaSemprot']}"),
               subtitle: Text("Tersemprot: ${s['tersemprot']}, APD: ${s['apd']}, Alat: ${s['kondisiAlat']}, Nozel: ${s['keseragamanNozel']}"),
           )),
           ],

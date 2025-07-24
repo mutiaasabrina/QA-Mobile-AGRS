@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
 import '../utils/constants.dart';
 import 'menu_page.dart';
 import 'qa_pemupukan_summary.dart';
 import 'package:qa_agronomy/database/qa_database_pemupukan.dart';
-
-
 
 class QAPemupukanPage extends StatefulWidget {
   const QAPemupukanPage({super.key});
@@ -52,6 +51,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   bool _ujiPetik = false;
 
   final List<Map<String, dynamic>> _samples = [];
+  final List<Map<String, dynamic>> _tenagaTabur = [];
 
   bool get isLocked => _samples.isNotEmpty;
 
@@ -140,6 +140,15 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       'dosisAlatTabur': _ujiPetik ? dosisUjiPetikResult : '-',
       'tenagaTabur': _tenagaTaburController.text.toLowerCase(),
     });
+
+    if(!_tenagaTabur.any((item) => item['tenagaTabur'] == _tenagaTaburController.text.toLowerCase())) {
+      _tenagaTabur.add({
+        'tenagaTabur': _tenagaTaburController.text.toLowerCase(),
+        'jumlah': _jumlahAlatTaburController.text,
+        'seragam': _alatTaburSeragamController.text,
+        'tidakSeragam': _alatTaburTidakSeragamController.text,
+      });
+    }
 
     _barisController.clear();
     selectedLubangPocket = null;
@@ -283,6 +292,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
           }
 
           String mostCommonFisikPupuk = selectedFisikPupuk ?? '';
+          String tenagaTaburString = json.encode(_tenagaTabur);
 
           await QADatabasePemupukan.instance.insertQA({
             'tanggal': summary.tanggalPeriksa,
@@ -314,6 +324,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             'cara_aplikasi_standar': totalAplikasiStandar,
             'cara_aplikasi_tidak_standar': totalAplikasiTidakStandar,
             'apd_pekerja': worstApd,
+            'daftar_tenaga_tabur': tenagaTaburString,
             'ringkasan': ringkasan,
             'is_synced': 0,
             'timestamp_sync': null,

@@ -56,6 +56,7 @@ class QADatabaseChemistGulmaAncak {
         total_nozel_seragam INTEGER,
         total_nozel_tidak_seragam INTEGER,
         apd_pekerja TEXT,
+        daftar_tenaga_semprot TEXT,
         tanggal_mutu_ancak TEXT,
         jumlah_pokok_gulma INTEGER,
         total_gulma_circle_mati INTEGER,
