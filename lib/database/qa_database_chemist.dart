@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:qa_agronomy/database/input_mutu_ancak_database_chemist.dart';
+
 
 
 class QADatabaseChemist {
@@ -155,4 +157,45 @@ class QADatabaseChemist {
     final db = await instance.database;
     await db.delete('qa_chemist_samples');
   }
+
+  Future<List<Map<String, dynamic>>> getChemistSamplesNeedingAncak() async {
+  final chemistDB = await instance.database;
+
+  // Buka juga koneksi ke database QA Mutu Ancak
+  final ancakDB = await QADatabaseChemistGulmaAncak.instance.database;
+
+  final now = DateTime.now();
+  final limitDate = now.subtract(Duration(days: 14));
+  final formattedLimitDate = DateFormat('yyyy-MM-dd').format(limitDate);
+
+  // Ambil semua data Chemist yg lebih dari 14 hari
+  final chemistData = await chemistDB.query(
+    'qa_chemist_samples',
+    where: 'tanggal < ?',
+    whereArgs: [formattedLimitDate],
+  );
+
+  // Filter yang belum ada pasangan di qa_chemist_mutu_ancak_samples
+  List<Map<String, dynamic>> needAncak = [];
+
+  for (final chemist in chemistData) {
+    final exist = await ancakDB.query(
+      'qa_chemist_mutu_ancak_samples',
+      where: 'tanggal = ? AND kebun = ? AND divisi = ? AND blok = ?',
+      whereArgs: [
+        chemist['tanggal'],
+        chemist['kebun'],
+        chemist['divisi'],
+        chemist['blok'],
+      ],
+    );
+
+    if (exist.isEmpty) {
+      needAncak.add(chemist);
+    }
+  }
+
+  return needAncak;
+}
+
 }

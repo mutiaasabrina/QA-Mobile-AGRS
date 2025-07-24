@@ -4,9 +4,47 @@ import 'qa_produksi_perawatan.dart';
 import 'qa_tracker_page.dart';
 import 'qa_pemupukan_page.dart';
 import 'qa_chemist_menu_page.dart';
+import 'package:qa_agronomy/database/qa_database_chemist.dart';
 
-class MenuPage extends StatelessWidget {
+class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
+
+  @override
+  State<MenuPage> createState() => _MenuPageState();
+}
+
+class _MenuPageState extends State<MenuPage> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAncakNeeded();
+  }
+
+  void _checkAncakNeeded() async {
+    final overdueList = await QADatabaseChemist.instance.getChemistSamplesNeedingAncak();
+
+    if (overdueList.isNotEmpty) {
+      final message = overdueList.map((e) =>
+        "${e['kebun']} - ${e['divisi']} - ${e['blok']} (${e['tanggal']})"
+      ).join('\n');
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Mutu Ancak Belum Diisi"),
+            content: Text("Sudah lebih dari 14 hari sejak QA Chemist untuk:\n\n$message"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Oke"),
+              ),
+            ],
+          ),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,3 +105,4 @@ class MenuPage extends StatelessWidget {
     );
   }
 }
+
