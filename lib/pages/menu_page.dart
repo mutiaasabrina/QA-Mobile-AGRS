@@ -33,7 +33,7 @@ class _MenuPageState extends State<MenuPage> {
           context: context,
           builder: (_) => AlertDialog(
             title: const Text("Mutu Ancak Belum Diisi"),
-            content: Text("Sudah lebih dari 14 hari sejak QA Chemist untuk:\n\n$message"),
+            content: Text("Silahkan lakukan mutu ancak untuk:\n\n$message"),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
