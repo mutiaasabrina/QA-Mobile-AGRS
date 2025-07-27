@@ -40,7 +40,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   String? selectedSupervisi;
   String? selectedFisikPupuk;
 
-  String? selectedLubangPocket;
   String? selectedPokokTerpupuk;
   String? selectedKondisiPiringan;
   String? selectedCaraAplikasi;
@@ -110,7 +109,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     'Tekstur tidak baik, sebagian menggumpal',
     'Tekstur tidak baik, semua menggumpal'
   ];
-  final List<String> pocketOptions = ['Standar', 'Tidak Standar'];
   final List<String> pokokOptions = ['Terpupuk', 'Tidak Terpupuk'];
   final List<String> piringanOptions = ['Baik', 'Ancak Semak atau Ada Gulma'];
   final List<String> caraAplikasiOptions = ['Standar', 'Tidak Standar'];
@@ -118,7 +116,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
 
   void _saveSample() {
   if (_barisController.text.isEmpty ||
-      selectedLubangPocket == null ||
       selectedPokokTerpupuk == null ||
       selectedKondisiPiringan == null ||
       selectedCaraAplikasi == null ||
@@ -131,7 +128,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   setState(() {
     _samples.add({
       'baris': _barisController.text,
-      'lubangPocket': selectedLubangPocket,
       'pokokTerpupuk': selectedPokokTerpupuk,
       'kondisiPiringan': selectedKondisiPiringan,
       'caraAplikasi': selectedCaraAplikasi,
@@ -151,7 +147,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     }
 
     _barisController.clear();
-    selectedLubangPocket = null;
     selectedPokokTerpupuk = null;
     selectedKondisiPiringan = null;
     selectedCaraAplikasi = null;
@@ -214,7 +209,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       jumlahSample: countSample,
       jumlahAlatTabur: alatTabur['jumlah'],
       apd: alatTabur['apd'],
-      pocket: countBy('lubangPocket'),
       pokokTerpupuk: countBy('pokokTerpupuk'),
       piringan: countBy('kondisiPiringan'),
       caraAplikasi: countBy('caraAplikasi'),
@@ -264,8 +258,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
           int totalDosisTidakSesuai = _samples.where((s) => s['dosisAlatTabur'] == 'Tidak Sesuai').length;
           int totalPokokTerpupuk = _samples.where((s) => s['pokokTerpupuk'] == 'Terpupuk').length;
           int totalPokokTidakTerpupuk = _samples.where((s) => s['pokokTerpupuk'] == 'Tidak Terpupuk').length;
-          int totalPocketStandar = _samples.where((s) => s['lubangPocket'] == 'Standar').length;
-          int totalPocketTidakStandar = _samples.where((s) => s['lubangPocket'] == 'Tidak Standar').length;
           int totalGawanganBaik = _samples.where((s) => s['kondisiPiringan'] == 'Baik').length;
           int totalGawanganSemak = _samples.where((s) => s['kondisiPiringan'] == 'Ancak Semak atau Ada Gulma').length;
           int totalAplikasiStandar = _samples.where((s) => s['caraAplikasi'] == 'Standar').length;
@@ -317,8 +309,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             'total_dosis_tidak_sesuai': totalDosisTidakSesuai,
             'pokok_terpupuk': totalPokokTerpupuk,
             'pokok_tidak_terpupuk': totalPokokTidakTerpupuk,
-            'lubang_pocket_standar': totalPocketStandar,
-            'lubang_pocket_tidak_standar': totalPocketTidakStandar,
             'gawangan_baik': totalGawanganBaik,
             'gawangan_semak': totalGawanganSemak,
             'cara_aplikasi_standar': totalAplikasiStandar,
@@ -471,12 +461,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             const Divider(),
             const Text("Input Sample Pokok", style: TextStyle(fontWeight: FontWeight.bold)),
             TextField(controller: _barisController, decoration: const InputDecoration(labelText: "Baris ke-")),
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: "Lubang Pocket"),
-              value: selectedLubangPocket,
-              onChanged: (val) => setState(() => selectedLubangPocket = val),
-              items: pocketOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-            ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Pokok Terpupuk"),
               value: selectedPokokTerpupuk,

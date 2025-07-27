@@ -5,7 +5,6 @@ class TenagaTaburSummary {
   final int jumlahSample;
   final String jumlahAlatTabur;
   final String apd;
-  final Map<String, int> pocket;
   final Map<String, int> pokokTerpupuk;
   final Map<String, int> piringan;
   final Map<String, int> caraAplikasi;
@@ -16,7 +15,6 @@ class TenagaTaburSummary {
     required this.jumlahSample,
     required this.jumlahAlatTabur,
     required this.apd,
-    required this.pocket,
     required this.pokokTerpupuk,
     required this.piringan,
     required this.caraAplikasi,
@@ -90,7 +88,6 @@ String generateRingkasanText(QAPemupukanSummary data) {
       });
     }
 
-    addMap("Lubang Pocket", t.pocket);
     addMap("Pokok Terpupuk", t.pokokTerpupuk);
     addMap("Kondisi Piringan", t.piringan);
     addMap("Cara Aplikasi", t.caraAplikasi);

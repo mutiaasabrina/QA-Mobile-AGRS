@@ -158,8 +158,6 @@ class GSheetService {
       'total_dosis_tidak_sesuai',
       'pokok_terpupuk',
       'pokok_tidak_terpupuk',
-      'lubang_pocket_standar',
-      'lubang_pocket_tidak_standar',
       'gawangan_baik',
       'gawangan_semak',
       'cara_aplikasi_standar',

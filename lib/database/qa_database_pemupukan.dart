@@ -48,8 +48,6 @@ class QADatabasePemupukan {
         total_dosis_tidak_sesuai INTEGER,
         pokok_terpupuk INTEGER,
         pokok_tidak_terpupuk INTEGER,
-        lubang_pocket_standar INTEGER,
-        lubang_pocket_tidak_standar INTEGER,
         gawangan_baik INTEGER,
         gawangan_semak INTEGER,
         cara_aplikasi_standar INTEGER,
