@@ -5,7 +5,8 @@ import 'package:flutter/services.dart' show rootBundle;
 
 class GSheetService {
   static const _spreadsheetId = '1I0dkJq30JSM-sUaGUhd0eZiAdeuVjI7Ls4rNLWd6bbE';
-  static const _sheetNameProduksiPerawatan = 'Testing';
+  static const _sheetNameProduksi = 'Testing';
+  static const _sheetNamePerawatan = 'Testing Perawatan';
   static const _sheetNamePemupukan = 'Testing Pemupukan';
   static const _sheetNameChemist = 'Testing Chemist';
 
@@ -18,15 +19,17 @@ class GSheetService {
     final jsonCredentials = json.decode(jsonString);
     final gsheets = GSheets(jsonCredentials);
     final spreadsheet = await gsheets.spreadsheet(_spreadsheetId);
-    final sheet = await spreadsheet.worksheetByTitle(_sheetNameProduksiPerawatan,);
+    final sheet = await spreadsheet.worksheetByTitle(_sheetNameProduksi,);
 
     final service = GSheetService._();
     service._sheet = sheet;
     return service;
   }
 
-  Future<void> insertQA(Map<String, dynamic> data) async {
-    if (_sheet == null) return;
+  Future<void> insertQAProduksi(Map<String, dynamic> data) async {
+    final spreadsheet = await GSheets(json.decode(await rootBundle.loadString('assets/credentials/enginewaktuaplikasipemupukan-03e33861bae9.json',),),).spreadsheet(_spreadsheetId);
+    final sheet = await spreadsheet.worksheetByTitle(_sheetNameProduksi);
+    if (sheet == null) return;
 
     final orderedKeys = [
       'id',
@@ -45,6 +48,30 @@ class GSheetService {
       'lf_tinggal_tph',
       'buah_tinggal',
 
+      'is_synced',
+      'timestamp_sync',
+    ];
+
+    final values = orderedKeys
+        .map((key) => data[key]?.toString() ?? '')
+        .toList();
+    await _sheet!.values.appendRow(values);
+  }
+
+  Future<void> insertQAPerawatan(Map<String, dynamic> data) async {
+    final spreadsheet = await GSheets(json.decode(await rootBundle.loadString('assets/credentials/enginewaktuaplikasipemupukan-03e33861bae9.json',),),).spreadsheet(_spreadsheetId);
+    final sheet = await spreadsheet.worksheetByTitle(_sheetNamePerawatan);
+    if (sheet == null) return;
+
+    final orderedKeys = [
+      'id',
+      'tanggal',
+      'nama_petugas',
+      'kebun',
+      'divisi',
+      'blok',
+      'jumlah_pokok',
+
       'beneficial_plant',
       'peilscale',
 
@@ -56,8 +83,7 @@ class GSheetService {
       'kondisi_path_baik',
       'kondisi_path_tidak_baik',
 
-      'kondisi_tph_baik',
-      'kondisi_tph_tidak_baik',
+      'kondisi_tph',
 
       'lalang_ada',
       'lalang_tidak_ada',
@@ -74,17 +100,9 @@ class GSheetService {
       'pakis_udang_ada',
       'pakis_udang_tidak_ada',
 
-      'titi_panen_kondisi_standar_permanen_baik',
-      'titi_panen_kondisi_standar_semi_permanen_baik',
-      'titi_panen_kondisi_kurang_standar_semi_permanen_baik',
-      'titi_panen_kondisi_kurang_standar_semi_permanen_rusak',
-      'titi_panen_kondisi_tidak_ada',
+      'titi_panen',
 
-      'jalan_jembatan_rata_permanen',
-      'jalan_jembatan_sedang_permanen',
-      'jalan_jembatan_rusak_sebagian',
-      'jalan_jembatan_dominan_rusak',
-      'jalan_jembatan_parah',
+      'jalan_jembatan',
 
       'pruning_baik',
       'pruning_over',
@@ -107,10 +125,8 @@ class GSheetService {
       'timestamp_sync',
     ];
 
-    final values = orderedKeys
-        .map((key) => data[key]?.toString() ?? '')
-        .toList();
-    await _sheet!.values.appendRow(values);
+    final values = orderedKeys.map((k) => data[k]?.toString() ?? '').toList();
+    await sheet.values.appendRow(values);
   }
 
   Future<void> insertQAPemupukan(Map<String, dynamic> data) async {

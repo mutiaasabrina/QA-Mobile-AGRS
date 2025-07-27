@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
-import 'qa_produksi_perawatan.dart';
+import 'qa_produksi.dart';
+import 'qa_perawatan.dart';
 import 'qa_tracker_page.dart';
 import 'qa_pemupukan_page.dart';
 import 'qa_chemist_menu_page.dart';
@@ -59,9 +60,21 @@ class _MenuPageState extends State<MenuPage> {
               foregroundColor: Colors.white,
               padding: const EdgeInsets.all(16),
             ),
-            child: const Text("QA Produksi dan Perawatan"),
+            child: const Text("QA Produksi"),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const QAProduksiPage()));
+            },
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+            ),
+            child: const Text("QA Perawatan"),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const QAPerawatanPage()));
             },
           ),
           const SizedBox(height: 16),

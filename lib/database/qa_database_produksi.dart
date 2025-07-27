@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-// import 'dart:io';
 
 class QADatabase {
   static final QADatabase instance = QADatabase._init();
@@ -40,64 +39,6 @@ class QADatabase {
       lf_tinggal INTEGER,
       lf_tinggal_tph INTEGER,
       buah_tinggal INTEGER,
-
-      beneficial_plant TEXT,
-      peilscale TEXT,
-
-      kondisi_circle_baik INTEGER,
-      kondisi_circle_semak INTEGER,
-      kondisi_circle_dominan_anak_sawit INTEGER,
-      kondisi_circle_dominan_sampah INTEGER,
-
-      kondisi_path_baik INTEGER,
-      kondisi_path_tidak_baik INTEGER,
-
-      kondisi_tph_baik INTEGER,
-      kondisi_tph_tidak_baik INTEGER,
-
-      lalang_ada INTEGER,
-      lalang_tidak_ada INTEGER,
-
-      anak_kayu_ada INTEGER,
-      anak_kayu_tidak_ada INTEGER,
-
-      perumpung_ada INTEGER,
-      perumpung_tidak_ada INTEGER,
-
-      purun_tikus_ada INTEGER,
-      purun_tikus_tidak_ada INTEGER,
-
-      pakis_udang_ada INTEGER,
-      pakis_udang_tidak_ada INTEGER,
-
-      titi_panen_kondisi_standar_permanen_baik INTEGER,
-      titi_panen_kondisi_standar_semi_permanen_baik INTEGER,
-      titi_panen_kondisi_kurang_standar_semi_permanen_baik INTEGER,
-      titi_panen_kondisi_kurang_standar_semi_permanen_rusak INTEGER,
-      titi_panen_kondisi_tidak_ada INTEGER,
-
-      jalan_jembatan_rata_permanen INTEGER,
-      jalan_jembatan_sedang_permanen INTEGER,
-      jalan_jembatan_rusak_sebagian INTEGER,
-      jalan_jembatan_dominan_rusak INTEGER,
-      jalan_jembatan_parah INTEGER,
-
-      pruning_baik INTEGER,
-      pruning_over INTEGER,
-      pruning_sengkleh INTEGER,
-      pruning_under INTEGER,
-
-      susunan_pelepah_rapi INTEGER,
-      susunan_pelepah_tidak_rapi INTEGER,
-
-      serangan_tikus_ada INTEGER,
-      serangan_tikus_tidak_ada INTEGER,
-      serangan_rayap_ada INTEGER,
-      serangan_rayap_tidak_ada INTEGER,
-      thirathaba_ada INTEGER,
-      thirathaba_tidak_ada INTEGER,
-      updpks_ada INTEGER,
-      updpks_tidak_ada INTEGER,
 
       is_synced INTEGER,
       timestamp_sync TEXT

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:qa_agronomy/database/qa_database_produksi_perawatan.dart';
+import 'package:qa_agronomy/database/qa_database_perawatan.dart';
 import '../utils/constants.dart';
 import 'menu_page.dart';
 
-class QAProduksiPage extends StatefulWidget {
-  const QAProduksiPage({super.key});
+class QAPerawatanPage extends StatefulWidget {
+  const QAPerawatanPage({super.key});
 
   @override
-  State<QAProduksiPage> createState() => _QAProduksiPageState();
+  State<QAPerawatanPage> createState() => _QAPerawatanPageState();
 }
 
-class _QAProduksiPageState extends State<QAProduksiPage> {
+class _QAPerawatanPageState extends State<QAPerawatanPage> {
   final _namaPetugasController = TextEditingController();
-  final _rotasiController = TextEditingController();
 
   final List<Map<String, dynamic>> _samples = [];
   bool get isLocked => _samples.isNotEmpty;
@@ -33,11 +32,35 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   String? selectedKebun;
   String? selectedBlok;
 
+  String? selectedKondisiTPH;
+  String? selectedTitiPanen;
+  String? selectedJalanJembatan;
   String? selectedBeneficialPlant;
   String? selectedPeilscale;
 
   final Map<String, String?> dropdownSelections = {};
   final Map<String, int> dropdownCounters = {};
+
+ final List<String> kondisiTPHOptions = [
+    "Baik", 
+    "Tidak Baik"
+  ];
+
+ final List<String> titiPanenOptions = [
+    "Rasio Standar, Permanen, Kondisi Baik", 
+    "Rasio Standar, Semi Permanen, Kondisi Baik", 
+    "Rasio Kurang Standar, Semi Permanen, Kondisi Baik", 
+    "Rasio Kurang Standar, Semi Permanen, Kondisi Rusak", 
+    "Tidak Ada Sama Sekali"
+ ];
+
+ final List<String> JalanJembatanOptions = [
+    "Jalan Rata (Tidak Lubang/Rel), Jembatan Permanen", 
+    "Jalan Kondisi Sedang, Jembatan Permanen", 
+    "Jalan Rusak Sebagian, Jembatan Rusak Sebagian", 
+    "Jalan Dominan Rusak, Jembatan Rusak", 
+    "Jalan Rusak Parah, Jembatan Rusak Parah"
+  ];
 
  final List<String> beneficialPlantOptions = [
     'Semua ruas jalan terdapat tanaman rasio 10m2/ha',
@@ -128,7 +151,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   }
 
   void _saveAll() async {
-    if (_samples.isEmpty || selectedKebun == null || selectedDivisi == null || selectedBlok == null || _namaPetugasController.text.isEmpty || _rotasiController.text.isEmpty) {
+    if (_samples.isEmpty || selectedKebun == null || selectedDivisi == null || selectedBlok == null || _namaPetugasController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
       return;
     }
@@ -139,6 +162,27 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: "Kondisi TPH"),
+              isExpanded: true,
+              value: selectedKondisiTPH,
+              onChanged: (val) => setState(() => selectedKondisiTPH = val),
+              items: kondisiTPHOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
+            ),
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: "Titi Panen"),
+              isExpanded: true,
+              value: selectedTitiPanen,
+              onChanged: (val) => setState(() => selectedTitiPanen = val),
+              items: titiPanenOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
+            ),
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: "Jalan & Jembatan"),
+              isExpanded: true,
+              value: selectedJalanJembatan,
+              onChanged: (val) => setState(() => selectedJalanJembatan = val),
+              items: JalanJembatanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
+            ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Beneficial Plant"),
               isExpanded: true,
@@ -193,30 +237,17 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       });
     }
 
-    int totalDipanen = _samples.where((s) => s['dipanen'] == true).length;
-    int totalBuahDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahDipanen'] ?? '0')!);
-    int totalBuahMatangTidakDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahMatangTidakDipanen'] ?? '0')!);
-    int totalBuahBusukTidakDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahBusukTidakDipanen'] ?? '0')!);
-    int totalLfTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['lfTinggal'] ?? '0')!);
-    int totalTphTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['tphTinggal'] ?? '0')!);
-    int totalBuahTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTinggal'] ?? '0')!);
-
     StringBuffer result = StringBuffer();
     result.writeln("Tanggal Periksa: $_tanggalPeriksa");
     result.writeln("Nama Petugas: ${_namaPetugasController.text}");
     result.writeln("Kebun: $selectedKebun");
     result.writeln("Divisi: $selectedDivisi");
     result.writeln("Kode Blok: $selectedBlok");
-    result.writeln("Rotasi: ${_rotasiController.text} hari\n");
     result.writeln("Jumlah Pokok Sample: ${_samples.length}");
-    result.writeln("Pkk dipanen: $totalDipanen");
-    result.writeln("Buah di Panen: $totalBuahDipanen Jjg");
-    result.writeln("Buah Matang Tdk di Panen: $totalBuahMatangTidakDipanen Jjg");
-    result.writeln("Buah Busuk Tdk di Panen: $totalBuahBusukTidakDipanen Jjg");
-    result.writeln("LF Tinggal: $totalLfTinggal");
-    result.writeln("LF Tinggal (Pr,PP,TPH): $totalTphTinggal");
-    result.writeln("Buah Tinggal (Pr,PP,TPH): $totalBuahTinggal\n");
     result.writeln("== Ringkasan Kondisi ==");
+    result.writeln("Kondisi TPH: $selectedKondisiTPH");
+    result.writeln("Titi Panen: $selectedTitiPanen");
+    result.writeln("Jalan & Jembatan: $selectedJalanJembatan");
     result.writeln("Beneficial Plant: $selectedBeneficialPlant");
     result.writeln("Peilscale: $selectedPeilscale");
 
@@ -241,15 +272,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'kebun': selectedKebun,
       'divisi': selectedDivisi,
       'blok': selectedBlok,
-      'rotasi': int.tryParse(_rotasiController.text) ?? 0,
       'jumlah_pokok': _samples.length,
-      'pkk_dipanen': totalDipanen,
-      'buah_dipanen': totalBuahDipanen,
-      'buah_matang_tidak_dipanen': totalBuahMatangTidakDipanen,
-      'buah_busuk_tidak_dipanen': totalBuahBusukTidakDipanen,
-      'lf_tinggal': totalLfTinggal,
-      'lf_tinggal_tph': totalTphTinggal,
-      'buah_tinggal': totalBuahTinggal,
       'is_synced': 0,
       'timestamp_sync': null,
 
@@ -262,8 +285,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'kondisi_circle_dominan_sampah': dropdownCounters['Kondisi Circle: Dominan Sampah (Berondolan Busuk)'] ?? 0,
       'kondisi_path_baik': dropdownCounters['Kondisi Path: Baik'] ?? 0,
       'kondisi_path_tidak_baik': dropdownCounters['Kondisi Path: Tidak Baik'] ?? 0,
-      'kondisi_tph_baik': dropdownCounters['Kondisi TPH: Baik'] ?? 0,
-      'kondisi_tph_tidak_baik': dropdownCounters['Kondisi TPH: Tidak Baik'] ?? 0,
+      'kondisi_tph': selectedKondisiTPH,
       'lalang_ada': dropdownCounters['Lalang: Ada'] ?? 0,
       'lalang_tidak_ada': dropdownCounters['Lalang: Tidak Ada'] ?? 0,
       'anak_kayu_ada': dropdownCounters['Anak Kayu: Ada'] ?? 0,
@@ -274,16 +296,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'purun_tikus_tidak_ada': dropdownCounters['Purun Tikus: Tidak Ada'] ?? 0,
       'pakis_udang_ada': dropdownCounters['Pakis Udang: Ada'] ?? 0,
       'pakis_udang_tidak_ada': dropdownCounters['Pakis Udang: Tidak Ada'] ?? 0,
-      'titi_panen_kondisi_standar_permanen_baik': dropdownCounters['Titi Panen: Rasio Standar, Permanen, Kondisi Baik'] ?? 0,
-      'titi_panen_kondisi_standar_semi_permanen_baik': dropdownCounters['Titi Panen: Rasio Standar, Semi Permanen, Kondisi Baik'] ?? 0,
-      'titi_panen_kondisi_kurang_standar_semi_permanen_baik': dropdownCounters['Titi Panen: Rasio Kurang Standar, Semi Permanen, Kondisi Baik'] ?? 0,
-      'titi_panen_kondisi_kurang_standar_semi_permanen_rusak': dropdownCounters['Titi Panen: Rasio Kurang Standar, Semi Permanen, Kondisi Rusak'] ?? 0,
-      'titi_panen_kondisi_tidak_ada': dropdownCounters['Titi Panen: Tidak Ada Sama Sekali'] ?? 0,
-      'jalan_jembatan_rata_permanen': dropdownCounters['Jalan dan Jembatan: Jalan Rata (Tidak Lubang/Rel), Jembatan Permanen'] ?? 0,
-      'jalan_jembatan_sedang_permanen': dropdownCounters['Jalan dan Jembatan: Jalan Kondisi Sedang, Jembatan Permanen'] ?? 0,
-      'jalan_jembatan_rusak_sebagian': dropdownCounters['Jalan dan Jembatan: Jalan Rusak Sebagian, Jembatan Rusak Sebagian'] ?? 0,
-      'jalan_jembatan_dominan_rusak': dropdownCounters['Jalan dan Jembatan: Jalan Dominan Rusak, Jembatan Rusak'] ?? 0,
-      'jalan_jembatan_parah': dropdownCounters['Jalan dan Jembatan: Jalan Rusak Parah, Jembatan Rusak Parah'] ?? 0,
+      'titi_panen': selectedTitiPanen,
+      'jalan_jembatan': selectedJalanJembatan,
       'pruning_baik': dropdownCounters['Pruning: Baik'] ?? 0,
       'pruning_over': dropdownCounters['Pruning: Over'] ?? 0,
       'pruning_sengkleh': dropdownCounters['Pruning: Sengkleh'] ?? 0,
@@ -299,7 +313,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'updpks_ada': dropdownCounters['UPDPKS: Ada'] ?? 0,
       'updpks_tidak_ada': dropdownCounters['UPDPKS: Tidak Ada'] ?? 0,
     };
-    await QADatabase.instance.insertQA(qaData);
+    await QADatabasePerawatan.instance.insertQA(qaData);
 
      showDialog(
       context: context,
@@ -327,7 +341,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("QA Produksi & Perawatan")),
+      appBar: AppBar(title: const Text("QA Perawatan")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -367,37 +381,16 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
               items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
-            TextField(
-              controller: _rotasiController,
-              decoration: const InputDecoration(labelText: "Rotasi (hari)"),
-              enabled: !isLocked,
-            ),
             const Divider(),
             const Text("Masukkan Pokok Sample", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             TextField(controller: _barisController, decoration: const InputDecoration(labelText: "Baris ke-")),
-            Row(
-              children: [
-                Checkbox(value: _dipanen, onChanged: (val) => setState(() => _dipanen = val ?? false)),
-                const Text("Pkk di Panen")
-              ],
-            ),
-            TextField(controller: _buahDipanenController, decoration: const InputDecoration(labelText: "Buah di Panen (Mtg/Bsk)")),
-            TextField(controller: _buahMatangTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Matang Tidak di Panen (Jjg)")),
-            TextField(controller: _buahBusukTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Busuk Tidak di Panen (Jjg)")),
-            TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (pr,pk,lp,pp)")),
-            TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
-            TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (pr,pk,lp,pp)")),
-            const Divider(),
             _buildDropdown("Kondisi Circle", ["Baik", "Semak", "Dominan Anak Sawit", "Dominan Sampah (Berondolan Busuk)"], "Kondisi Circle"),
             _buildDropdown("Kondisi Path", ["Baik", "Tidak Baik"], "Kondisi Path"),
-            _buildDropdown("Kondisi TPH", ["Baik", "Tidak Baik"], "Kondisi TPH"),
             _buildDropdown("Lalang", ["Ada", "Tidak Ada"], "Lalang"),
             _buildDropdown("Anak Kayu", ["Ada", "Tidak Ada"], "Anak Kayu"),
             _buildDropdown("Perumpung", ["Ada", "Tidak Ada"], "Perumpung"),
             _buildDropdown("Purun Tikus", ["Ada", "Tidak Ada"], "Purun Tikus"),
             _buildDropdown("Pakis Udang", ["Ada", "Tidak Ada"], "Pakis Udang"),
-            _buildDropdown("Titi Panen", ["Rasio Standar, Permanen, Kondisi Baik", "Rasio Standar, Semi Permanen, Kondisi Baik", "Rasio Kurang Standar, Semi Permanen, Kondisi Baik", "Rasio Kurang Standar, Semi Permanen, Kondisi Rusak", "Tidak Ada Sama Sekali"], "Titi Panen"),
-            _buildDropdown("Jalan dan Jembatan", ["Jalan Rata (Tidak Lubang/Rel), Jembatan Permanen", "Jalan Kondisi Sedang, Jembatan Permanen", "Jalan Rusak Sebagian, Jembatan Rusak Sebagian", "Jalan Dominan Rusak, Jembatan Rusak", "Jalan Rusak Parah, Jembatan Rusak Parah"], "Jalan dan Jembatan"),
             _buildDropdown("Pruning", ["Baik", "Over", "Sengkleh", "Under"], "Pruning"),
             _buildDropdown("Susunan Pelepah", ["Rapi", "Tidak Rapi"], "Susunan Pelepah"),
             _buildDropdown("Serangan Tikus", ["Ada", "Tidak Ada"], "Serangan Tikus"),
@@ -421,8 +414,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             else
               Column(
                 children: _samples.map((p) => ListTile(
-                      title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
-                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${(int.tryParse(p['buahMatangTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahBusukTidakDipanen'] ?? '0') ?? 0)}"),
+                      title: Text("Baris: ${p['baris']} - Pokok Sample: ${p['pokok']}"),
                     )).toList(),
               ),
             const SizedBox(height: 16),
