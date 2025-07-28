@@ -4,15 +4,15 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 
-class QADatabasePemupukan {
-  static final QADatabasePemupukan instance = QADatabasePemupukan._init();
+class QADatabasePemupukanGulmaAncak {
+  static final QADatabasePemupukanGulmaAncak instance = QADatabasePemupukanGulmaAncak._init();
   static Database? _database;
 
-  QADatabasePemupukan._init();
+  QADatabasePemupukanGulmaAncak._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('qa_pemupukan.db');
+    _database = await _initDB('qa_pemupukan_mutu_ancak.db');
     return _database!;
   }
 
@@ -24,7 +24,7 @@ class QADatabasePemupukan {
 
   Future _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE qa_pemupukan_samples (
+      CREATE TABLE qa_pemupukan_mutu_ancak_samples (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         tanggal TEXT,
         nama_petugas TEXT,
@@ -37,14 +37,24 @@ class QADatabasePemupukan {
         tenaga_pemupuk TEXT,
         supervisi TEXT,
         fisik_pupuk TEXT,
+        jumlah_pokok INTEGER,
         total_alat_tabur INTEGER,
         alat_tabur_seragam INTEGER,
         alat_tabur_tidak_seragam INTEGER,
+        total_tenaga_kerja INTEGER,
         total_uji_petik_aktif INTEGER,
         total_uji_petik_nonaktif INTEGER,
         total_dosis_sesuai INTEGER,
         total_dosis_tidak_sesuai INTEGER,
+        tanggal_mutu_ancak TEXT,
+        pokok_terpupuk INTEGER,
+        pokok_tidak_terpupuk INTEGER,
+        gawangan_baik INTEGER,
+        gawangan_semak INTEGER,
+        cara_aplikasi_standar INTEGER,
+        cara_aplikasi_tidak_standar INTEGER,
         apd_pekerja TEXT,
+        daftar_tenaga_tabur TEXT,
         ringkasan TEXT,
         is_synced INTEGER,
         timestamp_sync TEXT
@@ -54,54 +64,24 @@ class QADatabasePemupukan {
 
   Future<int> insertQA(Map<String, dynamic> data) async {
     final db = await instance.database;
-    return await db.insert('qa_pemupukan_samples', data);
-  }
-
-  Future<int> updateSyncStatusQAData(String tanggalPeriksa, String kebun, String divisi, String blok, int newSyncStatus) async {
-    final db = await instance.database;
-
-    Map<String, dynamic> updateData = {
-      'is_synced': newSyncStatus,
-    };
-
-    return await db.update(
-      'qa_pemupukan_samples',
-      updateData,
-      where: 'tanggal = ? AND kebun = ? AND divisi = ? AND blok = ?',
-      whereArgs: [
-        tanggalPeriksa,
-        kebun, 
-        divisi, 
-        blok
-      ],
-    );
-  }
-
-  Future<List<Map<String, dynamic>>> getUnsyncedQAOrderedByDate() async {
-    final db = await instance.database;
-
-    return await db.query(
-      'qa_pemupukan_samples',
-      where: 'is_synced = ?',
-      whereArgs: [0],
-      orderBy: 'tanggal DESC',
-    );
-  }
-
-  Future<List<Map<String, dynamic>>> getAllQAOrderedByDate() async {
-    final db = await instance.database;
-
-    return await db.query(
-      'qa_pemupukan_samples',
-      orderBy: 'tanggal DESC',
-    );
+    return await db.insert('qa_pemupukan_mutu_ancak_samples', data);
   }
 
   Future<List<Map<String, dynamic>>> getAllQAHariIni(String tanggal) async {
     final db = await instance.database;
     return await db.query(
-      'qa_pemupukan_samples',
+      'qa_pemupukan_mutu_ancak_samples',
       where: 'tanggal = ?',
+      whereArgs: [tanggal],
+      orderBy: 'id DESC',
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getAllQABasedTanggalMutuAncak(String tanggal) async {
+    final db = await instance.database;
+    return await db.query(
+      'qa_pemupukan_mutu_ancak_samples',
+      where: 'tanggal_mutu_ancak = ?',
       whereArgs: [tanggal],
       orderBy: 'id DESC',
     );
@@ -110,7 +90,7 @@ class QADatabasePemupukan {
   Future<void> updateSyncStatusWithTimestamp(int id, bool synced, String timestamp) async {
     final db = await instance.database;
     await db.update(
-      'qa_pemupukan_samples',
+      'qa_pemupukan_mutu_ancak_samples',
       {
         'is_synced': synced ? 1 : 0,
         'timestamp_sync': synced ? timestamp : null,
@@ -122,11 +102,11 @@ class QADatabasePemupukan {
 
   Future<void> deleteQA(int id) async {
     final db = await instance.database;
-    await db.delete('qa_pemupukan_samples', where: 'id = ?', whereArgs: [id]);
+    await db.delete('qa_pemupukan_mutu_ancak_samples', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> clearAll() async {
     final db = await instance.database;
-    await db.delete('qa_pemupukan_samples');
+    await db.delete('qa_pemupukan_mutu_ancak_samples');
   }
 }

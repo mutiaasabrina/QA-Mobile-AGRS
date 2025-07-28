@@ -1,4 +1,4 @@
-class SampleAncakSummary {
+class SampleAncakChemistSummary {
   final String baris;
   final int jumlahSample;
   final Map<String, int> gulmaCircle;
@@ -6,7 +6,7 @@ class SampleAncakSummary {
   final Map<String, int> gulmaTPH;
   final Map<String, int> gulmaGawangan;
 
-  SampleAncakSummary({
+  SampleAncakChemistSummary({
     required this.baris,
     required this.jumlahSample,
     required this.gulmaCircle,
@@ -16,7 +16,7 @@ class SampleAncakSummary {
   });
 }
 
-class AncakSummary {
+class ChemistAncakSummary {
   final String tanggalPeriksa;
   final String namaPetugas;
   final String kebun;
@@ -28,12 +28,12 @@ class AncakSummary {
   final String jenisChemist;
   final String dosis;
   final String tanggalPeriksaMutuAncak;
-  final List<SampleAncakSummary> sampleAncakList;
+  final List<SampleAncakChemistSummary> sampleAncakList;
   int getTotalSample(){
     return sampleAncakList.fold(0,(sum, e)=> sum +e.jumlahSample);
   }
 
-  AncakSummary({
+  ChemistAncakSummary({
     required this.tanggalPeriksa,
     required this.namaPetugas,
     required this.kebun,
@@ -49,7 +49,7 @@ class AncakSummary {
   });
 }
 
-String generateRingkasanText(AncakSummary data) {
+String generateRingkasanText(ChemistAncakSummary data) {
   final buffer = StringBuffer();
 
   buffer.writeln("Tanggal Pemeriksaan Terakhir: ${data.tanggalPeriksa}");

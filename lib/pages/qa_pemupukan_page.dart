@@ -15,11 +15,9 @@ class QAPemupukanPage extends StatefulWidget {
 
 class _QAPemupukanPageState extends State<QAPemupukanPage> {
   final _namaPetugasController = TextEditingController();
-  final _tenagaTaburController = TextEditingController();
   final _dosisController = TextEditingController();
   final _jumlahAlatTaburController = TextEditingController();
   final _jumlahSampleUjiPetikController = TextEditingController();
-  final _barisController = TextEditingController();
   final _alatTaburSeragamController = TextEditingController();
   final _alatTaburTidakSeragamController = TextEditingController();
   List<TextEditingController> _dosisSampleControllers =[];
@@ -28,8 +26,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
 
   final String _tanggalPeriksa = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final String _tanggalPemupukan = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-  final Map<String, Map<String, dynamic>> _alatTaburData = {};
 
   String? selectedKebun;
   String? selectedDivisi;
@@ -40,22 +36,12 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   String? selectedSupervisi;
   String? selectedFisikPupuk;
 
-  String? selectedPokokTerpupuk;
-  String? selectedKondisiPiringan;
-  String? selectedCaraAplikasi;
  // String? selectedDosisUjiPetik;
 
-  String get _tenagaTaburKey => "${_tenagaTaburController.text.trim().toLowerCase()}|${selectedBlok ??''}|$_tanggalPemupukan";
-
   bool _ujiPetik = false;
-
   final List<Map<String, dynamic>> _samples = [];
-  final List<Map<String, dynamic>> _tenagaTabur = [];
-
-  bool get isLocked => _samples.isNotEmpty;
-
-  bool get isAlatTaburLocked => _alatTaburData.containsKey(_tenagaTaburKey);
-  bool get isAPDLocked => isAlatTaburLocked;
+  bool _isLocked = false;
+  int _pokokCounter = 1; // Counter otomatis untuk pokok
 
   final List<String> kebunOptions = ['Inti', 'Plasma'];
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
@@ -109,112 +95,68 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     'Tekstur tidak baik, sebagian menggumpal',
     'Tekstur tidak baik, semua menggumpal'
   ];
-  final List<String> pokokOptions = ['Terpupuk', 'Tidak Terpupuk'];
-  final List<String> piringanOptions = ['Baik', 'Ancak Semak atau Ada Gulma'];
-  final List<String> caraAplikasiOptions = ['Standar', 'Tidak Standar'];
   final List<String> dosisUjiOptions = ['Sesuai', 'Tidak Sesuai'];
 
   void _saveSample() {
-  if (_barisController.text.isEmpty ||
-      selectedPokokTerpupuk == null ||
-      selectedKondisiPiringan == null ||
-      selectedCaraAplikasi == null ||
-      (_ujiPetik && (_dosisSampleControllers.any((c)=> c.text.isEmpty)))) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Lengkapi semua data pokok sample.")));
-    return;
+  if (_namaPetugasController.text.isEmpty ||
+      selectedKebun == null ||
+      selectedDivisi == null ||
+      selectedBlok == null ||
+      selectedJenisPupuk == null ||
+      selectedAPD == null ||
+      _jumlahAlatTaburController.text.isEmpty ||
+      _alatTaburSeragamController.text.isEmpty ||
+      _alatTaburTidakSeragamController.text.isEmpty ||
+      selectedTenagaPemupuk == null ||
+      selectedSupervisi == null ||
+      selectedFisikPupuk == null ||
+      (_ujiPetik && (_dosisSampleControllers.any((c)=> c.text.isEmpty) || _ujiPetik && _hasilUjiPetikController.text.isEmpty))) 
+  {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+        return;
   }
 
   setState(() {
     _samples.add({
-      'baris': _barisController.text,
-      'pokokTerpupuk': selectedPokokTerpupuk,
-      'kondisiPiringan': selectedKondisiPiringan,
-      'caraAplikasi': selectedCaraAplikasi,
+      'pokok': _pokokCounter++,
       'ujiPetik': _ujiPetik,
       'jumlahSample': _ujiPetik ? _jumlahSampleUjiPetikController.text : '-',
       'dosisAlatTabur': _ujiPetik ? dosisUjiPetikResult : '-',
-      'tenagaTabur': _tenagaTaburController.text.toLowerCase(),
     });
 
-    if(!_tenagaTabur.any((item) => item['tenagaTabur'] == _tenagaTaburController.text.toLowerCase())) {
-      _tenagaTabur.add({
-        'tenagaTabur': _tenagaTaburController.text.toLowerCase(),
-        'jumlah': _jumlahAlatTaburController.text,
-        'seragam': _alatTaburSeragamController.text,
-        'tidakSeragam': _alatTaburTidakSeragamController.text,
-      });
-    }
-
-    _barisController.clear();
-    selectedPokokTerpupuk = null;
-    selectedKondisiPiringan = null;
-    selectedCaraAplikasi = null;
     //selectedDosisUjiPetik = null;
     _jumlahSampleUjiPetikController.clear();
     _ujiPetik = false;
     dosisUjiPetikResult ="";
-
-    // ✅ Simpan data alat tabur kalau belum pernah
-    if (!_alatTaburData.containsKey(_tenagaTaburKey)) {
-      _alatTaburData[_tenagaTaburKey] = {
-        'jumlah': _jumlahAlatTaburController.text,
-        'apd': selectedAPD,
-        'seragam': _alatTaburSeragamController.text,
-        'tidakSeragam': _alatTaburTidakSeragamController.text,
-      };
-    }
-
-    // ✅ Auto isi jika data sudah ada (kalau kamu edit tenaga ke yang lama)
-    final alatTabur = _alatTaburData[_tenagaTaburKey];
-    if (alatTabur != null) {
-      _jumlahAlatTaburController.text = alatTabur['jumlah'];
-      _alatTaburSeragamController.text = alatTabur['seragam'];
-      _alatTaburTidakSeragamController.text = alatTabur['tidakSeragam'];
-      selectedAPD = alatTabur['apd'];
-    }
+    _isLocked = true;
+    _hasilUjiPetikController.clear();
   });
 }
 
   void _saveAll() {
-  if (_samples.isEmpty || selectedKebun == null || selectedDivisi == null || selectedBlok == null || _namaPetugasController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
-    return;
+  if (_samples.isEmpty || 
+      _namaPetugasController.text.isEmpty ||
+      selectedKebun == null ||
+      selectedDivisi == null ||
+      selectedBlok == null ||
+      selectedJenisPupuk == null ||
+      selectedAPD == null ||
+      _jumlahAlatTaburController.text.isEmpty ||
+      _alatTaburSeragamController.text.isEmpty ||
+      _alatTaburTidakSeragamController.text.isEmpty ||
+      selectedTenagaPemupuk == null ||
+      selectedSupervisi == null ||
+      selectedFisikPupuk == null ||
+      (_ujiPetik && (_dosisSampleControllers.any((c)=> c.text.isEmpty) || _ujiPetik && _hasilUjiPetikController.text.isEmpty))) 
+  {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+        return;
   }
-  // Kelompokkan sample per tenaga tabur
-  final Map<String, List<Map<String, dynamic>>> perTenaga = {};
-  for (final sample in _samples) {
-    final key = sample['tenagaTabur'].toLowerCase();
-    perTenaga.putIfAbsent(key, () => []).add(sample);
-  }
 
-  final List<TenagaTaburSummary> tenagaList = perTenaga.entries.map((entry) {
-    final nama = entry.key;
-    final list = entry.value;
-    int countSample = list.length;
-
-    Map<String, int> countBy(String field) {
-      final Map<String, int> count = {};
-      for (final s in list) {
-        final val = s[field] ?? '-';
-        count[val] = (count[val] ?? 0) + 1;
-      }
-      return count;
-    }
-
-    final alatTabur = _alatTaburData.entries.firstWhere((e) => e.key.startsWith(nama.toLowerCase())).value;
-
-    return TenagaTaburSummary(
-      nama: nama.toLowerCase(),
-      jumlahSample: countSample,
-      jumlahAlatTabur: alatTabur['jumlah'],
-      apd: alatTabur['apd'],
-      pokokTerpupuk: countBy('pokokTerpupuk'),
-      piringan: countBy('kondisiPiringan'),
-      caraAplikasi: countBy('caraAplikasi'),
-      dosis: countBy('dosisAlatTabur'),
-    );
-  }).toList();
+  int totalUjiPetikAktif = _samples.where((s) => s['ujiPetik'] == true).length;
+  int totalUjiPetikNonAktif = _samples.where((s) => s['ujiPetik'] == false).length;
+  int totalDosisSesuai = _samples.where((s) => s['dosisAlatTabur'] == 'Sesuai').length;
+  int totalDosisTidakSesuai = _samples.where((s) => s['dosisAlatTabur'] == 'Tidak Sesuai').length;
 
   final summary = QAPemupukanSummary(
     tanggalPeriksa: _tanggalPeriksa,
@@ -228,7 +170,14 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     tenagaPemupuk: selectedTenagaPemupuk ?? '',
     supervisi: selectedSupervisi ?? '',
     fisikPupuk: selectedFisikPupuk ?? '',
-    tenagaTaburList: tenagaList,
+    totalAlatTabur: _jumlahAlatTaburController.text,
+    totalAlatTaburSeragam: _alatTaburSeragamController.text,
+    totalAlatTaburTidakSeragam: _alatTaburTidakSeragamController.text,
+    totalUjiPetikAktif: totalUjiPetikAktif,
+    totalUjiPetikTidakAktif: totalUjiPetikNonAktif,
+    totalDosisSesuai: totalDosisSesuai,
+    totalDosisTidakSesuai: totalDosisTidakSesuai,
+    apdPekerja: selectedAPD ?? '',
   );
 
   final ringkasan = generateRingkasanText(summary);
@@ -247,45 +196,6 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
           onPressed: () async {
           Navigator.pop(context);
 
-          final totalSample = tenagaList.fold<int>(0, (sum, t) => sum + t.jumlahSample);
-          final totalAlatTabur = _alatTaburData.values.fold<int>(0, (sum, e)=> sum + int.tryParse(e['jumlah']??'0')!);
-          final totalSeragam = _alatTaburData.values.fold<int>(0, (sum, e)=> sum + int.tryParse(e['seragam']??'0')!);
-          final totalTidakSeragam = _alatTaburData.values.fold<int>(0, (sum, e)=> sum + int.tryParse(e['tidakSeragam']??'0')!);
-          int totalTenagaKerja = perTenaga.length;
-          int totalUjiPetikAktif = _samples.where((s) => s['ujiPetik'] == true).length;
-          int totalUjiPetikNonAktif = _samples.where((s) => s['ujiPetik'] == false).length;
-          int totalDosisSesuai = _samples.where((s) => s['dosisAlatTabur'] == 'Sesuai').length;
-          int totalDosisTidakSesuai = _samples.where((s) => s['dosisAlatTabur'] == 'Tidak Sesuai').length;
-          int totalPokokTerpupuk = _samples.where((s) => s['pokokTerpupuk'] == 'Terpupuk').length;
-          int totalPokokTidakTerpupuk = _samples.where((s) => s['pokokTerpupuk'] == 'Tidak Terpupuk').length;
-          int totalGawanganBaik = _samples.where((s) => s['kondisiPiringan'] == 'Baik').length;
-          int totalGawanganSemak = _samples.where((s) => s['kondisiPiringan'] == 'Ancak Semak atau Ada Gulma').length;
-          int totalAplikasiStandar = _samples.where((s) => s['caraAplikasi'] == 'Standar').length;
-          int totalAplikasiTidakStandar = _samples.where((s) => s['caraAplikasi'] == 'Tidak Standar').length;
-          const List<String> apdRank = [
-            'Lengkap',
-            'Kurang dari 1 item',
-            'Kurang dari 2 item',
-            'Kurang dari 3 item',
-            'Tidak ada APD',
-          ];
-          String worstApd ='';
-          int worstIndex = -1;
-
-          for (var tabur in _alatTaburData.values){
-            final apd = tabur['apd'];
-            if (apd == null)continue;
-
-            final idx = apdRank.indexOf(apd);
-            if(idx > worstIndex){
-              worstIndex = idx;
-              worstApd = apd;
-            }
-          }
-
-          String mostCommonFisikPupuk = selectedFisikPupuk ?? '';
-          String tenagaTaburString = json.encode(_tenagaTabur);
-
           await QADatabasePemupukan.instance.insertQA({
             'tanggal': summary.tanggalPeriksa,
             'nama_petugas': summary.namaPetugas,
@@ -297,29 +207,19 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
             'dosis': summary.dosis,
             'tenaga_pemupuk': summary.tenagaPemupuk,
             'supervisi': summary.supervisi,
-            'fisik_pupuk': mostCommonFisikPupuk,
-            'jumlah_pokok': totalSample,
-            'total_alat_tabur': totalAlatTabur,
-            'alat_tabur_seragam': totalSeragam,
-            'alat_tabur_tidak_seragam': totalTidakSeragam,
-            'total_tenaga_kerja': totalTenagaKerja,
+            'fisik_pupuk': selectedFisikPupuk,
+            'total_alat_tabur': _jumlahAlatTaburController.text,
+            'alat_tabur_seragam': _alatTaburSeragamController.text,
+            'alat_tabur_tidak_seragam': _alatTaburTidakSeragamController.text,
             'total_uji_petik_aktif': totalUjiPetikAktif,
             'total_uji_petik_nonaktif': totalUjiPetikNonAktif,
             'total_dosis_sesuai': totalDosisSesuai,
             'total_dosis_tidak_sesuai': totalDosisTidakSesuai,
-            'pokok_terpupuk': totalPokokTerpupuk,
-            'pokok_tidak_terpupuk': totalPokokTidakTerpupuk,
-            'gawangan_baik': totalGawanganBaik,
-            'gawangan_semak': totalGawanganSemak,
-            'cara_aplikasi_standar': totalAplikasiStandar,
-            'cara_aplikasi_tidak_standar': totalAplikasiTidakStandar,
-            'apd_pekerja': worstApd,
-            'daftar_tenaga_tabur': tenagaTaburString,
+            'apd_pekerja': selectedAPD,
             'ringkasan': ringkasan,
             'is_synced': 0,
             'timestamp_sync': null,
           });
-
           
           Navigator.of(context).popUntil((route) => route.isFirst);
           Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()));
@@ -349,21 +249,17 @@ void _calculateDosisUjiPetik() {
   });
 }
 
-
-
   @override
   void dispose() {
     for (var c in _dosisSampleControllers) {
       c.dispose();
     }
     _namaPetugasController.dispose();
-    _tenagaTaburController.dispose();
     _dosisController.dispose();
     _jumlahAlatTaburController.dispose();
     _alatTaburSeragamController.dispose();
     _alatTaburTidakSeragamController.dispose();
     _jumlahSampleUjiPetikController.dispose();
-    _barisController.dispose();
     super.dispose();
   }
 
@@ -378,100 +274,58 @@ void _calculateDosisUjiPetik() {
           children: [
             Text("Tanggal Pemeriksaan: $_tanggalPeriksa"),
             Text("Tanggal Pemupukan: $_tanggalPemupukan"),
-            TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas")),
+            TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas"), enabled: !_isLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kebun"),
               value: selectedKebun,
-              onChanged: isLocked ? null : (val) => setState(() => selectedKebun = val),
+              onChanged: _isLocked ? null : (val) => setState(() => selectedKebun = val),
               items: kebunOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Divisi"),
               value: selectedDivisi,
-              onChanged: isLocked ? null : (val) => setState(() => selectedDivisi = val),
+              onChanged: _isLocked ? null : (val) => setState(() => selectedDivisi = val),
               items: divisiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kode Blok"),
               value: selectedBlok,
-              onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
+              onChanged: _isLocked ? null : (val) => setState(() => selectedBlok = val),
               items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Jenis Pupuk"),
               value: selectedJenisPupuk,
-              onChanged: isLocked ? null : (val) => setState(() => selectedJenisPupuk = val),
+              onChanged: _isLocked ? null : (val) => setState(() => selectedJenisPupuk = val),
               items: jenisPupukOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
-            TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis/Pokok"), enabled: !isLocked),
-            TextField(
-                  controller: _tenagaTaburController,
-                  decoration: const InputDecoration(labelText: "Nama Tenaga Tabur"),
-                  onChanged: (_) {
-                    final alatTabur = _alatTaburData[_tenagaTaburKey];
-                    if (alatTabur != null) {
-                      setState(() {
-                        _jumlahAlatTaburController.text = alatTabur['jumlah'];
-                        _alatTaburSeragamController.text = alatTabur['seragam'];
-                        _alatTaburTidakSeragamController.text = alatTabur['tidakSeragam'];
-                        selectedAPD = alatTabur['apd'];
-                      });
-                    } else {
-                      setState(() {
-                        _jumlahAlatTaburController.clear();
-                        _alatTaburSeragamController.clear();
-                        _alatTaburTidakSeragamController.clear();
-                      });
-                    }
-                  },
-                ),
+            TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis/Pokok"), enabled: !_isLocked),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "APD Pekerja"),
               value: selectedAPD,
-              onChanged: isAPDLocked ? null : (val) => setState(() => selectedAPD = val),
+              onChanged: _isLocked ? null : (val) => setState(() => selectedAPD = val),
               items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
-            TextField(controller: _jumlahAlatTaburController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur", hintText: isAlatTaburLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !isAlatTaburLocked,),
-            TextField(controller: _alatTaburSeragamController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur Seragam", hintText: isAlatTaburLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !isAlatTaburLocked,),
-            TextField(controller: _alatTaburTidakSeragamController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur Tidak Seragam", hintText: isAlatTaburLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !isAlatTaburLocked,),
+            TextField(controller: _jumlahAlatTaburController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur", hintText: _isLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !_isLocked,),
+            TextField(controller: _alatTaburSeragamController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur Seragam", hintText: _isLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !_isLocked,),
+            TextField(controller: _alatTaburTidakSeragamController, decoration: InputDecoration(labelText: "Jumlah Alat Tabur Tidak Seragam", hintText: _isLocked ? "Data Ini Sudah Tersedia": null,), keyboardType: TextInputType.number, enabled: !_isLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Tenaga Pemupuk"),
               value: selectedTenagaPemupuk,
-              onChanged: isLocked ? null : (val) => setState(() => selectedTenagaPemupuk = val),
+              onChanged: _isLocked ? null : (val) => setState(() => selectedTenagaPemupuk = val),
               items: tenagaPemupukOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Supervisi"),
               value: selectedSupervisi,
-              onChanged: isLocked ? null : (val) => setState(() => selectedSupervisi = val),
+              onChanged: _isLocked ? null : (val) => setState(() => selectedSupervisi = val),
               items: supervisiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 14),))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Fisik Pupuk"),
               value: selectedFisikPupuk,
-              onChanged: isLocked ? null : (val) => setState(() => selectedFisikPupuk = val),
+              onChanged: _isLocked ? null : (val) => setState(() => selectedFisikPupuk = val),
               items: fisikPupukOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-            ),
-            const Divider(),
-            const Text("Input Sample Pokok", style: TextStyle(fontWeight: FontWeight.bold)),
-            TextField(controller: _barisController, decoration: const InputDecoration(labelText: "Baris ke-")),
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: "Pokok Terpupuk"),
-              value: selectedPokokTerpupuk,
-              onChanged: (val) => setState(() => selectedPokokTerpupuk = val),
-              items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-            ),
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: "Kondisi Piringan/Gawangan"),
-              value: selectedKondisiPiringan,
-              onChanged: (val) => setState(() => selectedKondisiPiringan = val),
-              items: piringanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-            ),
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: "Cara Aplikasi"),
-              value: selectedCaraAplikasi,
-              onChanged: (val) => setState(() => selectedCaraAplikasi = val),
-              items: caraAplikasiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             SwitchListTile(
               title: const Text("Apakah melakukan uji petik?"),
@@ -508,18 +362,16 @@ void _calculateDosisUjiPetik() {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
-
-              
             const SizedBox(height: 12),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save & Tambah Pokok Sample")),
+              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save Data Pemupukan")),
             const SizedBox(height: 16),
             ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All")),
             const Divider(),
             const Text("Daftar Sample"),
             ..._samples.map((s) => ListTile(
-              title: Text("Baris: ${s['baris']}, Pokok: ${s['pokokTerpupuk']}"),
-              subtitle: Text("Uji Petik: ${s['ujiPetik'] ? 'Ya' : 'Tidak'}"),
+              title: Text("Uji Petik Ke: ${s['pokok']}"),
+              subtitle: Text("Uji Petik: ${s['ujiPetik'] ? 'Ya' : 'Tidak'}, Kesesuaian: ${s['dosisAlatTabur']}"),
             ))
           ],
         ),

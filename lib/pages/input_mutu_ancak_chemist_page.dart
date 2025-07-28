@@ -70,7 +70,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
       perSample.putIfAbsent(key, () => []).add(sample);
     }
 
-    final List<SampleAncakSummary> sampleAncakList = perSample.entries.map((entry) {
+    final List<SampleAncakChemistSummary> sampleAncakList = perSample.entries.map((entry) {
       final baris = entry.key;
       final list = entry.value;
       int countSample = list.length;
@@ -84,7 +84,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
         return count;
       }
       
-      return SampleAncakSummary(
+      return SampleAncakChemistSummary(
         baris: baris,
         jumlahSample: countSample,
         gulmaCircle: countBy('gulmaCircle'),
@@ -94,7 +94,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
       );
     }).toList();
     
-    final summary = AncakSummary(
+    final summary = ChemistAncakSummary(
       tanggalPeriksa: qaData['tanggal'],
       namaPetugas: qaData['nama_petugas'],
       kebun: qaData['kebun'],
@@ -196,7 +196,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mutu Ancak - ${qaData['tanggal']} - ${qaData['kebun']} - ${qaData['divisi']} - ${qaData['blok']}")),
+      appBar: AppBar(title: Text("Mutu Ancak Chemist - ${qaData['tanggal']} - ${qaData['kebun']} - ${qaData['divisi']} - ${qaData['blok']}")),
       body: ListView(
         padding: const EdgeInsets.all(10),
         children: [
@@ -216,8 +216,10 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   Text("Chemist: ${qaData['chemist']}"),
                   Text("Jenis Chemist: ${qaData['jenis_chemist']}"),
                   Text("Dosis / Knapsack (liter/ha):: ${qaData['dosis_knapsack']}",),
+                  const SizedBox(height: 12),
                 ],
               ),
+              const SizedBox(height: 12),
               if (qaData['chemist'] == 'Chemist CPT') ...[
                 TextField(
                   controller: barisController,

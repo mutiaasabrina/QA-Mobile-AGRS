@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:qa_agronomy/database/qa_database_chemist.dart';
-import 'input_mutu_ancak_chemist_page.dart';
+import 'package:qa_agronomy/database/qa_database_pemupukan.dart';
+import 'input_mutu_ancak_pemupukan_page.dart';
 import 'package:sqflite/sqflite.dart';
 
-class MutuAncakChemistPage extends StatefulWidget {
-  const MutuAncakChemistPage({super.key});
+class MutuAncakPemupukanPage extends StatefulWidget {
+  const MutuAncakPemupukanPage({super.key});
 
   @override
-  State<MutuAncakChemistPage> createState() => _MutuAncakChemistPageState();
+  State<MutuAncakPemupukanPage> createState() => _MutuAncakPemupukanPageState();
 }
 
-class _MutuAncakChemistPageState extends State<MutuAncakChemistPage> {
-  List<Map<String, dynamic>> _qaListChemist = [];
+class _MutuAncakPemupukanPageState extends State<MutuAncakPemupukanPage> {
+  List<Map<String, dynamic>> _qaListPemupukan = [];
 
   @override
   void initState() {
@@ -21,41 +21,20 @@ class _MutuAncakChemistPageState extends State<MutuAncakChemistPage> {
   }
 
   Future<void> _loadQAData() async {
-    final chemist = await QADatabaseChemist.instance.getUnsyncedQAOrderedByDate();
+    final pemupukan = await QADatabasePemupukan.instance.getUnsyncedQAOrderedByDate();
 
-    setState(() {
-      _qaListChemist = chemist;
+    setState(() { 
+      _qaListPemupukan = pemupukan;
     });
   }
 
   void _showDetailDialog(Map<String, dynamic> qa) {
-    final DateTime tanggalPeriksa = DateFormat('yyyy-MM-dd').parse(qa["tanggal"]);
-    if (tanggalPeriksa.difference(DateTime.now()).inDays < 14) 
-    {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Peringatan"),
-          content: SingleChildScrollView(
-            child: Text("Belum dapat melakukan mutu ancak, karena QA Chemist di bawah 14 hari."),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Tutup"),
-            ),
-          ],
-        ),
-      );
-    }
-    else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => InputMutuAncakChemistPage(qa: qa),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InputMutuAncakPemupukanPage(qa: qa),
+      ),
+    );
   }
   
 Widget _buildListSection(
@@ -84,7 +63,7 @@ Widget _buildListSection(
           child: ListTile(
             title: Text("${qa['kebun']} - ${qa['divisi']} - ${qa['blok']}"),
             subtitle: Text(
-              "Chemist: ${qa['chemist']}\nJenis Chemist: ${qa['jenis_chemist']}\nTanggal Periksa: ${qa['tanggal']}"
+              "Jenis Pupuk: ${qa['jenis_pupuk']}\nDosis/Pokok: ${qa['dosis']}\nTanggal Periksa: ${qa['tanggal']}"
             ),
             trailing: isSynced
                 ? const Icon(Icons.check_circle, color: Colors.green)
@@ -104,21 +83,21 @@ Widget _buildListSection(
 
   @override
   Widget build(BuildContext context) {
-    final isAllEmpty = _qaListChemist.isEmpty;
+    final isAllEmpty = _qaListPemupukan.isEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Mutu Ancak Chemist")),
+      appBar: AppBar(title: const Text("Mutu Ancak Pemupukan")),
       body: isAllEmpty
-          ? const Center(child: Text("Belum ada data QA Chemist hari ini."))
+          ? const Center(child: Text("Belum ada data QA Pemupukan hari ini."))
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildListSection(
-                    "Chemist",
-                    _qaListChemist,
-                    tableName: 'qa_chemist_samples',
-                    getDb: () => QADatabaseChemist.instance.database,
+                    "Pemupukan",
+                    _qaListPemupukan,
+                    tableName: 'qa_pemupukan_samples',
+                    getDb: () => QADatabasePemupukan.instance.database,
                   ),
                   const SizedBox(height: 24),
                 ],

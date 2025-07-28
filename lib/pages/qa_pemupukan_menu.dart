@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'qa_pemupukan_page.dart';
-import 'package:qa_agronomy/pages/mutu_ancak_chemist_page.dart';
+import 'package:qa_agronomy/pages/mutu_ancak_pemupukan_page.dart';
 import 'package:qa_agronomy/utils/constants.dart';
 
 class QAPupukMenuPage extends StatelessWidget {
@@ -37,7 +37,7 @@ class QAPupukMenuPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const MutuAncakChemistPage()),
+                MaterialPageRoute(builder: (_) => const MutuAncakPemupukanPage()),
               );
             },
             child: const Text("Mutu Ancak Pemupukan"),

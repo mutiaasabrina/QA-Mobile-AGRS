@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_produksi.dart';
 import 'package:qa_agronomy/database/qa_database_perawatan.dart';
-import 'package:qa_agronomy/database/qa_database_pemupukan.dart';
+import 'package:qa_agronomy/database/input_mutu_ancak_database_pemupukan.dart';
 import 'package:qa_agronomy/database/input_mutu_ancak_database_chemist.dart';
 import 'package:qa_agronomy/gsheet_service.dart';
 import 'package:sqflite/sqflite.dart';
@@ -21,6 +21,10 @@ class _QATrackerPageState extends State<QATrackerPage> {
   List<Map<String, dynamic>> _qaListPemupukan = [];
   List<Map<String, dynamic>> _qaListChemist = [];
 
+  final List<String> SkippedDetails = [
+    'Daftar Tenaga Tabur',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +35,7 @@ class _QATrackerPageState extends State<QATrackerPage> {
     final tanggal = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final produksi = await QADatabase.instance.getAllQAHariIni(tanggal);
     final perawatan = await QADatabasePerawatan.instance.getAllQAHariIni(tanggal);
-    final pupuk = await QADatabasePemupukan.instance.getAllQAHariIni(tanggal);
+    final pupuk = await QADatabasePemupukanGulmaAncak.instance.getAllQABasedTanggalMutuAncak(tanggal);
     final chemist = await QADatabaseChemistGulmaAncak.instance.getAllQABasedTanggalMutuAncak(tanggal);
 
     setState(() {
@@ -58,10 +62,13 @@ String _formatKey(String key) {
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: qa.entries.map((e) {
+            children: qa.entries
+            .where((e) => !SkippedDetails.contains(_formatKey(e.key)))
+            .map((e) {
               String formattedKey = _formatKey(e.key);
               return Text("$formattedKey: ${e.value}");
-            }).toList(),
+            })
+            .toList(),
           ),
         ),
         actions: [
@@ -104,11 +111,11 @@ String _formatKey(String key) {
         await gsheet.insertQAPerawatan(updatedQA);
 
       } else if (title == "Pemupukan") {
-        await QADatabasePemupukan.instance.updateSyncStatusWithTimestamp(qa['id'], true, nowFormatted);
-        final db = await QADatabasePemupukan.instance.database;
+        await QADatabasePemupukanGulmaAncak.instance.updateSyncStatusWithTimestamp(qa['id'], true, nowFormatted);
+        final db = await QADatabasePemupukanGulmaAncak.instance.database;
 
         final updatedQA = (await db.query(
-          'qa_pemupukan_samples',
+          'qa_pemupukan_mutu_ancak_samples',
           where: 'id =?',
           whereArgs: [qa['id']],
         )).first;
@@ -252,8 +259,8 @@ Widget _buildListSection(
                   _buildListSection(
                     "Pemupukan",
                     _qaListPemupukan,
-                    tableName: 'qa_pemupukan_samples',
-                    getDb: () => QADatabasePemupukan.instance.database,
+                    tableName: 'qa_pemupukan_mutu_ancak_samples',
+                    getDb: () => QADatabasePemupukanGulmaAncak.instance.database,
                   ),
                   _buildListSection(
                     "Chemist",
