@@ -144,7 +144,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     result.writeln("LF Tinggal (Pr): $totalLfTinggal");
     result.writeln("LF Tinggal (TPH): $totalTphTinggal");
     result.writeln("Buah Tinggal (Pr,PP,Pk,Lp): $totalBuahTinggal\n");
-    result.writeln("Buah Tingal TPH: $totalBuahTinggalTPH\n");
+    result.writeln("Buah Tinggal TPH: $totalBuahTinggalTPH\n");
     
     // Hitung semua kolom dropdown
     Map<String, dynamic> dropdownCounts = {};
@@ -257,9 +257,9 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             TextField(controller: _buahDipanenController, decoration: const InputDecoration(labelText: "Buah di Panen (Mtg/Bsk)")),
             TextField(controller: _buahMatangTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Matang Tidak di Panen (Jjg)")),
             TextField(controller: _buahBusukTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Busuk Tidak di Panen (Jjg)")),
-            TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (pr,pk,lp,pp)")),
+            TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (Pr,PP,Pk,Lp)")),
             TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
-            TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (pr,pk,lp,pp)")),
+            TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (Pr,PP,Pk,Lp)")),
             TextField(controller: _buahTinggalTPHController, decoration: const InputDecoration(labelText: "Buah Tinggal di TPH")),
             const Divider(),
             const SizedBox(height: 16),

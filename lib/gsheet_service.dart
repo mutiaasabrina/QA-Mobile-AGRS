@@ -47,6 +47,7 @@ class GSheetService {
       'lf_tinggal',
       'lf_tinggal_tph',
       'buah_tinggal',
+      'buah_tinggal_tph',
 
       'is_synced',
       'timestamp_sync',
