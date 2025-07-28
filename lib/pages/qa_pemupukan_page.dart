@@ -119,7 +119,7 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       selectedPokokTerpupuk == null ||
       selectedKondisiPiringan == null ||
       selectedCaraAplikasi == null ||
-      (_ujiPetik && (_jumlahSampleUjiPetikController.text.isEmpty || _dosisSampleControllers.any((c)=> c.text.isEmpty)))) {
+      (_ujiPetik && (_dosisSampleControllers.any((c)=> c.text.isEmpty)))) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Lengkapi semua data pokok sample.")));
     return;
@@ -329,32 +329,26 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
       ],
 ),
 );
+} 
+  final TextEditingController _hasilUjiPetikController = TextEditingController();
+  
+void _calculateDosisUjiPetik() {
+  if (_dosisController.text.isEmpty || _hasilUjiPetikController.text.isEmpty) return;
+
+  final double dosisPerPokokKg = double.tryParse(_dosisController.text) ?? 0;
+  final double dosisPerPokokGram = dosisPerPokokKg * 1000;
+  final double targetPerTitik = dosisPerPokokGram / 4;
+
+  final double hasilUji = double.tryParse(_hasilUjiPetikController.text) ?? 0;
+  final double toleransi = targetPerTitik * 0.05;
+
+  final double selisih = (hasilUji - targetPerTitik).abs();
+
+  setState(() {
+    dosisUjiPetikResult = selisih <= toleransi ? "Sesuai" : "Tidak Sesuai";
+  });
 }
 
-  void _updateDosisSamples(){
-    final int jumlah = int.tryParse(_jumlahSampleUjiPetikController.text)??0;
-    _dosisSampleControllers = List.generate(jumlah, (_) => TextEditingController());
-    dosisUjiPetikResult =""; //Reset
-  }
-  
-  void _calculateDosisUjiPetik() {
-    if (_dosisController.text.isEmpty) return;
-
-    final double targetKg = double.tryParse(_dosisController.text) ?? 0;
-    final double targetGram = targetKg * 1000;
-
-    final double total = _dosisSampleControllers.fold<double>(
-      0,
-      (sum, c) => sum + (double.tryParse(c.text) ?? 0),
-    );
-
-    final double selisih = (total - targetGram).abs();
-    final double toleransi = targetGram * 0.05; // 5% toleransi
-
-    setState(() {
-      dosisUjiPetikResult = selisih <= toleransi ? "Sesuai" : "Tidak Sesuai";
-    });
-  }
 
 
   @override
@@ -499,34 +493,22 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
               },
             ),
             if (_ujiPetik) ...[
-                TextField(
-                  controller: _jumlahSampleUjiPetikController,
-                  decoration: const InputDecoration(labelText: "Jumlah titik pocket/pokok (Minimal 4)"),
-                  keyboardType: TextInputType.number,
-                  onChanged: (_) {
-                    setState(() {
-                      _updateDosisSamples();
-                    });
-                  },
+              const SizedBox(height: 8),
+              TextField(
+                controller: _hasilUjiPetikController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: "Berat pupuk dari salah satu titik pocket (gram)",
                 ),
-                const SizedBox(height: 8),
-                ..._dosisSampleControllers.asMap().entries.map((entry) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: TextField(
-                    controller: entry.value,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: "Dosis pupuk titik pocket ${entry.key + 1} (gram)",
-                    ),
-                    onChanged: (_) => _calculateDosisUjiPetik(),
-                  ),
-                )),
-                const SizedBox(height: 8),
-                Text(
-                  "Dosis Alat Tabur: $dosisUjiPetikResult",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
+                onChanged: (_) => _calculateDosisUjiPetik(),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Dosis Alat Tabur: $dosisUjiPetikResult",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+
               
             const SizedBox(height: 12),
             ElevatedButton(
