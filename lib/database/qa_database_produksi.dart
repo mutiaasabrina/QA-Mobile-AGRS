@@ -39,6 +39,7 @@ class QADatabase {
       lf_tinggal INTEGER,
       lf_tinggal_tph INTEGER,
       buah_tinggal INTEGER,
+      buah_tinggal_tph INTEGER,
 
       is_synced INTEGER,
       timestamp_sync TEXT

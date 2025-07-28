@@ -28,6 +28,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _lfTinggalController = TextEditingController();
   final _tphTinggalController = TextEditingController();
   final _buahTinggalController = TextEditingController();
+  final _buahTinggalTPHController = TextEditingController();
 
   String? selectedDivisi;
   String? selectedKebun;
@@ -81,6 +82,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         "lfTinggal": _lfTinggalController.text,
         "tphTinggal": _tphTinggalController.text,
         "buahTinggal": _buahTinggalController.text,
+        "buahTinggalTPH" : _buahTinggalTPHController.text,
         "dropdowns": Map<String, String?>.from(dropdownSelections),
       });
       _pokokCounter++;
@@ -98,6 +100,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     _lfTinggalController.clear();
     _tphTinggalController.clear();
     _buahTinggalController.clear();
+    _buahTinggalTPHController.clear();
   }
 
   void _saveAll() async {
@@ -124,6 +127,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     int totalLfTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['lfTinggal'] ?? '0')!);
     int totalTphTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['tphTinggal'] ?? '0')!);
     int totalBuahTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTinggal'] ?? '0')!);
+    int totalBuahTinggalTPH = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTinggalTPH'] ?? '0')!);
 
     StringBuffer result = StringBuffer();
     result.writeln("Tanggal Periksa: $_tanggalPeriksa");
@@ -140,6 +144,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     result.writeln("LF Tinggal: $totalLfTinggal");
     result.writeln("LF Tinggal (Pr,PP,TPH): $totalTphTinggal");
     result.writeln("Buah Tinggal (Pr,PP,TPH): $totalBuahTinggal\n");
+    result.writeln("Buah Tingal TPH: $totalBuahTinggalTPH\n");
     
     // Hitung semua kolom dropdown
     Map<String, dynamic> dropdownCounts = {};
@@ -163,6 +168,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'lf_tinggal': totalLfTinggal,
       'lf_tinggal_tph': totalTphTinggal,
       'buah_tinggal': totalBuahTinggal,
+      'buah_tinggal_tph': totalBuahTinggalTPH,
       'is_synced': 0,
       'timestamp_sync': null,
     };
@@ -254,6 +260,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (pr,pk,lp,pp)")),
             TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
             TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (pr,pk,lp,pp)")),
+            TextField(controller: _buahTinggalTPHController, decoration: const InputDecoration(labelText: "Buah Tinggal di TPH")),
             const Divider(),
             const SizedBox(height: 16),
             ElevatedButton(
