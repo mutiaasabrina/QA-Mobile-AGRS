@@ -3,9 +3,9 @@ import '../utils/constants.dart';
 import 'qa_produksi.dart';
 import 'qa_perawatan.dart';
 import 'qa_tracker_page.dart';
-import 'qa_pemupukan_page.dart';
 import 'qa_chemist_menu_page.dart';
 import 'package:qa_agronomy/database/qa_database_chemist.dart';
+import 'package:qa_agronomy/pages/qa_pemupukan_menu.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -86,7 +86,7 @@ class _MenuPageState extends State<MenuPage> {
             ),
             child: const Text("QA Pemupukan"),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const QAPemupukanPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const QAPupukMenuPage()));
             },
           ),
           const SizedBox(height: 16),
