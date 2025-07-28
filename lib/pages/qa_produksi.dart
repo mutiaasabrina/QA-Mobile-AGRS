@@ -141,9 +141,9 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     result.writeln("Buah di Panen: $totalBuahDipanen Jjg");
     result.writeln("Buah Matang Tdk di Panen: $totalBuahMatangTidakDipanen Jjg");
     result.writeln("Buah Busuk Tdk di Panen: $totalBuahBusukTidakDipanen Jjg");
-    result.writeln("LF Tinggal: $totalLfTinggal");
-    result.writeln("LF Tinggal (Pr,PP,TPH): $totalTphTinggal");
-    result.writeln("Buah Tinggal (Pr,PP,TPH): $totalBuahTinggal\n");
+    result.writeln("LF Tinggal (Pr): $totalLfTinggal");
+    result.writeln("LF Tinggal (TPH): $totalTphTinggal");
+    result.writeln("Buah Tinggal (Pr,PP,Pk,Lp): $totalBuahTinggal\n");
     result.writeln("Buah Tingal TPH: $totalBuahTinggalTPH\n");
     
     // Hitung semua kolom dropdown
