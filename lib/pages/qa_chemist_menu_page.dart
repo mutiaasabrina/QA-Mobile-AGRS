@@ -25,7 +25,7 @@ class QAChemistMenuPage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const QAChemistPage()),
               );
             },
-            child: const Text("Input QA Chemist"),
+            child: const Text("QA Kalibrasi Chemist"),
           ),
           const SizedBox(height: 16),
           ElevatedButton(

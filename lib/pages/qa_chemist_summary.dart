@@ -3,7 +3,6 @@
 class TenagaSemprotSummary {
   final String nama;
   final int jumlahSample;
-  final Map<String, int> pokokTersemprot;
   final String apd;
   final String kondisiAlat;
   final String keseragamanNozel;
@@ -12,7 +11,6 @@ class TenagaSemprotSummary {
   TenagaSemprotSummary({
     required this.nama,
     required this.jumlahSample,
-    required this.pokokTersemprot,
     required this.apd,
     required this.kondisiAlat,
     required this.keseragamanNozel,
@@ -107,7 +105,6 @@ String generateRingkasanText(QAChemistSummary data) {
       });
     }
 
-    addMap("Pokok Tersemprot", t.pokokTersemprot);
     addMap("Uji Petik", t.ujiPetik);
   }
 

@@ -37,7 +37,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
   String? selectedAPD;
   String? selectedAlatSemprot;
   String? selectedKeseragamanNozel;
-  String? selectedPokokTersemprot;
 
   final Map<String, Map<String, dynamic>> _alatSemprotData = {};
   String get _tenagaSemprotKey => "${_namaPetugasSemprotController.text.trim().toLowerCase()}|${selectedBlok ??''}|$_tanggalSemprot";
@@ -67,8 +66,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
   final List<String> peletakanOptions = ['Semua alat, tercatat', 'Semua alat, tidak tercatat', 'Sebagian alat saja dan tercatat', 'Sebagian alat saja, tidak tercatat', 'Tidak ada gudang dan pencatatan'];
   final List<String> keseragamanNozel = ['Seragam', 'Tidak Seragam'];
   final List<String> alatSemprot = ['Baik dan Lancar', 'Tidak Baik'];
-
-  final List<String> pokokOptions = ['Tersemprot', 'Tidak Tersemprot'];
 
   final Map<String, List<String>> blokOptions = {
     "Inti-1": ["I-18", "I-19", "I-20", "I-21", "I-22", "I-23", "I-24", "I-25", "I-26", "I-27", "I-28", "I-29", "J-18", "J-19", "J-20", "J-21", "J-22", "J-23", "J-24", "J-25", "J-26", "J-27", "J-28", "J-29", "I-12", "I-13", "I-14", "I-14B", "I-15", "I-15B", "I-16", "I-16B", "I-17", "I-08", "I-09", "I-10", "I-11"],
@@ -124,13 +121,11 @@ class _QAChemistPageState extends State<QAChemistPage> {
   void _saveSample() {
     if (_barisController.text.isNotEmpty &&
         _namaPetugasSemprotController.text.isNotEmpty &&
-        selectedPokokTersemprot != null &&
         selectedAPD != null) {
       setState(() {
         _pokokSamples.add({
           'baris': _barisController.text,
           'tenagaSemprot': _namaPetugasSemprotController.text.toLowerCase(),
-          'tersemprot': selectedPokokTersemprot,
           'kondisiAlat': selectedAlatSemprot,
           'keseragamanNozel': selectedKeseragamanNozel,
           'apd': selectedAPD,
@@ -165,7 +160,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
 
         _barisController.clear();
         _namaPetugasSemprotController.clear();
-        selectedPokokTersemprot = null;
         selectedAlatSemprot = null;
         selectedKeseragamanNozel = null;
         selectedAPD = null;
@@ -217,7 +211,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
       return TenagaSemprotSummary(
         nama: nama.toLowerCase(),
         jumlahSample: countSample,
-        pokokTersemprot: countBy('tersemprot'),
         kondisiAlat: _alatSemprot['kondisiAlat'],
         keseragamanNozel: _alatSemprot['keseragamanNozel'],
         apd: _alatSemprot['apd'],
@@ -270,8 +263,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
               int totalUjiPetikNonAktif = _pokokSamples.where((s) => s['ujiPetik'] == false).length;
               int totalHasilUjiPetikSesuai = _pokokSamples.where((s) => s['hasilUjiPetik'] == 'Sesuai').length;
               int totalHasilUjiPetikTidakSesuai = _pokokSamples.where((s) => s['hasilUjiPetik'] == 'Tidak Sesuai').length;
-              int totalPokokTersemprot = _pokokSamples.where((s) => s['tersemprot'] == 'Tersemprot').length;
-              int totalPokokTidakTersemprot = _pokokSamples.where((s) => s['tersemprot'] == 'Tidak Tersemprot').length;
               int totalAlatSemprotBaik = _alatSemprotData.values.where((s) => s['kondisiAlat'] == 'Baik dan Lancar').length;
               int totalAlatSemprotTidakLayak = _alatSemprotData.values.where((s) => s['kondisiAlat'] == 'Tidak Baik').length;
               int totalNozelSeragam = _alatSemprotData.values.where((s) => s['keseragamanNozel'] == 'Seragam').length;
@@ -323,8 +314,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
                 'total_uji_petik_nonaktif': totalUjiPetikNonAktif,
                 'total_uji_petik_sesuai': totalHasilUjiPetikSesuai,
                 'total_uji_petik__tidak_sesuai': totalHasilUjiPetikTidakSesuai,
-                'total_pokok_tersemprot': totalPokokTersemprot,
-                'total_pokok__tidak_tersemprot': totalPokokTidakTersemprot,
                 'total_alat_semprot_baik': totalAlatSemprotBaik,
                 'total_alat_semprot__tidak_layak': totalAlatSemprotTidakLayak,
                 'total_nozel_seragam': totalNozelSeragam,
@@ -449,12 +438,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
                   },
                 ),
           DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: "Pokok Tersemprot"),
-            value: selectedPokokTersemprot,
-            onChanged: (val) => setState(() => selectedPokokTersemprot = val),
-            items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-          ),
-          DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Kondisi Alat Semprot"),
             value: selectedAlatSemprot,
             onChanged: isAlatSemprotLocked ? null : (val) => setState(() => selectedAlatSemprot = val),
@@ -519,7 +502,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
             const Text("Daftar Sample:", style: TextStyle(fontWeight: FontWeight.bold)),
             ..._pokokSamples.map((s) => ListTile(
               title: Text("Baris ${s['baris']} - ${s['tenagaSemprot']}"),
-              subtitle: Text("Tersemprot: ${s['tersemprot']}, APD: ${s['apd']}, Alat: ${s['kondisiAlat']}, Nozel: ${s['keseragamanNozel']}"),
+              subtitle: Text("APD: ${s['apd']}, Alat: ${s['kondisiAlat']}, Nozel: ${s['keseragamanNozel']}"),
           )),
           ],
           const SizedBox(height: 16),

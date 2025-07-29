@@ -51,8 +51,6 @@ class QADatabaseChemist {
         total_uji_petik_nonaktif INTEGER,
         total_uji_petik_sesuai INTEGER,
         total_uji_petik__tidak_sesuai INTEGER,
-        total_pokok_tersemprot INTEGER,
-        total_pokok__tidak_tersemprot INTEGER,
         total_alat_semprot_baik INTEGER,
         total_alat_semprot__tidak_layak INTEGER,
         total_nozel_seragam INTEGER,

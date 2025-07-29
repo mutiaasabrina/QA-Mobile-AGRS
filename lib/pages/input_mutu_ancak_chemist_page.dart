@@ -24,6 +24,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   final kematianGulmaGawanganController = TextEditingController();
   final String tanggalPemeriksaanMutuAncak = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+  String? selectedPokokTersemprot;
   String? selectedCircle;
   String? selectedPath;
   String? selectedTPH;
@@ -33,6 +34,8 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
 
   int pokokCounter = 1;
   bool isGawanganUsed = false;
+
+  final List<String> pokokOptions = ['Tersemprot', 'Tidak Tersemprot'];
 
   @override
   void initState() {
@@ -45,9 +48,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   void dispose() {
     super.dispose();
   }
-
   
-
   void _saveSample() {
     if (barisController.text.isEmpty ||
         kematianGulmaCircleController.text.isEmpty ||
@@ -62,14 +63,16 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
       pokokSamples.add({
         'baris': barisController.text,
         'pokok': pokokCounter.toString(),
+        'tersemprot': selectedPokokTersemprot,
         'gulmaCircle': kematianGulmaCircleController.text,
         'gulmaPath': kematianGulmaPathontroller.text,
         'gulmaTPH': kematianGulmaTPHController.text,
         'gulmaGawangan': kematianGulmaGawanganController.text,
       });
 
-      pokokCounter++;
       barisController.clear();
+      pokokCounter++;
+      selectedPokokTersemprot = null;
       kematianGulmaCircleController.clear();
       kematianGulmaPathontroller.clear();
       kematianGulmaTPHController.clear();
@@ -102,10 +105,20 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
         }
         return count;
       }
+
+      Map<String, int> countBy(String field) {
+        final Map<String, int> count = {};
+        for (final s in list) {
+          final val = s[field] ?? '-';
+          count[val] = (count[val] ?? 0) + 1;
+        }
+        return count;
+      }
       
       return SampleAncakChemistSummary(
         baris: baris,
         jumlahSample: countSample,
+        pokokTersemprot: countBy('tersemprot'),
         gulmaCircle: count('gulmaCircle'),
         gulmaPath: count('gulmaPath'),
         gulmaTPH: count('gulmaTPH'),
@@ -145,7 +158,9 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
               Navigator.pop(context);
 
               final totalSampleGulma = sampleAncakList.fold<int>(0, (sum, t) => sum + t.jumlahSample,);
-
+              int totalPokokTersemprot = sampleAncakList.map((s) => s.pokokTersemprot['Tersemprot'] ?? 0).reduce((a, b) => a + b);
+              int totalPokokTidakTersemprot = sampleAncakList.map((s) => s.pokokTersemprot['Tidak Tersemprot'] ?? 0).reduce((a, b) => a + b);
+              
               double averageGulmaCircleMati =
                   pokokSamples
                       .where(
@@ -209,8 +224,8 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 'total_uji_petik_nonaktif': qaData['total_uji_petik_nonaktif'],
                 'total_uji_petik_sesuai': qaData['total_uji_petik_sesuai'],
                 'total_uji_petik__tidak_sesuai': qaData['total_uji_petik__tidak_sesuai'],
-                'total_pokok_tersemprot': qaData['total_pokok_tersemprot'],
-                'total_pokok__tidak_tersemprot': qaData['total_pokok__tidak_tersemprot'],
+                'total_pokok_tersemprot': totalPokokTersemprot,
+                'total_pokok__tidak_tersemprot': totalPokokTidakTersemprot,
                 'total_alat_semprot_baik': qaData['total_alat_semprot_baik'],
                 'total_alat_semprot__tidak_layak': qaData['total_alat_semprot__tidak_layak'],
                 'total_nozel_seragam': qaData['total_nozel_seragam'],
@@ -271,12 +286,18 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 ],
               ),
               const SizedBox(height: 12),
+              TextField(
+                controller: barisController,
+                decoration: const InputDecoration(labelText: "Baris ke-"),
+                keyboardType: TextInputType.number,
+              ),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(labelText: "Pokok Tersemprot"),
+                value: selectedPokokTersemprot,
+                onChanged: (val) => setState(() => selectedPokokTersemprot = val),
+                items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              ),
               if (qaData['chemist'] == 'Chemist CPT') ...[
-                TextField(
-                  controller: barisController,
-                  decoration: const InputDecoration(labelText: "Baris ke-"),
-                  keyboardType: TextInputType.number,
-                ),
                 TextField(
                   controller: kematianGulmaCircleController,
                   decoration: const InputDecoration(labelText: "Kematian Gulma Circle"),
@@ -295,22 +316,12 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
               ]
               else if (qaData['chemist'] == 'Chemist Gawangan') ...[
                 TextField(
-                  controller: barisController,
-                  decoration: const InputDecoration(labelText: "Baris ke-"),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
                   controller: kematianGulmaGawanganController,
                   decoration: const InputDecoration(labelText: "Kematian Gulma Gawangan"),
                   keyboardType: TextInputType.number,
                 ),
               ]
               else if (qaData['chemist'] == 'Chemist CPT + Gawangan') ...[
-                TextField(
-                  controller: barisController,
-                  decoration: const InputDecoration(labelText: "Baris ke-"),
-                  keyboardType: TextInputType.number,
-                ),
                 TextField(
                   controller: kematianGulmaCircleController,
                   decoration: const InputDecoration(labelText: "Kematian Gulma Circle-"),
@@ -347,7 +358,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                     (s) => ListTile(
                       title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
                       subtitle: Text(
-                        "Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}",
+                        "Tersemprot: ${s['tersemprot']}, Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}",
                       ),
                     ),
                   ),
@@ -357,7 +368,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                     (s) => ListTile(
                       title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
                       subtitle: Text(
-                        "Gawangan: ${s['gulmaGawangan']}",
+                        "Tersemprot: ${s['tersemprot']}, Gawangan: ${s['gulmaGawangan']}",
                       ),
                     ),
                   ),
@@ -367,7 +378,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                     (s) => ListTile(
                       title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
                       subtitle: Text(
-                        "Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}, Gawangan: ${s['gulmaGawangan']}",
+                        "Tersemprot: ${s['tersemprot']}, Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}, Gawangan: ${s['gulmaGawangan']}",
                       ),
                     ),
                   ),
