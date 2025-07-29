@@ -1,10 +1,10 @@
 class SampleAncakChemistSummary {
   final String baris;
   final int jumlahSample;
-  final Map<String, int> gulmaCircle;
-  final Map<String, int> gulmaPath;
-  final Map<String, int> gulmaTPH;
-  final Map<String, int> gulmaGawangan;
+  final int gulmaCircle;
+  final int gulmaPath;
+  final int gulmaTPH;
+  final int gulmaGawangan;
 
   SampleAncakChemistSummary({
     required this.baris,
@@ -69,19 +69,28 @@ String generateRingkasanText(ChemistAncakSummary data) {
     buffer.writeln("Baris: ${t.baris}");
     buffer.writeln("Jumlah Sample: ${t.jumlahSample}");
 
-    void addMap(String title, Map<String, int> map) {
-      buffer.writeln("🔹 $title:");
-      map.forEach((key, value) {
-        if (key.isEmpty || key == "-") {
-          return;
-        }
-        buffer.writeln("     - $key: $value");
-      });
+    buffer.writeln("🔹 Kematian Gulma Circle: ${t.gulmaCircle}");
+    buffer.writeln("🔹 Kematian Gulma Path: ${t.gulmaPath}");
+    buffer.writeln("🔹 Kematian Gulma TPH: ${t.gulmaTPH}");
+
+    if(data.chemist == 'Chemist CPT + Gawangan' || data.chemist == 'Chemist Gawangan')
+    {
+      buffer.writeln("🔹 Kematian Gulma Gawangan: ${t.gulmaGawangan}");
     }
 
-    addMap("Total Circle", t.gulmaCircle);
-    addMap("Total Path", t.gulmaPath);
-    addMap("Total TPH", t.gulmaTPH);
+    // void addMap(String title, Map<String, int> map) {
+    //   buffer.writeln("🔹 $title:");
+    //   map.forEach((key, value) {
+    //     if (key.isEmpty || key == "-") {
+    //       return;
+    //     }
+    //     buffer.writeln("     - $key: $value");
+    //   });
+    // }
+
+    // addMap("Total Circle", t.gulmaCircle);
+    // addMap("Total Path", t.gulmaPath);
+    // addMap("Total TPH", t.gulmaTPH);
   }
 
   return buffer.toString();

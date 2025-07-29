@@ -91,7 +91,7 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
       selectedPokokTerpupuk == null ||
       selectedKondisiPiringan == null ||
       selectedCaraAplikasi == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data pokok sample.")));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data pokok sample dengan benar.")));
         return;
   }
 

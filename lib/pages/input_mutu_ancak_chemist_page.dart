@@ -18,6 +18,10 @@ class InputMutuAncakChemistPage extends StatefulWidget {
 class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   late Map<String, dynamic> qaData;
   final barisController = TextEditingController();
+  final kematianGulmaCircleController = TextEditingController();
+  final kematianGulmaPathontroller = TextEditingController();
+  final kematianGulmaTPHController = TextEditingController();
+  final kematianGulmaGawanganController = TextEditingController();
   final String tanggalPemeriksaanMutuAncak = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
   String? selectedCircle;
@@ -27,14 +31,14 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
 
   final List<Map<String, dynamic>> pokokSamples = [];
 
-  final List<String> mutuAncakOptions = ['Mati', 'Tidak Mati'];
-
   int pokokCounter = 1;
+  bool isGawanganUsed = false;
 
   @override
   void initState() {
     super.initState();
     qaData = widget.qa;
+    isGawanganUsed = qaData['chemist'] == 'Chemist CPT + Gawangan' || qaData['chemist'] == 'Chemist Gawangan';
   }
   
   @override
@@ -42,19 +46,34 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
     super.dispose();
   }
 
+  
+
   void _saveSample() {
+    if (barisController.text.isEmpty ||
+        kematianGulmaCircleController.text.isEmpty ||
+        kematianGulmaPathontroller.text.isEmpty ||
+        kematianGulmaTPHController.text.isEmpty ||
+        (isGawanganUsed && kematianGulmaGawanganController.text.isEmpty)) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data pokok sample dengan benar.")));
+          return;
+    }
+
     setState(() {
       pokokSamples.add({
         'baris': barisController.text,
         'pokok': pokokCounter.toString(),
-        'gulmaCircle': selectedCircle ?? "",
-        'gulmaPath': selectedPath ?? "",
-        'gulmaTPH': selectedTPH ?? "",
-        'gulmaGawangan': selectedGawangan ?? "",
+        'gulmaCircle': kematianGulmaCircleController.text,
+        'gulmaPath': kematianGulmaPathontroller.text,
+        'gulmaTPH': kematianGulmaTPHController.text,
+        'gulmaGawangan': kematianGulmaGawanganController.text,
       });
 
       pokokCounter++;
       barisController.clear();
+      kematianGulmaCircleController.clear();
+      kematianGulmaPathontroller.clear();
+      kematianGulmaTPHController.clear();
+      kematianGulmaGawanganController.clear();
       selectedCircle = null;
       selectedPath = null;
       selectedTPH = null;
@@ -75,11 +94,11 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
       final list = entry.value;
       int countSample = list.length;
       
-      Map<String, int> countBy(String field) {
-        final Map<String, int> count = {};
+      int count(String field) {
+        int count = 0;
         for (final s in list) {
-          final val = s[field] ?? '-';
-          count[val] = (count[val] ?? 0) + 1;
+          final val = int.tryParse(s[field]) ?? 0;
+          count = count + val;
         }
         return count;
       }
@@ -87,10 +106,10 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
       return SampleAncakChemistSummary(
         baris: baris,
         jumlahSample: countSample,
-        gulmaCircle: countBy('gulmaCircle'),
-        gulmaPath: countBy('gulmaPath'),
-        gulmaTPH: countBy('gulmaTPH'),
-        gulmaGawangan: countBy('gulmaGawangan'),
+        gulmaCircle: count('gulmaCircle'),
+        gulmaPath: count('gulmaPath'),
+        gulmaTPH: count('gulmaTPH'),
+        gulmaGawangan: count('gulmaGawangan'),
       );
     }).toList();
     
@@ -126,14 +145,46 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
               Navigator.pop(context);
 
               final totalSampleGulma = sampleAncakList.fold<int>(0, (sum, t) => sum + t.jumlahSample,);
-              int totalGulmaCircleMati = pokokSamples.where((s) => s['gulmaCircle'] == 'Mati').length;
-              int totalGulmaCircleTidakMati = pokokSamples.where((s) => s['gulmaCircle'] == 'Tidak Mati').length;
-              int totalGulmaPathMati = pokokSamples.where((s) => s['gulmaPath'] == 'Mati').length;
-              int totalGulmaPathTidakMati = pokokSamples.where((s) => s['gulmaPath'] == 'Tidak Mati').length;
-              int totalGulmaTPHMati = pokokSamples.where((s) => s['gulmaTPH'] == 'Mati').length;
-              int totalGulmaTPHTidakMati = pokokSamples.where((s) => s['gulmaTPH'] == 'Tidak Mati').length;
-              int totalGulmaGawanganMati = pokokSamples.where((s) => s['gulmaGawangan'] == 'Mati').length;
-              int totalGulmaGawanganTidakMati = pokokSamples.where((s) => s['gulmaGawangan'] == 'Tidak Mati').length;
+
+              double averageGulmaCircleMati =
+                  pokokSamples
+                      .where(
+                        (s) => double.tryParse(s['gulmaCircle'].toString()) != null,)
+                      .map((s) => double.parse(s['gulmaCircle'].toString()),) 
+                      .fold(0.0, (a, b) => a + b) /
+                    pokokSamples
+                        .where((s) => double.tryParse(s['gulmaCircle'].toString()) != null,)
+                        .length;
+
+              double averageGulmaPathMati =
+                  pokokSamples
+                      .where(
+                        (s) => double.tryParse(s['gulmaPath'].toString()) != null,)
+                      .map((s) => double.parse(s['gulmaPath'].toString()),) 
+                      .fold(0.0, (a, b) => a + b) /
+                    pokokSamples
+                        .where((s) => double.tryParse(s['gulmaPath'].toString()) != null,)
+                        .length;
+
+              double averageGulmaTPHMati =
+                  pokokSamples
+                      .where(
+                        (s) => double.tryParse(s['gulmaTPH'].toString()) != null,)
+                      .map((s) => double.parse(s['gulmaTPH'].toString()),) 
+                      .fold(0.0, (a, b) => a + b) /
+                    pokokSamples
+                        .where((s) => double.tryParse(s['gulmaTPH'].toString()) != null,)
+                        .length;
+
+              double averageGawanganTPHMati =
+                  pokokSamples
+                      .where(
+                        (s) => double.tryParse(s['gulmaGawangan'].toString()) != null,)
+                      .map((s) => double.parse(s['gulmaGawangan'].toString()),) 
+                      .fold(0.0, (a, b) => a + b) /
+                    pokokSamples
+                        .where((s) => double.tryParse(s['gulmaGawangan'].toString()) != null,)
+                        .length;
 
               await QADatabaseChemistGulmaAncak.instance.insertQA({
                 'tanggal': qaData['tanggal'],
@@ -168,10 +219,10 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 'daftar_tenaga_semprot': qaData['daftar_tenaga_semprot'],
                 'tanggal_mutu_ancak': tanggalPemeriksaanMutuAncak,
                 'jumlah_pokok_gulma': totalSampleGulma,
-                'total_gulma_circle_mati': totalGulmaCircleMati,
-                'total_gulma_path_mati': totalGulmaPathMati,
-                'total_gulma_tph_mati': totalGulmaTPHMati,
-                'total_gulma_gawangan_mati': totalGulmaGawanganMati,
+                'total_gulma_circle_mati': averageGulmaCircleMati,
+                'total_gulma_path_mati': averageGulmaPathMati,
+                'total_gulma_tph_mati': averageGulmaTPHMati,
+                'total_gulma_gawangan_mati': averageGawanganTPHMati,
                 'ringkasan_chemist': qaData['ringkasan_chemist'],
                 'ringkasan_mutu_ancak': ringkasan,
                 'is_synced': 0,
@@ -226,23 +277,20 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   decoration: const InputDecoration(labelText: "Baris ke-"),
                   keyboardType: TextInputType.number,
                 ),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Kematian Gulma Circle",),
-                  value: selectedCircle,
-                  onChanged: (val) => setState(() => selectedCircle = val),
-                  items: mutuAncakOptions.map((e) => DropdownMenuItem(value: e, child: Text(e)),).toList(),
+                TextField(
+                  controller: kematianGulmaCircleController,
+                  decoration: const InputDecoration(labelText: "Kematian Gulma Circle"),
+                  keyboardType: TextInputType.number,
                 ),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Kematian Gulma Path",),
-                  value: selectedPath,
-                  onChanged: (val) => setState(() => selectedPath = val),
-                  items: mutuAncakOptions.map((e) => DropdownMenuItem(value: e, child: Text(e)),).toList(),
+                TextField(
+                  controller: kematianGulmaPathontroller,
+                  decoration: const InputDecoration(labelText: "Kematian Gulma Path"),
+                  keyboardType: TextInputType.number,
                 ),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Kematian Gulma TPH",),
-                  value: selectedTPH,
-                  onChanged: (val) => setState(() => selectedTPH = val),
-                  items: mutuAncakOptions.map((e) => DropdownMenuItem(value: e, child: Text(e)),).toList(),
+                TextField(
+                  controller: kematianGulmaTPHController,
+                  decoration: const InputDecoration(labelText: "Kematian Gulma TPH"),
+                  keyboardType: TextInputType.number,
                 ),
               ]
               else if (qaData['chemist'] == 'Chemist Gawangan') ...[
@@ -251,11 +299,10 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   decoration: const InputDecoration(labelText: "Baris ke-"),
                   keyboardType: TextInputType.number,
                 ),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Kematian Gulma Gawangan",),
-                  value: selectedGawangan,
-                  onChanged: (val) => setState(() => selectedGawangan = val),
-                  items: mutuAncakOptions.map((e) => DropdownMenuItem(value: e, child: Text(e)),).toList(),
+                TextField(
+                  controller: kematianGulmaGawanganController,
+                  decoration: const InputDecoration(labelText: "Kematian Gulma Gawangan"),
+                  keyboardType: TextInputType.number,
                 ),
               ]
               else if (qaData['chemist'] == 'Chemist CPT + Gawangan') ...[
@@ -264,30 +311,27 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   decoration: const InputDecoration(labelText: "Baris ke-"),
                   keyboardType: TextInputType.number,
                 ),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Kematian Gulma Circle",),
-                  value: selectedCircle,
-                  onChanged: (val) => setState(() => selectedCircle = val),
-                  items: mutuAncakOptions.map((e) => DropdownMenuItem(value: e, child: Text(e)),).toList(),
+                TextField(
+                  controller: kematianGulmaCircleController,
+                  decoration: const InputDecoration(labelText: "Kematian Gulma Circle-"),
+                  keyboardType: TextInputType.number,
                 ),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Kematian Gulma Path",),
-                  value: selectedPath,
-                  onChanged: (val) => setState(() => selectedPath = val),
-                  items: mutuAncakOptions.map((e) => DropdownMenuItem(value: e, child: Text(e)),).toList(),
+                TextField(
+                  controller: kematianGulmaPathontroller,
+                  decoration: const InputDecoration(labelText: "Kematian Gulma Path"),
+                  keyboardType: TextInputType.number,
                 ),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Kematian Gulma TPH",),
-                  value: selectedTPH,
-                  onChanged: (val) => setState(() => selectedTPH = val),
-                  items: mutuAncakOptions.map((e) => DropdownMenuItem(value: e, child: Text(e)),).toList(),
+                TextField(
+                  controller: kematianGulmaTPHController,
+                  decoration: const InputDecoration(labelText: "Kematian Gulma TPH"),
+                  keyboardType: TextInputType.number,
                 ),
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Kematian Gulma Gawangan",),
-                  value: selectedGawangan,
-                  onChanged: (val) => setState(() => selectedGawangan = val),
-                  items: mutuAncakOptions.map((e) => DropdownMenuItem(value: e, child: Text(e)),).toList(),
-                ),              ],
+                TextField(
+                  controller: kematianGulmaGawanganController,
+                  decoration: const InputDecoration(labelText: "Kematian Gulma Gawangan"),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
               const SizedBox(height: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white,),
