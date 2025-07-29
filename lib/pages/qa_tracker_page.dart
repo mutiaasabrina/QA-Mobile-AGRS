@@ -23,6 +23,10 @@ class _QATrackerPageState extends State<QATrackerPage> {
 
   final List<String> SkippedDetails = [
     'Daftar Tenaga Tabur',
+    'Ringkasan',
+    'Daftar Tenaga Semprot',
+    'Ringkasan Chemist',
+    'Ringkasan Mutu Ancak',
   ];
 
   @override

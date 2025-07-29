@@ -97,7 +97,6 @@ String generateRingkasanText(QAChemistSummary data) {
     buffer.writeln("Keseragaman Nozel: ${t.keseragamanNozel}");
     buffer.writeln("APD: ${t.apd}");
 
-
     void addMap(String title, Map<String, int> map) {
       buffer.writeln("🔹 $title:");
       map.forEach((key, value) {
