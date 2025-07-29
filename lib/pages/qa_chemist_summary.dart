@@ -26,6 +26,7 @@ class QAChemistSummary {
   final String blok;
   final String tanggalPenyemprotan;
   final String luasan;
+  final String jumlahTenagaKerja;
   final String chemist;
   final String jenisChemist;
   final String dosis;
@@ -49,6 +50,7 @@ class QAChemistSummary {
     required this.blok,
     required this.tanggalPenyemprotan,
     required this.luasan,
+    required this.jumlahTenagaKerja,
     required this.chemist,
     required this.jenisChemist,
     required this.dosis,
@@ -73,6 +75,7 @@ String generateRingkasanText(QAChemistSummary data) {
   buffer.writeln("Blok: ${data.blok}");
   buffer.writeln("Tanggal Semprot: ${data.tanggalPenyemprotan}");
   buffer.writeln("Luasan: ${data.luasan}");
+  buffer.writeln("Jumlah Tenaga Kerja: ${data.jumlahTenagaKerja}");
   buffer.writeln("Chemist: ${data.chemist}");
   buffer.writeln("Jenis Chemist yang digunakan: ${data.jenisChemist}");
 

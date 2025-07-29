@@ -209,6 +209,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 'blok': qaData['blok'],
                 'tanggal_semprot': qaData['tanggal_semprot'],
                 'luas': qaData['luas'],
+                'jumlah_tenaga_kerja': qaData['jumlah_tenaga_kerja'],
                 'chemist': qaData['chemist'],
                 'jenis_chemist': qaData['jenis_chemist'],
                 'dosis_knapsack': qaData['dosis_knapsack'],

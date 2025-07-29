@@ -34,6 +34,7 @@ class QADatabaseChemistGulmaAncak {
         blok TEXT,
         tanggal_semprot TEXT,
         luas TEXT,
+        jumlah_tenaga_kerja TEXT,
         chemist TEXT,
         jenis_chemist TEXT,
         dosis_knapsack TEXT,

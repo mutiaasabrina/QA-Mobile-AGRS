@@ -21,6 +21,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
   final _barisController = TextEditingController();
   final _jenisChemist = TextEditingController();
   final _jumlahSampleUjiPetikController = TextEditingController();
+  final _jumlahTenagaKerja = TextEditingController();
   List<TextEditingController> _volumeSampleControllers = [];
   final _namaPetugasSemprotController = TextEditingController();
 
@@ -51,6 +52,22 @@ class _QAChemistPageState extends State<QAChemistPage> {
   int totalUjiPetik = 0;
   String dosisKnapsack = "";
   final _dosisController = TextEditingController();
+
+  List<bool?> _hasilCheckboxUjiPetik = [];
+
+  void _updateCheckboxes() {
+    final jumlah = int.tryParse(_jumlahSampleUjiPetikController.text) ?? 0;
+    setState(() {
+      _hasilCheckboxUjiPetik = List.generate(jumlah, (_) => null);
+    });
+  }
+
+  double _hitungPersentaseKesesuaian() {
+    final total = _hasilCheckboxUjiPetik.length;
+    final sesuai = _hasilCheckboxUjiPetik.where((e) => e == true).length;
+    if (total == 0) return 0.0;
+    return sesuai / total * 100;
+}
 
   final List<String> estateOptions = ['Inti', 'Plasma'];
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
@@ -88,22 +105,22 @@ class _QAChemistPageState extends State<QAChemistPage> {
     return [];
   }
 
-  void _updateVolumeSampleControllers() {
-    final int jumlah = int.tryParse(_jumlahSampleUjiPetikController.text) ?? 0;
-    _volumeSampleControllers = List.generate(jumlah, (_) => TextEditingController());
-    dosisKnapsack = "";
-  }
+  // void _updateVolumeSampleControllers() {
+  //   final int jumlah = int.tryParse(_jumlahSampleUjiPetikController.text) ?? 0;
+  //   _volumeSampleControllers = List.generate(jumlah, (_) => TextEditingController());
+  //   dosisKnapsack = "";
+  // }
 
-  void _calculateDosisUjiPetik() {
-    if (_dosisController.text.isEmpty) return;
-    final double targetLiter = double.tryParse(_dosisController.text) ?? 0;
-    final double targetMililiter = targetLiter*1000;
-    final double total = _volumeSampleControllers.fold(0.0, (sum, c) => sum + (double.tryParse(c.text) ?? 0));
-    final selisih = (total - targetMililiter).abs();
-    setState(() {
-      dosisKnapsack = selisih == targetMililiter? 'Sesuai' : 'Tidak Sesuai';
-    });
-  }
+  // void _calculateDosisUjiPetik() {
+  //   if (_dosisController.text.isEmpty) return;
+  //   final double targetLiter = double.tryParse(_dosisController.text) ?? 0;
+  //   final double targetMililiter = targetLiter*1000;
+  //   final double total = _volumeSampleControllers.fold(0.0, (sum, c) => sum + (double.tryParse(c.text) ?? 0));
+  //   final selisih = (total - targetMililiter).abs();
+  //   setState(() {
+  //     dosisKnapsack = selisih == targetMililiter? 'Sesuai' : 'Tidak Sesuai';
+  //   });
+  // }
 
     @override
   void dispose() {
@@ -228,6 +245,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
       blok: selectedBlok ?? '',
       tanggalPenyemprotan: _tanggalSemprot,
       luasan: _luasanController.text,
+      jumlahTenagaKerja: _jumlahTenagaKerja.text,
       chemist: selectedChemist ?? '',
       jenisChemist: _jenisChemist.text,
       dosis: _dosisController.text,
@@ -299,6 +317,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
                 'blok': summary.blok,
                 'tanggal_semprot': summary.tanggalPenyemprotan,
                 'luas': summary.luasan,
+                'jumlah_tenaga_kerja' : summary.jumlahTenagaKerja,
                 'chemist': summary.chemist,
                 'jenis_chemist': summary.jenisChemist,
                 'dosis_knapsack': summary.dosis,
@@ -367,13 +386,14 @@ class _QAChemistPageState extends State<QAChemistPage> {
             items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           TextField(controller: _luasanController, decoration: const InputDecoration(labelText: "Luasan (Ha)"), enabled: !isLocked,),
+          TextField(controller: _jumlahTenagaKerja, decoration: const InputDecoration(labelText: "Jumlah Tenaga Kerja"), enabled: !isLocked,),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Chemist"),
             value: selectedChemist,
             onChanged: isLocked ? null : (val) => setState(() => selectedChemist = val),
             items: chemistType.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
-          TextField(controller: _jenisChemist, decoration: const InputDecoration(labelText: "Jenis Chemist yang digunakan"), enabled: !isLocked,),
+          TextField(controller: _jenisChemist, decoration: const InputDecoration(labelText: "Bahan Chemist yang digunakan"), enabled: !isLocked,),
           TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis / Knapsack (liter/ha)"), keyboardType: TextInputType.number, enabled: !isLocked,),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Bahan Herbisida"),
@@ -411,9 +431,6 @@ class _QAChemistPageState extends State<QAChemistPage> {
             onChanged: isLocked ? null : (val) => setState(() => selectedPeletakan = val),
             items: peletakanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 14),))).toList(),
           ),
-
-          const Divider(),
-          const Text("Input Pokok Sample", style: TextStyle(fontWeight: FontWeight.bold)),
           TextField(
             controller: _barisController,
             decoration: const InputDecoration(labelText: "Baris ke-"),
@@ -456,18 +473,15 @@ class _QAChemistPageState extends State<QAChemistPage> {
             items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
            const Divider(),
-          const Text("Input Sample Uji Petik", style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text("Kalibrasi Dosis/Knapsack", style: TextStyle(fontWeight: FontWeight.bold)),
           SwitchListTile(
             title: const Text("Apakah melakukan uji petik?"),
             value: _ujiPetik,
             onChanged: (val) {
               setState(() {
                 _ujiPetik = val;
-                for (final c in _volumeSampleControllers) {
-                  c.dispose();
-                }
-                _volumeSampleControllers.clear();
-                dosisKnapsack = "";
+                _jumlahSampleUjiPetikController.clear();
+                _hasilCheckboxUjiPetik.clear();
               });
             },
           ),
@@ -476,21 +490,48 @@ class _QAChemistPageState extends State<QAChemistPage> {
               controller: _jumlahSampleUjiPetikController,
               decoration: const InputDecoration(labelText: "Jumlah Sample"),
               keyboardType: TextInputType.number,
-              onChanged: (_) => setState(() => _updateVolumeSampleControllers()),
+              onChanged: (_) => _updateCheckboxes(),
             ),
+            const SizedBox(height: 12),
+            ..._hasilCheckboxUjiPetik.asMap().entries.map((entry) {
+              final i = entry.key;
+              final val = entry.value;
+              return Row(
+                children: [
+                  Text("${i + 1}"),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: CheckboxListTile(
+                      title: const Text("Sesuai"),
+                      value: val == true,
+                      onChanged: (_) {
+                        setState(() {
+                          _hasilCheckboxUjiPetik[i] = true;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: CheckboxListTile(
+                      title: const Text("Tidak Sesuai"),
+                      value: val == false,
+                      onChanged: (_) {
+                        setState(() {
+                          _hasilCheckboxUjiPetik[i] = false;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }),
             const SizedBox(height: 8),
-            ..._volumeSampleControllers.asMap().entries.map((entry) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: TextField(
-                controller: entry.value,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: "Volume Sample ${entry.key + 1} (ml)"),
-                onChanged: (_) => _calculateDosisUjiPetik(),
-              ),
-            )),
-            const SizedBox(height: 8),
-            Text("Hasil Uji Petik: $dosisKnapsack", style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              "Persentase Kesesuaian: ${_hitungPersentaseKesesuaian().toStringAsFixed(1)}%",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
+
           const SizedBox(height: 8),
           ElevatedButton(
             onPressed: _saveSample,

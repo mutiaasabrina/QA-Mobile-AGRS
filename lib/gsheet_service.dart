@@ -188,6 +188,7 @@ class GSheetService {
       'blok',
       'tanggal_semprot',
       'luas',
+      'jumlah_tenaga_kerja',
       'chemist',
       'jenis_chemist',
       'dosis_knapsack',
