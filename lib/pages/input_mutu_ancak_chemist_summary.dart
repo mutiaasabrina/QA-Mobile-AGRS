@@ -1,5 +1,5 @@
 class SampleAncakChemistSummary {
-  final String baris;
+  final String nama;
   final int jumlahSample;
   final Map<String, int> pokokTersemprot;
   final int gulmaCircle;
@@ -8,7 +8,7 @@ class SampleAncakChemistSummary {
   final int gulmaGawangan;
 
   SampleAncakChemistSummary({
-    required this.baris,
+    required this.nama,
     required this.jumlahSample,
     required this.pokokTersemprot,
     required this.gulmaCircle,
@@ -30,6 +30,9 @@ class ChemistAncakSummary {
   final String jenisChemist;
   final String dosis;
   final String tanggalPeriksaMutuAncak;
+  final String kondisiAlatSemprot;
+  final String keseragamanNozel;
+  final String apdPekerja;
   final List<SampleAncakChemistSummary> sampleAncakList;
   int getTotalSample(){
     return sampleAncakList.fold(0,(sum, e)=> sum +e.jumlahSample);
@@ -47,6 +50,9 @@ class ChemistAncakSummary {
     required this.jenisChemist,
     required this.dosis,
     required this.tanggalPeriksaMutuAncak,
+    required this.kondisiAlatSemprot,
+    required this.keseragamanNozel,
+    required this.apdPekerja,
     required this.sampleAncakList,
   });
 }
@@ -68,7 +74,6 @@ String generateRingkasanText(ChemistAncakSummary data) {
 
   buffer.writeln("\nTanggal Periksa Mutu Ancak: ${data.tanggalPeriksaMutuAncak}");
   for (final t in data.sampleAncakList) {
-    buffer.writeln("Baris: ${t.baris}");
     buffer.writeln("Jumlah Sample: ${t.jumlahSample}");
 
     buffer.writeln("🔹 Kematian Gulma Circle: ${t.gulmaCircle}");

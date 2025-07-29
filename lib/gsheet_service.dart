@@ -198,19 +198,13 @@ class GSheetService {
       'kalibrasi_alat_nozel',
       'gelas_ukur_perkakas',
       'peletakan_alat_semprot',
-      'jumlah_pokok',
-      'total_tenaga_kerja',
-      'total_uji_petik_aktif',
-      'total_uji_petik_nonaktif',
-      'total_uji_petik_sesuai',
-      'total_uji_petik_tidak_sesuai',
+      'total_tenaga_kerja_semprot',
       'total_pokok_tersemprot',
       'total_pokok_tidak_tersemprot',
-      'total_alat_semprot_baik',
-      'total_alat_semprot_tidak_layak',
-      'total_nozel_seragam',
-      'total_nozel_tidak_seragam',
+      'kondisi_alat_semprot',
+      'keseragaman_nozel',
       'apd_pekerja',
+      'kesesuaian_kalibrasi_dosis',
       'daftar_tenaga_semprot',
       'tanggal_mutu_ancak',
       'jumlah_pokok_gulma',
@@ -221,7 +215,7 @@ class GSheetService {
       'ringkasan_chemist',
       'ringkasan_mutu_ancak',
       'is_synced',
-      'timestamp_sync',
+      'timestamp_sync'
     ];
 
     final values = orderedKeys.map((k) => data[k]?.toString() ?? '').toList();

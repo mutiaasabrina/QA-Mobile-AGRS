@@ -177,7 +177,7 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
-      title: const Text("Ringkasan QA Pemupukan"),
+      title: const Text("Ringkasan Mutu Ancak QA Pemupukan"),
       content: SingleChildScrollView(child: Text(ringkasan)),
       actions: [
         TextButton(

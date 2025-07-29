@@ -1,23 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
-class TenagaSemprotSummary {
-  final String nama;
-  final int jumlahSample;
-  final String apd;
-  final String kondisiAlat;
-  final String keseragamanNozel;
-  final Map<String, int> ujiPetik;
-
-  TenagaSemprotSummary({
-    required this.nama,
-    required this.jumlahSample,
-    required this.apd,
-    required this.kondisiAlat,
-    required this.keseragamanNozel,
-    required this.ujiPetik
-  });
-}
-
 class QAChemistSummary {
   final String tanggalPeriksa;
   final String namaPetugas;
@@ -36,11 +16,10 @@ class QAChemistSummary {
   final String kalibrasiAlatNozel;
   final String gelasUkurPerkakas;
   final String peletakanAlatSemprot;
-  final int totalUjiPetik;
-  final List<TenagaSemprotSummary> tenagaSemprotList;
-  int getTotalSample(){
-    return tenagaSemprotList.fold(0,(sum, e)=> sum +e.jumlahSample);
-  }
+  final String kondisiAlatSemprot;
+  final String keseragamanNozel;
+  final String apdPekerja;
+  final String kesesuaianKalibrasiDosis;
 
   QAChemistSummary({
     required this.tanggalPeriksa,
@@ -60,8 +39,10 @@ class QAChemistSummary {
     required this.kalibrasiAlatNozel,
     required this.gelasUkurPerkakas,
     required this.peletakanAlatSemprot,
-    required this.totalUjiPetik,
-    required this.tenagaSemprotList,
+    required this.kondisiAlatSemprot,
+    required this.keseragamanNozel,
+    required this.apdPekerja,
+    required this.kesesuaianKalibrasiDosis,
   });
 }
 
@@ -85,30 +66,14 @@ String generateRingkasanText(QAChemistSummary data) {
   buffer.writeln("Kartu Pengambilan dan Pencampuran: ${data.kartuPengambilanPencampuran}");
   buffer.writeln("Kalibrasi Alat & Nozel: ${data.kalibrasiAlatNozel}");
   buffer.writeln("Gelas Ukur & Perkakas: ${data.gelasUkurPerkakas}");
-  buffer.writeln("Peletakan Alat Semprot: ${data.peletakanAlatSemprot}");
-  buffer.writeln("Total Pokok Sample: ${data.getTotalSample()}");
-  buffer.writeln("Total Tenaga Semprot: ${data.tenagaSemprotList.length}");
-  buffer.writeln("Total Uji Petik: ${data.totalUjiPetik}");
 
-  for (final t in data.tenagaSemprotList) {
-    buffer.writeln("\nTenaga Semprot: ${t.nama}");
-    buffer.writeln("Jumlah Sample: ${t.jumlahSample}");
-    buffer.writeln("Kondisi Alat Semprot: ${t.kondisiAlat}");
-    buffer.writeln("Keseragaman Nozel: ${t.keseragamanNozel}");
-    buffer.writeln("APD: ${t.apd}");
+  buffer.writeln("\nPeletakan Alat Semprot: ${data.peletakanAlatSemprot}");
+  buffer.writeln("Kondisi Alat Semprot: ${data.kondisiAlatSemprot}");
+  buffer.writeln("Keseragaman Alat Semprot: ${data.keseragamanNozel}");
 
-    void addMap(String title, Map<String, int> map) {
-      buffer.writeln("🔹 $title:");
-      map.forEach((key, value) {
-        if (key.isEmpty || key == "-") {
-          return;
-        }
-        buffer.writeln("     - $key: $value");
-      });
-    }
+  buffer.writeln("\nAPD Pekerja: ${data.apdPekerja}");
 
-    addMap("Uji Petik", t.ujiPetik);
-  }
+  buffer.writeln("\nKesesuaian Dosis Kalibrasi: ${data.kesesuaianKalibrasiDosis}");
 
   return buffer.toString();
 }

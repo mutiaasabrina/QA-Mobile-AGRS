@@ -18,14 +18,12 @@ class _QAChemistPageState extends State<QAChemistPage> {
   final String _tanggalSemprot = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final _namaPetugasController = TextEditingController();
   final _luasanController = TextEditingController();
-  final _barisController = TextEditingController();
   final _jenisChemist = TextEditingController();
   final _jumlahSampleUjiPetikController = TextEditingController();
-  final _jumlahTenagaKerja = TextEditingController();
+  final _jumlahTenagaKerjaController = TextEditingController();
   List<TextEditingController> _volumeSampleControllers = [];
-  final _namaPetugasSemprotController = TextEditingController();
 
-  String? selectedEstate;
+  String? selectedKebun;
   String? selectedDivisi;
   String? selectedBlok;
   String? selectedChemist;
@@ -36,21 +34,10 @@ class _QAChemistPageState extends State<QAChemistPage> {
   String? selectedPerkakas;
   String? selectedPeletakan;
   String? selectedAPD;
-  String? selectedAlatSemprot;
+  String? selectedKondisiAlatSemprot;
   String? selectedKeseragamanNozel;
 
-  final Map<String, Map<String, dynamic>> _alatSemprotData = {};
-  String get _tenagaSemprotKey => "${_namaPetugasSemprotController.text.trim().toLowerCase()}|${selectedBlok ??''}|$_tanggalSemprot";
-  bool get isAlatSemprotLocked => _alatSemprotData.containsKey(_tenagaSemprotKey);
-
-  final List<Map<String, dynamic>> _pokokSamples = [];
-  bool get isLocked => _pokokSamples.isNotEmpty;
-
-  final List<Map<String, dynamic>> _tenagaSemprot = [];
-
   bool _ujiPetik = false;
-  int totalUjiPetik = 0;
-  String dosisKnapsack = "";
   final _dosisController = TextEditingController();
 
   List<bool?> _hasilCheckboxUjiPetik = [];
@@ -62,19 +49,21 @@ class _QAChemistPageState extends State<QAChemistPage> {
     });
   }
 
-  double _hitungPersentaseKesesuaian() {
+  double persentaseKesesuaian = 0.0;
+  void _hitungPersentaseKesesuaian() {
     final total = _hasilCheckboxUjiPetik.length;
     final sesuai = _hasilCheckboxUjiPetik.where((e) => e == true).length;
-    if (total == 0) return 0.0;
-    return sesuai / total * 100;
+
+    setState(() {
+      if (total == 0) persentaseKesesuaian = 0.0;
+      persentaseKesesuaian = sesuai / total * 100;
+    });
 }
 
   final List<String> estateOptions = ['Inti', 'Plasma'];
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
   final List<String> chemistType = ['Chemist CPT', 'Chemist Gawangan', 'Chemist CPT + Gawangan'];
-  final List<String> apdOptions = [
-    'Lengkap', 'Kurang dari 1 item', 'Kurang dari 2 item', 'Kurang dari 3 item', 'Tidak ada APD'
-  ];
+  final List<String> apdOptions = ['Lengkap', 'Kurang dari 1 item', 'Kurang dari 2 item', 'Kurang dari 3 item', 'Tidak ada APD'];
   final List<String> bahanHerbisidaOptions = ['Sesuai sasaran, sesuai kebutuhan', 'Kurang sesuai sasaran, Sesuai kebutuhan', 'Sesuai gulma sasaran, tidak sesuai kebutuhan', 'Kurang sesuai gulma sasaran, tidak sesuai kebutuhan', 'Tidak Sesuai Gulma sasaran, Jumlah tidak sesuai'];
   final List<String> programGulmaOptions = ['Terdapat RKB/RKH, Sesuai program Rotasi', 'Terdapat RKB/RKH,  kurang Sesuai program Rotasi', 'Terdapat RKB/RKH,  Tidak sesuai program Rotasi', 'Tidak terdapat RKB/RKH, Sesuai program Rotasi', 'Tidak terdapat RKB/RKH, Tidak Sesuai program Rotasi'];
   final List<String> kartuOptions = ['Kartu lengkap dan Update', 'Kartu lengkap, Terlambat 1 Hari', 'Kartu lengkap, Terlambat > 2 Hari', 'Kartu tidak lengkap, terlambat 1 hari', 'Kartu dan Monitoring tidak ada'];
@@ -97,38 +86,20 @@ class _QAChemistPageState extends State<QAChemistPage> {
     "Plasma-5": ["B-15", "B-16", "C-23", "D-20", "D-28", "B-10", "B-13", "B-14", "C-15", "C-16", "C-8", "C-9", "D-11", "C-19", "C-20", "D-25", "D-26", "D-27", "B-12", "C-5", "B-11", "C-10", "C-11", "C-14", "D-19", "C-6", "C-7", "D-17", "D-1", "D-2", "D-3"]
   };
 
-
   List<String> get availableBloks {
-    if (selectedEstate != null && selectedDivisi != null) {
-      return blokOptions['$selectedEstate-$selectedDivisi'] ?? [];
+    if (selectedKebun != null && selectedDivisi != null) {
+      return blokOptions['$selectedKebun-$selectedDivisi'] ?? [];
     }
     return [];
   }
-
-  // void _updateVolumeSampleControllers() {
-  //   final int jumlah = int.tryParse(_jumlahSampleUjiPetikController.text) ?? 0;
-  //   _volumeSampleControllers = List.generate(jumlah, (_) => TextEditingController());
-  //   dosisKnapsack = "";
-  // }
-
-  // void _calculateDosisUjiPetik() {
-  //   if (_dosisController.text.isEmpty) return;
-  //   final double targetLiter = double.tryParse(_dosisController.text) ?? 0;
-  //   final double targetMililiter = targetLiter*1000;
-  //   final double total = _volumeSampleControllers.fold(0.0, (sum, c) => sum + (double.tryParse(c.text) ?? 0));
-  //   final selisih = (total - targetMililiter).abs();
-  //   setState(() {
-  //     dosisKnapsack = selisih == targetMililiter? 'Sesuai' : 'Tidak Sesuai';
-  //   });
-  // }
-
+  
     @override
   void dispose() {
     _namaPetugasController.dispose();
     _luasanController.dispose();
+    _jumlahTenagaKerjaController.dispose();
     _dosisController.dispose();
     _jumlahSampleUjiPetikController.dispose();
-    _barisController.dispose();
     for (var c in _volumeSampleControllers) {
       c.dispose();
     }
@@ -136,117 +107,67 @@ class _QAChemistPageState extends State<QAChemistPage> {
   }
 
   void _saveSample() {
-    if (_barisController.text.isNotEmpty &&
-        _namaPetugasSemprotController.text.isNotEmpty &&
-        selectedAPD != null) {
-      setState(() {
-        _pokokSamples.add({
-          'baris': _barisController.text,
-          'tenagaSemprot': _namaPetugasSemprotController.text.toLowerCase(),
-          'kondisiAlat': selectedAlatSemprot,
-          'keseragamanNozel': selectedKeseragamanNozel,
-          'apd': selectedAPD,
-          'ujiPetik': _ujiPetik,
-          'hasilUjiPetik': _ujiPetik ? dosisKnapsack : '-',
-
-        });
-
-      if(!_tenagaSemprot.any((item) => item['tenagaSemprot'] == _namaPetugasSemprotController.text.toLowerCase())) {
-        _tenagaSemprot.add({
-          'tenagaSemprot': _namaPetugasSemprotController.text.toLowerCase(),
-          'kondisiAlat': selectedAlatSemprot,
-          'keseragamanNozel': selectedKeseragamanNozel,
-        });
-      }
-
-        if (!_alatSemprotData.containsKey(_tenagaSemprotKey)) {
-          _alatSemprotData[_tenagaSemprotKey] = {
-            'apd': selectedAPD,
-            'kondisiAlat': selectedAlatSemprot,
-            'keseragamanNozel': selectedKeseragamanNozel,
-          };
-        }
-
-        // ✅ Auto isi jika data sudah ada (kalau kamu edit tenaga ke yang lama)
-        final alatchemist = _alatSemprotData[_tenagaSemprotKey];
-        if (alatchemist != null) {
-          selectedAPD = alatchemist['apd'];
-          selectedAlatSemprot = alatchemist['kondisiAlat'];
-          selectedKeseragamanNozel = alatchemist['keseragamanNozel'];
-        }
-
-        _barisController.clear();
-        _namaPetugasSemprotController.clear();
-        selectedAlatSemprot = null;
-        selectedKeseragamanNozel = null;
-        selectedAPD = null;
-        _ujiPetik = false;
-        dosisKnapsack = "";
-        _jumlahSampleUjiPetikController.clear();
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Sample berhasil ditambahkan")),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Lengkapi semua data sample")),
-      );
+    if (_namaPetugasController.text.isEmpty ||
+        selectedKebun == null ||
+        selectedDivisi == null ||
+        selectedBlok == null ||
+        _luasanController.text.isEmpty ||
+        _jumlahTenagaKerjaController.text.isEmpty ||
+        selectedChemist == null ||
+        _jenisChemist.text.isEmpty ||
+        _dosisController.text.isEmpty ||
+        selectedBahanHerbisida == null ||
+        selectedProgramGulma == null ||
+        selectedKartu == null ||
+        selectedKalibrasi == null ||
+        selectedPerkakas == null ||
+        selectedPeletakan == null ||
+        selectedKondisiAlatSemprot == null ||
+        selectedKeseragamanNozel == null ||
+        selectedAPD == null) 
+    {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+          return;
     }
+    
+    _ujiPetik = false;
+    _jumlahSampleUjiPetikController.clear();
   }
   
   void _saveAll() {
-  if (_pokokSamples.isEmpty || selectedEstate == null || selectedDivisi == null || selectedBlok == null || _namaPetugasController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
-    return;
-  }
-    // Kelompokkan sample per tenaga semprot
-    final Map<String, List<Map<String, dynamic>>> perTenaga = {};
-    for (final sample in _pokokSamples) {
-      final key = sample['tenagaSemprot'].toString().toLowerCase();
-      perTenaga.putIfAbsent(key, () => []).add(sample);
+    if (_namaPetugasController.text.isEmpty ||
+        selectedKebun == null ||
+        selectedDivisi == null ||
+        selectedBlok == null ||
+        _luasanController.text.isEmpty ||
+        _jumlahTenagaKerjaController.text.isEmpty ||
+        selectedChemist == null ||
+        _jenisChemist.text.isEmpty ||
+        _dosisController.text.isEmpty ||
+        selectedBahanHerbisida == null ||
+        selectedProgramGulma == null ||
+        selectedKartu == null ||
+        selectedKalibrasi == null ||
+        selectedPerkakas == null ||
+        selectedPeletakan == null ||
+        selectedKondisiAlatSemprot == null ||
+        selectedKeseragamanNozel == null ||
+        selectedAPD == null) 
+    {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+          return;
     }
-
-    final List<TenagaSemprotSummary> tenagaList = perTenaga.entries.map((entry) {
-      final nama = entry.key;
-      final list = entry.value;
-      int countSample = list.length;
-
-      Map<String, int> countBy(String field) {
-        final Map<String, int> count = {};
-        for (final s in list) {
-          final val = s[field] ?? '-';
-          count[val] = (count[val] ?? 0) + 1;
-        }
-        return count;
-      }
-
-      final _alatSemprot = _alatSemprotData.entries
-          .firstWhere((e) => e.key.startsWith(nama.toLowerCase()))
-          .value;
-
-      return TenagaSemprotSummary(
-        nama: nama.toLowerCase(),
-        jumlahSample: countSample,
-        kondisiAlat: _alatSemprot['kondisiAlat'],
-        keseragamanNozel: _alatSemprot['keseragamanNozel'],
-        apd: _alatSemprot['apd'],
-        ujiPetik: countBy('hasilUjiPetik')
-      );
-    }).toList();
-    
-    final totalUjiPetik = _pokokSamples.where((s) => s['ujiPetik'] == true).length;
-
+  
     final summary = QAChemistSummary(
       tanggalPeriksa: _tanggalPemeriksaan,
       namaPetugas: _namaPetugasController.text,
-      kebun: selectedEstate ?? '',
+      kebun: selectedKebun ?? '',
       divisi: selectedDivisi ?? '',
       blok: selectedBlok ?? '',
-      tanggalPenyemprotan: _tanggalSemprot,
       luasan: _luasanController.text,
-      jumlahTenagaKerja: _jumlahTenagaKerja.text,
+      jumlahTenagaKerja: _jumlahTenagaKerjaController.text,
       chemist: selectedChemist ?? '',
+      tanggalPenyemprotan: _tanggalSemprot,
       jenisChemist: _jenisChemist.text,
       dosis: _dosisController.text,
       bahanHerbisida: selectedBahanHerbisida ?? '',
@@ -255,8 +176,10 @@ class _QAChemistPageState extends State<QAChemistPage> {
       kalibrasiAlatNozel: selectedKalibrasi ?? '',
       gelasUkurPerkakas: selectedPerkakas ?? '',
       peletakanAlatSemprot: selectedPeletakan ?? '',
-      totalUjiPetik: totalUjiPetik,
-      tenagaSemprotList: tenagaList,
+      kondisiAlatSemprot: selectedKondisiAlatSemprot ?? '',
+      keseragamanNozel: selectedKeseragamanNozel ?? '',
+      apdPekerja: selectedAPD ?? '',
+      kesesuaianKalibrasiDosis: persentaseKesesuaian.toStringAsFixed(1) ?? '',
     );
 
     final ringkasan = generateRingkasanText(summary);
@@ -274,41 +197,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-
-              final totalSample = tenagaList.fold<int>(0, (sum, t) => sum + t.jumlahSample,);
-              int totalTenagaKerja = perTenaga.length;
-              int totalUjiPetikAktif = _pokokSamples.where((s) => s['ujiPetik'] == true).length;
-              int totalUjiPetikNonAktif = _pokokSamples.where((s) => s['ujiPetik'] == false).length;
-              int totalHasilUjiPetikSesuai = _pokokSamples.where((s) => s['hasilUjiPetik'] == 'Sesuai').length;
-              int totalHasilUjiPetikTidakSesuai = _pokokSamples.where((s) => s['hasilUjiPetik'] == 'Tidak Sesuai').length;
-              int totalAlatSemprotBaik = _alatSemprotData.values.where((s) => s['kondisiAlat'] == 'Baik dan Lancar').length;
-              int totalAlatSemprotTidakLayak = _alatSemprotData.values.where((s) => s['kondisiAlat'] == 'Tidak Baik').length;
-              int totalNozelSeragam = _alatSemprotData.values.where((s) => s['keseragamanNozel'] == 'Seragam').length;
-              int totalNozelTidakSeragam = _alatSemprotData.values.where((s) => s['keseragamanNozel'] == 'Tidak Seragam').length;
-
-              const List<String> apdRank = [
-                'Lengkap',
-                'Kurang dari 1 item',
-                'Kurang dari 2 item',
-                'Kurang dari 3 item',
-                'Tidak ada APD',
-              ];
-              String worstApd = '';
-              int worstIndex = -1;
-
-              for (var tabur in _alatSemprotData.values) {
-                final apd = tabur['apd'];
-                if (apd == null) continue;
-
-                final idx = apdRank.indexOf(apd);
-                if (idx > worstIndex) {
-                  worstIndex = idx;
-                  worstApd = apd;
-                }
-              }
-
-              String tenagaSemprotString = json.encode(_tenagaSemprot);
-
+              
               await QADatabaseChemist.instance.insertQA({
                 'tanggal': summary.tanggalPeriksa,
                 'nama_petugas': summary.namaPetugas,
@@ -327,18 +216,10 @@ class _QAChemistPageState extends State<QAChemistPage> {
                 'kalibrasi_alat_nozel': summary.kalibrasiAlatNozel,
                 'gelas_ukur_perkakas': summary.gelasUkurPerkakas,
                 'peletakan_alat_semprot': summary.peletakanAlatSemprot,
-                'jumlah_pokok': totalSample,
-                'total_tenaga_kerja': totalTenagaKerja,
-                'total_uji_petik_aktif': totalUjiPetikAktif,
-                'total_uji_petik_nonaktif': totalUjiPetikNonAktif,
-                'total_uji_petik_sesuai': totalHasilUjiPetikSesuai,
-                'total_uji_petik_tidak_sesuai': totalHasilUjiPetikTidakSesuai,
-                'total_alat_semprot_baik': totalAlatSemprotBaik,
-                'total_alat_semprot_tidak_layak': totalAlatSemprotTidakLayak,
-                'total_nozel_seragam': totalNozelSeragam,
-                'total_nozel_tidak_seragam': totalNozelTidakSeragam,
-                'apd_pekerja': worstApd,
-                'daftar_tenaga_semprot': tenagaSemprotString,
+                'kondisi_alat_semprot': summary.kondisiAlatSemprot,
+                'keseragaman_nozel': summary.keseragamanNozel,
+                'apd_pekerja': summary.apdPekerja,
+                'kesesuaian_kalibrasi_dosis': persentaseKesesuaian.toStringAsFixed(1),
                 'ringkasan_chemist': ringkasan,
                 'is_synced': 0,
                 'timestamp_sync': null,
@@ -369,110 +250,88 @@ class _QAChemistPageState extends State<QAChemistPage> {
           TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas")),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Estate"),
-            value: selectedEstate,
-            onChanged: isLocked ? null : (val) => setState(() => selectedEstate = val),
+            value: selectedKebun,
+            onChanged: (val) => setState(() => selectedKebun = val),
             items: estateOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Divisi"),
             value: selectedDivisi,
-            onChanged: isLocked ? null : (val) => setState(() => selectedDivisi = val),
+            onChanged: (val) => setState(() => selectedDivisi = val),
             items: divisiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Blok"),
             value: selectedBlok,
-            onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
+            onChanged: (val) => setState(() => selectedBlok = val),
             items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
-          TextField(controller: _luasanController, decoration: const InputDecoration(labelText: "Luasan (Ha)"), enabled: !isLocked,),
-          TextField(controller: _jumlahTenagaKerja, decoration: const InputDecoration(labelText: "Jumlah Tenaga Kerja"), enabled: !isLocked,),
+          TextField(controller: _luasanController, decoration: const InputDecoration(labelText: "Luasan (Ha)")),
+          TextField(controller: _jumlahTenagaKerjaController, decoration: const InputDecoration(labelText: "Jumlah Tenaga Kerja")),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Chemist"),
             value: selectedChemist,
-            onChanged: isLocked ? null : (val) => setState(() => selectedChemist = val),
+            onChanged: (val) => setState(() => selectedChemist = val),
             items: chemistType.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
-          TextField(controller: _jenisChemist, decoration: const InputDecoration(labelText: "Bahan Chemist yang digunakan"), enabled: !isLocked,),
-          TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis / Knapsack (liter/ha)"), keyboardType: TextInputType.number, enabled: !isLocked,),
+          TextField(controller: _jenisChemist, decoration: const InputDecoration(labelText: "Bahan Chemist yang digunakan")),
+          TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis / Knapsack (liter/ha)"), keyboardType: TextInputType.number),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Bahan Herbisida"),
             value: selectedBahanHerbisida,
-            onChanged: isLocked ? null : (val) => setState(() => selectedBahanHerbisida = val),
+            onChanged: (val) => setState(() => selectedBahanHerbisida = val),
             items: bahanHerbisidaOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 12),))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Program Pengendalian Gulma"),
             value: selectedProgramGulma,
-            onChanged: isLocked ? null : (val) => setState(() => selectedProgramGulma = val),
+            onChanged: (val) => setState(() => selectedProgramGulma = val),
             items: programGulmaOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 12),))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Kartu Pengambilan dan Pencampuran"),
             value: selectedKartu,
-            onChanged: isLocked ? null : (val) => setState(() => selectedKartu = val),
+            onChanged: (val) => setState(() => selectedKartu = val),
             items: kartuOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Kalibrasi Alat & Nozel"),
             value: selectedKalibrasi,
-            onChanged: isLocked ? null : (val) => setState(() => selectedKalibrasi = val),
+            onChanged: (val) => setState(() => selectedKalibrasi = val),
             items: kalibrasiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Gelas Ukur & Perkakas"),
             value: selectedPerkakas,
-            onChanged: isLocked ? null : (val) => setState(() => selectedPerkakas = val),
+            onChanged: (val) => setState(() => selectedPerkakas = val),
             items: perkakasOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 14),))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Peletakan Alat Semprot"),
             value: selectedPeletakan,
-            onChanged: isLocked ? null : (val) => setState(() => selectedPeletakan = val),
+            onChanged: (val) => setState(() => selectedPeletakan = val),
             items: peletakanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, softWrap: true, style: TextStyle(fontSize: 14),))).toList(),
           ),
-          TextField(
-            controller: _barisController,
-            decoration: const InputDecoration(labelText: "Baris ke-"),
-            keyboardType: TextInputType.number,
-          ),
-          TextField(
-                  controller: _namaPetugasSemprotController,
-                  decoration: const InputDecoration(labelText: "Nama Tenaga Semprot"),
-                  onChanged: (_) {
-                    final alatchemist = _alatSemprotData[_tenagaSemprotKey];
-                    if (alatchemist != null) {
-                      setState(() {
-                         selectedAPD = alatchemist['apd'];
-                         selectedAlatSemprot = alatchemist['kondisiAlat'];
-                         selectedKeseragamanNozel = alatchemist['keseragamanNozel'];
-                      });
-                    } else {
-                      setState(() {
-                        
-                      });
-                    }
-                  },
-                ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Kondisi Alat Semprot"),
-            value: selectedAlatSemprot,
-            onChanged: isAlatSemprotLocked ? null : (val) => setState(() => selectedAlatSemprot = val),
+            value: selectedKondisiAlatSemprot,
+            onChanged: (val) => setState(() => selectedKondisiAlatSemprot = val),
             items: alatSemprot.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Keseragaman Nozel"),
             value: selectedKeseragamanNozel,
-            onChanged: isAlatSemprotLocked ? null : (val) => setState(() => selectedKeseragamanNozel = val),
+            onChanged: (val) => setState(() => selectedKeseragamanNozel = val),
             items: keseragamanNozel.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "APD Pekerja"),
             value: selectedAPD,
-            onChanged: isAlatSemprotLocked ? null : (val) => setState(() => selectedAPD = val),
+            onChanged: (val) => setState(() => selectedAPD = val),
             items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
-           const Divider(),
+          const SizedBox(height: 8),
+          const Divider(),
           const Text("Kalibrasi Dosis/Knapsack", style: TextStyle(fontWeight: FontWeight.bold)),
           SwitchListTile(
             title: const Text("Apakah melakukan uji petik?"),
@@ -508,6 +367,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
                         setState(() {
                           _hasilCheckboxUjiPetik[i] = true;
                         });
+                        _hitungPersentaseKesesuaian();
                       },
                     ),
                   ),
@@ -519,6 +379,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
                         setState(() {
                           _hasilCheckboxUjiPetik[i] = false;
                         });
+                        _hitungPersentaseKesesuaian();
                       },
                     ),
                   ),
@@ -527,24 +388,9 @@ class _QAChemistPageState extends State<QAChemistPage> {
             }),
             const SizedBox(height: 8),
             Text(
-              "Persentase Kesesuaian: ${_hitungPersentaseKesesuaian().toStringAsFixed(1)}%",
+              "Persentase Kesesuaian: ${persentaseKesesuaian.toStringAsFixed(1)}%",
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-          ],
-
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: _saveSample,
-            style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
-            child: const Text("Save Sample"),
-          ),
-          if (_pokokSamples.isNotEmpty) ...[
-            const Divider(),
-            const Text("Daftar Sample:", style: TextStyle(fontWeight: FontWeight.bold)),
-            ..._pokokSamples.map((s) => ListTile(
-              title: Text("Baris ${s['baris']} - ${s['tenagaSemprot']}"),
-              subtitle: Text("APD: ${s['apd']}, Alat: ${s['kondisiAlat']}, Nozel: ${s['keseragamanNozel']}"),
-          )),
           ],
           const SizedBox(height: 16),
           ElevatedButton(

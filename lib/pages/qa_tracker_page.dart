@@ -27,6 +27,7 @@ class _QATrackerPageState extends State<QATrackerPage> {
     'Daftar Tenaga Semprot',
     'Ringkasan Chemist',
     'Ringkasan Mutu Ancak',
+    'Is Synced',
   ];
 
   @override

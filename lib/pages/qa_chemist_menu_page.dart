@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qa_agronomy/pages/input_qa_chemist_page.dart';
+import 'package:qa_agronomy/pages/qa_chemist_page.dart';
 import 'package:qa_agronomy/pages/mutu_ancak_chemist_page.dart';
 import 'package:qa_agronomy/utils/constants.dart';
 

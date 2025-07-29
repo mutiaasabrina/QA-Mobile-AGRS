@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
 import '../utils/constants.dart';
 import 'menu_page.dart';
 import 'input_mutu_ancak_chemist_summary.dart';
@@ -17,6 +18,7 @@ class InputMutuAncakChemistPage extends StatefulWidget {
 
 class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   late Map<String, dynamic> qaData;
+  final _tenagaSemprotController = TextEditingController();
   final barisController = TextEditingController();
   final kematianGulmaCircleController = TextEditingController();
   final kematianGulmaPathontroller = TextEditingController();
@@ -25,13 +27,12 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   final String tanggalPemeriksaanMutuAncak = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
   String? selectedPokokTersemprot;
-  String? selectedCircle;
-  String? selectedPath;
-  String? selectedTPH;
-  String? selectedGawangan;
 
-  final List<Map<String, dynamic>> pokokSamples = [];
+  String get _tenagaSemprotKey => "${_tenagaSemprotController.text.trim().toLowerCase()}|${qaData['blok'] ??''}|$tanggalPemeriksaanMutuAncak";
 
+  final List<Map<String, dynamic>> _samples = [];
+  final Map<String, Map<String, dynamic>> _tenagaSemprot = {};
+  bool get isTenagaSemprotLocked => _tenagaSemprot.containsKey(_tenagaSemprotKey);
   int pokokCounter = 1;
   bool isGawanganUsed = false;
 
@@ -50,7 +51,8 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   }
   
   void _saveSample() {
-    if (barisController.text.isEmpty ||
+    if (_tenagaSemprotController.text.isEmpty ||
+        barisController.text.isEmpty ||
         kematianGulmaCircleController.text.isEmpty ||
         kematianGulmaPathontroller.text.isEmpty ||
         kematianGulmaTPHController.text.isEmpty ||
@@ -58,42 +60,49 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data pokok sample dengan benar.")));
           return;
     }
-
-    setState(() {
-      pokokSamples.add({
-        'baris': barisController.text,
-        'pokok': pokokCounter.toString(),
-        'tersemprot': selectedPokokTersemprot,
-        'gulmaCircle': kematianGulmaCircleController.text,
-        'gulmaPath': kematianGulmaPathontroller.text,
-        'gulmaTPH': kematianGulmaTPHController.text,
-        'gulmaGawangan': kematianGulmaGawanganController.text,
-      });
-
-      barisController.clear();
-      pokokCounter++;
-      selectedPokokTersemprot = null;
-      kematianGulmaCircleController.clear();
-      kematianGulmaPathontroller.clear();
-      kematianGulmaTPHController.clear();
-      kematianGulmaGawanganController.clear();
-      selectedCircle = null;
-      selectedPath = null;
-      selectedTPH = null;
-      selectedGawangan = null;
+    
+  setState(() {
+    _samples.add({
+      'tenagaSemprot': _tenagaSemprotController.text.toLowerCase(),
+      'baris': barisController.text,
+      'pokok': pokokCounter++,
+      'tersemprot': selectedPokokTersemprot,
+      'gulmaCircle': kematianGulmaCircleController.text,
+      'gulmaPath': kematianGulmaPathontroller.text,
+      'gulmaTPH': kematianGulmaTPHController.text,
+      'gulmaGawangan': kematianGulmaGawanganController.text,
     });
-  }
-  
-  void _saveAll() {
-    // Kelompokkan per sample 
-    final Map<String, List<Map<String, dynamic>>> perSample = {};
-    for (final sample in pokokSamples) {
-      final key = sample['baris'];
-      perSample.putIfAbsent(key, () => []).add(sample);
+
+    if (!_tenagaSemprot.containsKey(_tenagaSemprotKey)) {
+      _tenagaSemprot[_tenagaSemprotKey] = {
+        'baris': barisController.text,
+      };
     }
 
-    final List<SampleAncakChemistSummary> sampleAncakList = perSample.entries.map((entry) {
-      final baris = entry.key;
+    selectedPokokTersemprot = null;
+    kematianGulmaCircleController.clear();
+    kematianGulmaPathontroller.clear();
+    kematianGulmaTPHController.clear();
+    kematianGulmaGawanganController.clear();
+  });
+}
+  
+  void _saveAll() {
+    if (_samples.isEmpty || 
+        _tenagaSemprot.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+          return;
+    }
+
+    // Kelompokkan sample per tenaga semprot
+    final Map<String, List<Map<String, dynamic>>> perTenaga = {};
+    for (final sample in _samples) {
+      final key = sample['tenagaSemprot'].toLowerCase();
+      perTenaga.putIfAbsent(key, () => []).add(sample);
+    }
+
+    final List<SampleAncakChemistSummary> tenagaList = perTenaga.entries.map((entry) {
+      final nama = entry.key;
       final list = entry.value;
       int countSample = list.length;
       
@@ -116,7 +125,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
       }
       
       return SampleAncakChemistSummary(
-        baris: baris,
+        nama: nama.toLowerCase(),
         jumlahSample: countSample,
         pokokTersemprot: countBy('tersemprot'),
         gulmaCircle: count('gulmaCircle'),
@@ -137,8 +146,11 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
       chemist: qaData['chemist'],
       jenisChemist: qaData['jenis_chemist'],
       dosis: qaData['dosis_knapsack'],
+      kondisiAlatSemprot : qaData['kondisi_alat_semprot'],
+      keseragamanNozel : qaData['keseragaman_nozel'],
+      apdPekerja : qaData['apd_pekerja'],
       tanggalPeriksaMutuAncak : tanggalPemeriksaanMutuAncak,
-      sampleAncakList: sampleAncakList,
+      sampleAncakList: tenagaList,
     );
 
     final ringkasan = generateRingkasanText(summary);
@@ -146,7 +158,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Ringkasan Mutu Ancak"),
+      title: const Text("Ringkasan Mutu Ancak QA Chemist"),
         content: SingleChildScrollView(child: Text(ringkasan)),
         actions: [
           TextButton(
@@ -157,49 +169,51 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
             onPressed: () async {
               Navigator.pop(context);
 
-              final totalSampleGulma = sampleAncakList.fold<int>(0, (sum, t) => sum + t.jumlahSample,);
-              int totalPokokTersemprot = sampleAncakList.map((s) => s.pokokTersemprot['Tersemprot'] ?? 0).reduce((a, b) => a + b);
-              int totalPokokTidakTersemprot = sampleAncakList.map((s) => s.pokokTersemprot['Tidak Tersemprot'] ?? 0).reduce((a, b) => a + b);
-              
+              final totalSample = tenagaList.fold<int>(0, (sum, t) => sum + t.jumlahSample,);
+              int totalTenagaKerja = perTenaga.length;
+              int totalPokokTersemprot = tenagaList.map((s) => s.pokokTersemprot['Tersemprot'] ?? 0).reduce((a, b) => a + b);
+              int totalPokokTidakTersemprot = tenagaList.map((s) => s.pokokTersemprot['Tidak Tersemprot'] ?? 0).reduce((a, b) => a + b);
               double averageGulmaCircleMati =
-                  pokokSamples
+                  _samples
                       .where(
                         (s) => double.tryParse(s['gulmaCircle'].toString()) != null,)
                       .map((s) => double.parse(s['gulmaCircle'].toString()),) 
                       .fold(0.0, (a, b) => a + b) /
-                    pokokSamples
+                    _samples
                         .where((s) => double.tryParse(s['gulmaCircle'].toString()) != null,)
                         .length;
 
               double averageGulmaPathMati =
-                  pokokSamples
+                  _samples
                       .where(
                         (s) => double.tryParse(s['gulmaPath'].toString()) != null,)
                       .map((s) => double.parse(s['gulmaPath'].toString()),) 
                       .fold(0.0, (a, b) => a + b) /
-                    pokokSamples
+                    _samples
                         .where((s) => double.tryParse(s['gulmaPath'].toString()) != null,)
                         .length;
 
               double averageGulmaTPHMati =
-                  pokokSamples
+                  _samples
                       .where(
                         (s) => double.tryParse(s['gulmaTPH'].toString()) != null,)
                       .map((s) => double.parse(s['gulmaTPH'].toString()),) 
                       .fold(0.0, (a, b) => a + b) /
-                    pokokSamples
+                    _samples
                         .where((s) => double.tryParse(s['gulmaTPH'].toString()) != null,)
                         .length;
 
               double averageGawanganTPHMati =
-                  pokokSamples
+                  _samples
                       .where(
                         (s) => double.tryParse(s['gulmaGawangan'].toString()) != null,)
                       .map((s) => double.parse(s['gulmaGawangan'].toString()),) 
                       .fold(0.0, (a, b) => a + b) /
-                    pokokSamples
+                    _samples
                         .where((s) => double.tryParse(s['gulmaGawangan'].toString()) != null,)
                         .length;
+
+              String tenagaSemprotString = json.encode(_tenagaSemprot);
 
               await QADatabaseChemistGulmaAncak.instance.insertQA({
                 'tanggal': qaData['tanggal'],
@@ -219,22 +233,16 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 'kalibrasi_alat_nozel': qaData['kalibrasi_alat_nozel'],
                 'gelas_ukur_perkakas': qaData['gelas_ukur_perkakas'],
                 'peletakan_alat_semprot': qaData['peletakan_alat_semprot'],
-                'jumlah_pokok': qaData['jumlah_pokok'],
-                'total_tenaga_kerja': qaData['total_tenaga_kerja'],
-                'total_uji_petik_aktif': qaData['total_uji_petik_aktif'],
-                'total_uji_petik_nonaktif': qaData['total_uji_petik_nonaktif'],
-                'total_uji_petik_sesuai': qaData['total_uji_petik_sesuai'],
-                'total_uji_petik_tidak_sesuai': qaData['total_uji_petik_tidak_sesuai'],
+                'total_tenaga_kerja_semprot': totalTenagaKerja,
                 'total_pokok_tersemprot': totalPokokTersemprot,
                 'total_pokok_tidak_tersemprot': totalPokokTidakTersemprot,
-                'total_alat_semprot_baik': qaData['total_alat_semprot_baik'],
-                'total_alat_semprot_tidak_layak': qaData['total_alat_semprot_tidak_layak'],
-                'total_nozel_seragam': qaData['total_nozel_seragam'],
-                'total_nozel_tidak_seragam': qaData['total_nozel_tidak_seragam'],
+                'kondisi_alat_semprot': qaData['kondisi_alat_semprot'],
+                'keseragaman_nozel': qaData['keseragaman_nozel'],
                 'apd_pekerja': qaData['apd_pekerja'],
-                'daftar_tenaga_semprot': qaData['daftar_tenaga_semprot'],
+                'kesesuaian_kalibrasi_dosis': qaData['kesesuaian_kalibrasi_dosis'],
+                'daftar_tenaga_semprot': tenagaSemprotString,
                 'tanggal_mutu_ancak': tanggalPemeriksaanMutuAncak,
-                'jumlah_pokok_gulma': totalSampleGulma,
+                'jumlah_pokok_gulma': totalSample,
                 'total_gulma_circle_mati': averageGulmaCircleMati.isNaN ? 0 : averageGulmaCircleMati,
                 'total_gulma_path_mati': averageGulmaPathMati.isNaN ? 0 : averageGulmaPathMati,
                 'total_gulma_tph_mati': averageGulmaTPHMati.isNaN ? 0 : averageGulmaTPHMati,
@@ -288,10 +296,22 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
               ),
               const SizedBox(height: 12),
               TextField(
-                controller: barisController,
-                decoration: const InputDecoration(labelText: "Baris ke-"),
-                keyboardType: TextInputType.number,
-              ),
+                    controller: _tenagaSemprotController,
+                    decoration: const InputDecoration(labelText: "Nama Tenaga Semprot"),
+                    onChanged: (_) {
+                      final tenagaSemprot = _tenagaSemprot[_tenagaSemprotKey];
+                      if (tenagaSemprot != null) {
+                        setState(() {
+                          barisController.text = tenagaSemprot['baris'];
+                        });
+                      } else {
+                        setState(() {
+                          barisController.clear();
+                        });
+                      }
+                    },
+                  ),
+              TextField(controller: barisController, decoration: const InputDecoration(labelText: "Baris ke-"), enabled: !isTenagaSemprotLocked,),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: "Pokok Tersemprot"),
                 value: selectedPokokTersemprot,
@@ -350,12 +370,12 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 onPressed: _saveSample,
                 child: const Text("Save & Tambah Pokok Sample"),
               ),
-              if (pokokSamples.isNotEmpty) ...[
+              if (_samples.isNotEmpty) ...[
                 const Divider(),
                 const Text("Daftar Sample:",style: TextStyle(fontWeight: FontWeight.bold),),
 
                 if(qaData['chemist'] == 'Chemist CPT') ...[
-                  ...pokokSamples.map(
+                  ..._samples.map(
                     (s) => ListTile(
                       title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
                       subtitle: Text(
@@ -365,7 +385,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   ),
                 ]
                 else if(qaData['chemist'] == 'Chemist Gawangan') ...[
-                  ...pokokSamples.map(
+                  ..._samples.map(
                     (s) => ListTile(
                       title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
                       subtitle: Text(
@@ -375,7 +395,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   ),
                 ]
                 else if(qaData['chemist'] == 'Chemist CPT + Gawangan') ...[
-                  ...pokokSamples.map(
+                  ..._samples.map(
                     (s) => ListTile(
                       title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
                       subtitle: Text(
