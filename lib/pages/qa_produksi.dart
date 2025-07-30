@@ -35,6 +35,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _tphTinggalController = TextEditingController();
   final _buahTinggalController = TextEditingController();
   final _buahTinggalTPHController = TextEditingController();
+  final _komentarController = TextEditingController();
+
 
   String? selectedDivisi;
   String? selectedKebun;
@@ -94,25 +96,58 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     if (original == null) return;
 
     // Tanggal & waktu sekarang
-    final String dateStr = DateFormat('dd/MM/yyyy – HH:mm:ss').format(DateTime.now());
+    final String dateStr = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
 
     // Teks watermark
-    final watermarkText =
-        "Estate: $estate\nDivisi: $divisi\nBlok: $blok\nBaris: $barisKe\nPetugas: $petugas\nWaktu: $dateStr";
+    final komentar = _komentarController.text;
+    final watermarkText = 
+      "Estate: $estate\nDivisi: $divisi\nBlok: $blok\nBaris: $barisKe\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
 
-    // Tambahkan teks ke foto
-    img.drawString(original, font: img.arial24, x: 10, y: 10, watermarkText,
-        color: img.ColorRgb8(255, 255, 255));
+  final font = img.arial48;
+  final avgCharWidth = 30;
+  final textWidth = watermarkText.length * avgCharWidth ~/ 4; // karena banyak baris
+  final textHeight = font.lineHeight * 6;
 
+  final margin = 30;
+  final x = original.width - textWidth - margin;
+  final y = original.height - textHeight - margin;
+
+  img.fillRect(
+    original,
+    x1: x - 10,
+    y1: y - 10,
+    x2: x + textWidth + 10,
+    y2: y + textHeight + 10,
+    color: img.ColorRgba8(0, 0, 0, 150),
+  );
+
+  img.drawString(
+    original,
+    font: font,
+    x: x,
+    y: y,
+   watermarkText,
+    color: img.ColorRgb8(255, 255, 255),
+  );
     // Simpan di local
-    final directory = await getApplicationDocumentsDirectory();
-    final imagePath = '${directory.path}/foto_${DateTime.now().millisecondsSinceEpoch}.png';
-    final watermarkedFile = File(imagePath);
-    await watermarkedFile.writeAsBytes(img.encodePng(original));
+    final path = '/storage/emulated/0/DCIM/QA_Agronomy';
+    final directory = Directory(path);
 
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Foto disimpan di: $imagePath")));
-  }
+    final filename = 'foto_${DateTime.now().millisecondsSinceEpoch}.png';
+    final imagePath = '$path/$filename';
+
+    final file = File(imagePath);
+    await file.writeAsBytes(img.encodePng(original));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Foto disimpan di galeri: $imagePath")),
+    );
+
+  }_komentarController.clear();
 }
 
   void _savePokokSample() {
@@ -313,6 +348,14 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (Pr,PP,Pk,Lp)")),
             TextField(controller: _buahTinggalTPHController, decoration: const InputDecoration(labelText: "Buah Tinggal di TPH")),
             const Divider(),
+            TextField(
+            controller: _komentarController,
+            decoration: InputDecoration(
+              labelText: 'Keterangan Foto',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+          ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
               icon: Icon(Icons.camera_alt),

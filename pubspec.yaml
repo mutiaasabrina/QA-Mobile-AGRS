@@ -42,7 +42,7 @@ dependencies:
   ##Camera Access
   image_picker: ^1.0.4
   image: ^4.1.7
-  permission_handler: ^11.3.1
+  permission_handler: ^11.0.0
 
 dev_dependencies:
   flutter_test:
