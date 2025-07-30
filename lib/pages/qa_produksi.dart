@@ -121,13 +121,14 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     }
 
     int totalDipanen = _samples.where((s) => s['dipanen'] == true).length;
-    int totalBuahDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahDipanen'] ?? '0')!);
-    int totalBuahMatangTidakDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahMatangTidakDipanen'] ?? '0')!);
-    int totalBuahBusukTidakDipanen = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahBusukTidakDipanen'] ?? '0')!);
-    int totalLfTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['lfTinggal'] ?? '0')!);
-    int totalTphTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['tphTinggal'] ?? '0')!);
-    int totalBuahTinggal = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTinggal'] ?? '0')!);
-    int totalBuahTinggalTPH = _samples.fold(0, (sum, s) => sum + int.tryParse(s['buahTinggalTPH'] ?? '0')!);
+    int totalBuahDipanen = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahDipanen'] ?? '0') ?? 0; return sum + value;});
+    int totalBuahMatangTidakDipanen = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahMatangTidakDipanen'] ?? '0') ?? 0; return sum + value;});
+    int totalBuahBusukTidakDipanen = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahBusukTidakDipanen'] ?? '0') ?? 0; return sum + value;});
+    int totalLfTinggal = _samples.fold(0, (sum, s) {int value = int.tryParse(s['lfTinggal'] ?? '0') ?? 0; return sum + value;});
+    int totalTphTinggal = _samples.fold(0, (sum, s) {int value = int.tryParse(s['tphTinggal'] ?? '0') ?? 0; return sum + value;});
+    int totalBuahTinggal = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahTinggal'] ?? '0') ?? 0; return sum + value;});
+    int totalBuahTinggalTPH = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahTinggalTPH'] ?? '0') ?? 0; return sum + value;});
+
 
     StringBuffer result = StringBuffer();
     result.writeln("Tanggal Periksa: $_tanggalPeriksa");
@@ -280,7 +281,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               Column(
                 children: _samples.map((p) => ListTile(
                       title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
-                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${p['buahDipanen']}, Tidak Panen: ${(int.tryParse(p['buahMatangTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahBusukTidakDipanen'] ?? '0') ?? 0)}"),
+                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${(int.tryParse(p['buahDipanen'] ?? '0') ?? 0)}, Tidak Panen: ${(int.tryParse(p['buahMatangTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahBusukTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahTinggal'] ?? '0') ?? 0)}"),
                     )).toList(),
               ),
             const SizedBox(height: 16),
