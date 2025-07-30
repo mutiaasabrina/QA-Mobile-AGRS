@@ -5,6 +5,10 @@ import '../utils/constants.dart';
 import 'menu_page.dart';
 import 'qa_pemupukan_summary.dart';
 import 'package:qa_agronomy/database/qa_database_pemupukan.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 class QAPemupukanPage extends StatefulWidget {
   const QAPemupukanPage({super.key});
@@ -20,6 +24,8 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   final _jumlahSampleUjiPetikController = TextEditingController();
   final _alatTaburSeragamController = TextEditingController();
   final _alatTaburTidakSeragamController = TextEditingController();
+  final _komentarController = TextEditingController();
+
   List<TextEditingController> _dosisSampleControllers =[];
   String dosisUjiPetikResult ="";
 
@@ -96,6 +102,93 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
     'Tekstur tidak baik, semua menggumpal'
   ];
   final List<String> dosisUjiOptions = ['Sesuai', 'Tidak Sesuai'];
+
+  Future<void> ambilFotoDenganWatermark({
+    required String estate,
+    required String divisi,
+    required String blok,
+    required String petugas,
+    required BuildContext context,
+  }) async {
+    if (_komentarController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Keterangan foto harus diisi")),
+      );
+      return;
+    }
+
+    final picker = ImagePicker();
+
+    // Minta izin akses kamera dan storage
+    await Permission.camera.request();
+    await Permission.storage.request();
+
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      final rawImage = File(pickedFile.path);
+      final img.Image? original = img.decodeImage(await rawImage.readAsBytes());
+
+      if (original == null) return;
+
+      // Tanggal & waktu sekarang
+      final String dateStr = DateFormat(
+        'dd/MM/yyyy HH:mm:ss',
+      ).format(DateTime.now());
+
+      // Teks watermark
+      final komentar = _komentarController.text;
+      final watermarkText =
+          "QA Pemupukan\nEstate: $estate\nDivisi: $divisi\nBlok: $blok\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
+
+      final font = img.arial48;
+      final avgCharWidth = 30;
+      final textWidth =
+          watermarkText.length * avgCharWidth ~/ 4; // karena banyak baris
+      final textHeight = font.lineHeight * 6;
+
+      final margin = 30;
+      final x = original.width - textWidth - margin;
+      final y = original.height - textHeight - margin;
+
+      img.fillRect(
+        original,
+        x1: x - 10,
+        y1: y - 10,
+        x2: x + textWidth + 10,
+        y2: y + textHeight + 10,
+        color: img.ColorRgba8(0, 0, 0, 150),
+      );
+
+      img.drawString(
+        original,
+        font: font,
+        x: x,
+        y: y,
+        watermarkText,
+        color: img.ColorRgb8(255, 255, 255),
+      );
+      // Simpan di local
+      final path = '/storage/emulated/0/DCIM/QA_Agronomy';
+      final directory = Directory(path);
+
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+
+      final filename = 'foto_${DateTime.now().millisecondsSinceEpoch}.png';
+      final imagePath = '$path/$filename';
+
+      final file = File(imagePath);
+      await file.writeAsBytes(img.encodePng(original));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Foto disimpan di galeri: $imagePath")),
+      );
+
+      _komentarController.clear();
+    }
+  }
 
   void _saveSample() {
   if (_namaPetugasController.text.isEmpty ||
@@ -326,6 +419,30 @@ void _calculateDosisUjiPetik() {
               value: selectedFisikPupuk,
               onChanged: _isLocked ? null : (val) => setState(() => selectedFisikPupuk = val),
               items: fisikPupukOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            ),
+            const Divider(),
+            TextField(
+              controller: _komentarController,
+              decoration: InputDecoration(
+                labelText: 'Keterangan Foto',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
+              icon: Icon(Icons.camera_alt),
+              label: Text("Ambil Foto"),
+              onPressed: () {
+                ambilFotoDenganWatermark(
+                  estate: selectedKebun.toString(),
+                  divisi: selectedDivisi.toString(),
+                  blok: selectedBlok.toString(),
+                  petugas: _namaPetugasController.text,
+                  context: context,
+                );
+              },
             ),
             SwitchListTile(
               title: const Text("Apakah melakukan uji petik?"),

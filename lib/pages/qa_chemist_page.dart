@@ -5,6 +5,10 @@ import '../utils/constants.dart';
 import 'menu_page.dart';
 import 'qa_chemist_summary.dart';
 import 'package:qa_agronomy/database/qa_database_chemist.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 class QAChemistPage extends StatefulWidget {
   const QAChemistPage({super.key});
@@ -21,6 +25,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
   final _jenisChemist = TextEditingController();
   final _jumlahSampleUjiPetikController = TextEditingController();
   final _jumlahTenagaKerjaController = TextEditingController();
+  final _komentarController = TextEditingController();
   List<TextEditingController> _volumeSampleControllers = [];
 
   String? selectedKebun;
@@ -106,32 +111,91 @@ class _QAChemistPageState extends State<QAChemistPage> {
     super.dispose();
   }
 
-  void _saveSample() {
-    if (_namaPetugasController.text.isEmpty ||
-        selectedKebun == null ||
-        selectedDivisi == null ||
-        selectedBlok == null ||
-        _luasanController.text.isEmpty ||
-        _jumlahTenagaKerjaController.text.isEmpty ||
-        selectedChemist == null ||
-        _jenisChemist.text.isEmpty ||
-        _dosisController.text.isEmpty ||
-        selectedBahanHerbisida == null ||
-        selectedProgramGulma == null ||
-        selectedKartu == null ||
-        selectedKalibrasi == null ||
-        selectedPerkakas == null ||
-        selectedPeletakan == null ||
-        selectedKondisiAlatSemprot == null ||
-        selectedKeseragamanNozel == null ||
-        selectedAPD == null) 
-    {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
-          return;
+  Future<void> ambilFotoDenganWatermark({
+    required String estate,
+    required String divisi,
+    required String blok,
+    required String petugas,
+    required BuildContext context,
+  }) async {
+    if (_komentarController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Keterangan foto harus diisi")),
+      );
+      return;
     }
-    
-    _ujiPetik = false;
-    _jumlahSampleUjiPetikController.clear();
+
+    final picker = ImagePicker();
+
+    // Minta izin akses kamera dan storage
+    await Permission.camera.request();
+    await Permission.storage.request();
+
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      final rawImage = File(pickedFile.path);
+      final img.Image? original = img.decodeImage(await rawImage.readAsBytes());
+
+      if (original == null) return;
+
+      // Tanggal & waktu sekarang
+      final String dateStr = DateFormat(
+        'dd/MM/yyyy HH:mm:ss',
+      ).format(DateTime.now());
+
+      // Teks watermark
+      final komentar = _komentarController.text;
+      final watermarkText =
+          "QA Chemist\nEstate: $estate\nDivisi: $divisi\nBlok: $blok\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
+
+      final font = img.arial48;
+      final avgCharWidth = 30;
+      final textWidth =
+          watermarkText.length * avgCharWidth ~/ 4; // karena banyak baris
+      final textHeight = font.lineHeight * 6;
+
+      final margin = 30;
+      final x = original.width - textWidth - margin;
+      final y = original.height - textHeight - margin;
+
+      img.fillRect(
+        original,
+        x1: x - 10,
+        y1: y - 10,
+        x2: x + textWidth + 10,
+        y2: y + textHeight + 10,
+        color: img.ColorRgba8(0, 0, 0, 150),
+      );
+
+      img.drawString(
+        original,
+        font: font,
+        x: x,
+        y: y,
+        watermarkText,
+        color: img.ColorRgb8(255, 255, 255),
+      );
+      // Simpan di local
+      final path = '/storage/emulated/0/DCIM/QA_Agronomy';
+      final directory = Directory(path);
+
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+
+      final filename = 'foto_QA_Chemist_${DateTime.now().millisecondsSinceEpoch}.png';
+      final imagePath = '$path/$filename';
+
+      final file = File(imagePath);
+      await file.writeAsBytes(img.encodePng(original));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Foto disimpan di galeri: $imagePath")),
+      );
+
+      _komentarController.clear();
+    }
   }
   
   void _saveAll() {
@@ -330,8 +394,30 @@ class _QAChemistPageState extends State<QAChemistPage> {
             onChanged: (val) => setState(() => selectedAPD = val),
             items: apdOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
-          const SizedBox(height: 8),
           const Divider(),
+          TextField(
+            controller: _komentarController,
+            decoration: InputDecoration(
+              labelText: 'Keterangan Foto',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
+            icon: Icon(Icons.camera_alt),
+            label: Text("Ambil Foto"),
+            onPressed: () {
+              ambilFotoDenganWatermark(
+                estate: selectedKebun.toString(),
+                divisi: selectedDivisi.toString(),
+                blok: selectedBlok.toString(),
+                petugas: _namaPetugasController.text,
+                context: context,
+              );
+            },
+          ),
           const Text("Kalibrasi Dosis/Knapsack", style: TextStyle(fontWeight: FontWeight.bold)),
           SwitchListTile(
             title: const Text("Apakah melakukan uji petik?"),
