@@ -39,6 +39,10 @@ dependencies:
   intl: ^0.20.2
   gsheets: ^0.5.0
   googleapis_auth: any
+  ##Camera Access
+  image_picker: ^1.0.4
+  image: ^4.1.7
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

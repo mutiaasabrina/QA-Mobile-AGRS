@@ -3,6 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_produksi.dart';
 import '../utils/constants.dart';
 import 'menu_page.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:image/image.dart' as img;
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
+
 
 class QAProduksiPage extends StatefulWidget {
   const QAProduksiPage({super.key});
@@ -64,6 +70,50 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   }
 
   int _pokokCounter = 1; // Counter otomatis untuk pokok
+
+  Future<void> ambilFotoDenganWatermark({
+  required String estate,
+  required String divisi,
+  required String blok,
+  required String barisKe,
+  required String petugas,
+  required BuildContext context,
+}) async {
+  final picker = ImagePicker();
+  
+  // Minta izin akses kamera dan storage
+  await Permission.camera.request();
+  await Permission.storage.request();
+
+  final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+  if (pickedFile != null) {
+    final rawImage = File(pickedFile.path);
+    final img.Image? original = img.decodeImage(await rawImage.readAsBytes());
+
+    if (original == null) return;
+
+    // Tanggal & waktu sekarang
+    final String dateStr = DateFormat('dd/MM/yyyy – HH:mm:ss').format(DateTime.now());
+
+    // Teks watermark
+    final watermarkText =
+        "Estate: $estate\nDivisi: $divisi\nBlok: $blok\nBaris: $barisKe\nPetugas: $petugas\nWaktu: $dateStr";
+
+    // Tambahkan teks ke foto
+    img.drawString(original, font: img.arial24, x: 10, y: 10, watermarkText,
+        color: img.ColorRgb8(255, 255, 255));
+
+    // Simpan di local
+    final directory = await getApplicationDocumentsDirectory();
+    final imagePath = '${directory.path}/foto_${DateTime.now().millisecondsSinceEpoch}.png';
+    final watermarkedFile = File(imagePath);
+    await watermarkedFile.writeAsBytes(img.encodePng(original));
+
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Foto disimpan di: $imagePath")));
+  }
+}
 
   void _savePokokSample() {
     if (_barisController.text.isEmpty) {
@@ -263,6 +313,22 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (Pr,PP,Pk,Lp)")),
             TextField(controller: _buahTinggalTPHController, decoration: const InputDecoration(labelText: "Buah Tinggal di TPH")),
             const Divider(),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
+              icon: Icon(Icons.camera_alt),
+              label: Text("Ambil Foto"),
+              onPressed: () {
+                ambilFotoDenganWatermark(
+                  estate: selectedKebun.toString(),
+                  divisi: selectedDivisi.toString(),
+                  blok: selectedBlok.toString(),
+                  barisKe: _barisController.text,
+                  petugas: _namaPetugasController.text,
+                  context: context,
+                );
+              },
+            ),
+
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
