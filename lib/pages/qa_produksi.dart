@@ -31,7 +31,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _buahMatangTidakDipanenController = TextEditingController();
   final _buahBusukTidakDipanenController = TextEditingController();
   final _lfTinggalController = TextEditingController();
-  final _tphTinggalController = TextEditingController();
+  final _lfTinggalTPHController = TextEditingController();
   final _buahTinggalController = TextEditingController();
   final _buahTinggalTPHController = TextEditingController();
   final _komentarController = TextEditingController();
@@ -71,6 +71,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   }
 
   int _pokokCounter = 1; // Counter otomatis untuk pokok
+  int _lfTinggalTPHCounter = 1; // Counter otomatis LF tinggal TPH
+  int _buahTinggalTPHCounter = 1; // Counter otomatis buah tinggal TPH
 
   Future<void> ambilFotoDenganWatermark({
     required String estate,
@@ -171,16 +173,28 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         "baris": _barisController.text,
         "pokok": _pokokCounter.toString(),
         "dipanen": _dipanen,
-        "buahDipanen": _buahDipanenController.text,
-        "buahMatangTidakDipanen": _buahMatangTidakDipanenController.text,
-        "buahBusukTidakDipanen": _buahBusukTidakDipanenController.text,
-        "lfTinggal": _lfTinggalController.text,
-        "tphTinggal": _tphTinggalController.text,
-        "buahTinggal": _buahTinggalController.text,
-        "buahTinggalTPH" : _buahTinggalTPHController.text,
+        "buahDipanen": _buahDipanenController.text.isEmpty ? '0' : _buahDipanenController.text,
+        "buahMatangTidakDipanen": _buahMatangTidakDipanenController.text.isEmpty ? '0' : _buahMatangTidakDipanenController.text,
+        "buahBusukTidakDipanen": _buahBusukTidakDipanenController.text.isEmpty ? '0' : _buahBusukTidakDipanenController.text,
+        "lfTinggal": _lfTinggalController.text.isEmpty ? '0' : _lfTinggalController.text,
+        "tphTinggal": _lfTinggalTPHController.text.isEmpty ? '0' : _lfTinggalTPHController.text,
+        "buahTinggal": _buahTinggalController.text.isEmpty ? '0' : _buahTinggalController.text,
+        "buahTinggalTPH": _buahTinggalTPHController.text.isEmpty ? '0' : _buahTinggalTPHController.text,
         "dropdowns": Map<String, String?>.from(dropdownSelections),
       });
+
       _pokokCounter++;
+
+      if(_lfTinggalTPHController.text.isNotEmpty && _lfTinggalTPHController.text != '0')
+      {
+        _lfTinggalTPHCounter++;
+      }
+
+      if(_buahTinggalTPHController.text.isNotEmpty && _buahTinggalTPHController.text != '0')
+      {
+        _buahTinggalTPHCounter++;
+      }
+      
       _clearPokokForm();
       dropdownSelections.clear();
     });
@@ -193,14 +207,21 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     _buahMatangTidakDipanenController.clear();
     _buahBusukTidakDipanenController.clear();
     _lfTinggalController.clear();
-    _tphTinggalController.clear();
+    _lfTinggalTPHController.clear();
     _buahTinggalController.clear();
     _buahTinggalTPHController.clear();
   }
 
   void _saveAll() async {
-    if (_samples.isEmpty || selectedKebun == null || selectedDivisi == null || selectedBlok == null || _namaPetugasController.text.isEmpty || _rotasiController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+    if (_samples.isEmpty ||
+        selectedKebun == null ||
+        selectedDivisi == null ||
+        selectedBlok == null ||
+        _namaPetugasController.text.isEmpty ||
+        _rotasiController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
       return;
     }
     
@@ -223,7 +244,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     int totalTphTinggal = _samples.fold(0, (sum, s) {int value = int.tryParse(s['tphTinggal'] ?? '0') ?? 0; return sum + value;});
     int totalBuahTinggal = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahTinggal'] ?? '0') ?? 0; return sum + value;});
     int totalBuahTinggalTPH = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahTinggalTPH'] ?? '0') ?? 0; return sum + value;});
-
 
     StringBuffer result = StringBuffer();
     result.writeln("Tanggal Periksa: $_tanggalPeriksa");
@@ -263,8 +283,10 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'buah_busuk_tidak_dipanen': totalBuahBusukTidakDipanen,
       'lf_tinggal': totalLfTinggal,
       'lf_tinggal_tph': totalTphTinggal,
+      'lf_tinggal_tph_counter': _lfTinggalTPHCounter,
       'buah_tinggal': totalBuahTinggal,
       'buah_tinggal_tph': totalBuahTinggalTPH,
+      'buah_tinggal_tph_counter': _buahTinggalTPHCounter,
       'is_synced': 0,
       'timestamp_sync': null,
     };
@@ -354,7 +376,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             TextField(controller: _buahMatangTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Matang Tidak di Panen (Jjg)")),
             TextField(controller: _buahBusukTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Busuk Tidak di Panen (Jjg)")),
             TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (Pr,PP,Pk,Lp)")),
-            TextField(controller: _tphTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
+            TextField(controller: _lfTinggalTPHController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
             TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (Pr,PP,Pk,Lp)")),
             TextField(controller: _buahTinggalTPHController, decoration: const InputDecoration(labelText: "Buah Tinggal (TPH)")),
             const Divider(),

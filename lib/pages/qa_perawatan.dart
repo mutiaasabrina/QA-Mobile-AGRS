@@ -79,7 +79,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
     '-30cm sampai -20cm , kondisi sedang, update',
     '-20cm sampai -10cm, kondisi sedang, update',
     '-10cm sampai 0cm, kondisi rusak, update',
-    '>0cm, kondisi rusak, tidak update'
+    '>0cm, kondisi rusak, tidak update'
   ];
 
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
