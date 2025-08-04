@@ -483,13 +483,24 @@ void _calculateDosisUjiPetik() {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save Data Pemupukan")),
             const SizedBox(height: 16),
-            ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All")),
             const Divider(),
-            const Text("Daftar Sample"),
-            ..._samples.map((s) => ListTile(
-              title: Text("Uji Petik Ke: ${s['pokok']}"),
-              subtitle: Text("Uji Petik: ${s['ujiPetik'] ? 'Ya' : 'Tidak'}, Kesesuaian: ${s['dosisAlatTabur']}"),
-            ))
+            const Text("Daftar Sample Yang Sudah Diinput"),
+            if (_samples.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text("Belum ada sample yang diinput."),
+              )
+            else
+              ..._samples.map(
+                (s) => ListTile(
+                  title: Text("Uji Petik Ke: ${s['pokok']}"),
+                  subtitle: Text(
+                    "Uji Petik: ${s['ujiPetik'] ? 'Ya' : 'Tidak'}, Kesesuaian: ${s['dosisAlatTabur']}",
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
+            ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All")),
           ],
         ),
 ),

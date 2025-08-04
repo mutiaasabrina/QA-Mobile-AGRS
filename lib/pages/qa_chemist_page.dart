@@ -418,6 +418,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
               );
             },
           ),
+          const SizedBox(height: 8),
           const Text("Kalibrasi Dosis/Knapsack", style: TextStyle(fontWeight: FontWeight.bold)),
           SwitchListTile(
             title: const Text("Apakah melakukan uji petik?"),

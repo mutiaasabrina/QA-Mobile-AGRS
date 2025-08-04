@@ -364,7 +364,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mutu Ancak Chemist - ${qaData['tanggal']} - ${qaData['kebun']} - ${qaData['divisi']} - ${qaData['blok']}")),
+      appBar: AppBar(title: Text("Mutu Ancak Chemist"), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(10),
         children: [
@@ -372,7 +372,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ExpansionTile(
-                title: Text("QA Details"),
+                title: Center(child: Text("QA Details")),
                 children: [
                   Text("Tanggal Pemeriksaan Terakhir: ${qaData['tanggal']}"),
                   Text("Nama Petugas: ${qaData['nama_petugas']}"),
@@ -383,7 +383,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   Text("Luas: ${qaData['luas']}"),
                   Text("Chemist: ${qaData['chemist']}"),
                   Text("Jenis Chemist: ${qaData['jenis_chemist']}"),
-                  Text("Dosis / Knapsack (liter/ha):: ${qaData['dosis_knapsack']}",),
+                  Text("Dosis / Knapsack (liter/ha): ${qaData['dosis_knapsack']}",),
                   const SizedBox(height: 12),
                 ],
               ),
@@ -414,17 +414,17 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
               if (qaData['chemist'] == 'Chemist CPT') ...[
                 TextField(
                   controller: kematianGulmaCircleController,
-                  decoration: const InputDecoration(labelText: "Kematian Gulma Circle"),
+                  decoration: const InputDecoration(labelText: "Jumlah Kematian Gulma Circle"),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: kematianGulmaPathontroller,
-                  decoration: const InputDecoration(labelText: "Kematian Gulma Path"),
+                  decoration: const InputDecoration(labelText: "Jumlah Kematian Gulma Path"),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: kematianGulmaTPHController,
-                  decoration: const InputDecoration(labelText: "Kematian Gulma TPH"),
+                  decoration: const InputDecoration(labelText: "Jumlah Kematian Gulma TPH"),
                   keyboardType: TextInputType.number,
                 ),
               ]
@@ -457,47 +457,6 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   keyboardType: TextInputType.number,
                 ),
               ],
-              const SizedBox(height: 8),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white,),
-                onPressed: _saveSample,
-                child: const Text("Save & Tambah Pokok Sample"),
-              ),
-              if (_samples.isNotEmpty) ...[
-                const Divider(),
-                const Text("Daftar Sample:",style: TextStyle(fontWeight: FontWeight.bold),),
-
-                if(qaData['chemist'] == 'Chemist CPT') ...[
-                  ..._samples.map(
-                    (s) => ListTile(
-                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
-                      subtitle: Text(
-                        "Tersemprot: ${s['tersemprot']}, Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}",
-                      ),
-                    ),
-                  ),
-                ]
-                else if(qaData['chemist'] == 'Chemist Gawangan') ...[
-                  ..._samples.map(
-                    (s) => ListTile(
-                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
-                      subtitle: Text(
-                        "Tersemprot: ${s['tersemprot']}, Gawangan: ${s['gulmaGawangan']}",
-                      ),
-                    ),
-                  ),
-                ]
-                else if(qaData['chemist'] == 'Chemist CPT + Gawangan') ...[
-                  ..._samples.map(
-                    (s) => ListTile(
-                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
-                      subtitle: Text(
-                        "Tersemprot: ${s['tersemprot']}, Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}, Gawangan: ${s['gulmaGawangan']}",
-                      ),
-                    ),
-                  ),
-                ]
-              ],
               const Divider(),
               TextField(
                 controller: _komentarController,
@@ -523,6 +482,52 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   );
                 },
               ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white,),
+                onPressed: _saveSample,
+                child: const Text("Save & Tambah Pokok Sample"),
+              ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const Text("Daftar Sample Yang Sudah Diinput", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              if (_samples.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text("Belum ada sample yang diinput."),
+                )
+              else ...[
+                if(qaData['chemist'] == 'Chemist CPT') ...[
+                  ..._samples.map(
+                    (s) => ListTile(
+                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
+                      subtitle: Text(
+                        "Status: ${s['tersemprot']}, Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}",
+                      ),
+                    ),
+                  ),
+                ]
+                else if(qaData['chemist'] == 'Chemist Gawangan') ...[
+                  ..._samples.map(
+                    (s) => ListTile(
+                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
+                      subtitle: Text(
+                        "Status: ${s['tersemprot']}, Gawangan: ${s['gulmaGawangan']}",
+                      ),
+                    ),
+                  ),
+                ]
+                else if(qaData['chemist'] == 'Chemist CPT + Gawangan') ...[
+                  ..._samples.map(
+                    (s) => ListTile(
+                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
+                      subtitle: Text(
+                        "Status: ${s['tersemprot']}, Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}, Gawangan: ${s['gulmaGawangan']}",
+                      ),
+                    ),
+                  ),
+                ]
+              ],
               const SizedBox(height: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(

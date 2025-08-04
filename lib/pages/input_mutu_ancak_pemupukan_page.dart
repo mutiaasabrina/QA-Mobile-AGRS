@@ -358,14 +358,14 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mutu Ancak Pemupukan - ${qaData['tanggal']} - ${qaData['kebun']} - ${qaData['divisi']} - ${qaData['blok']}")),
+      appBar: AppBar(title: Text("Mutu Ancak Pemupukan"), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ExpansionTile(
-              title: Text("QA Details"),
+              title: Center(child: Text("QA Details")),
               children: [
                 Text("Tanggal Pemeriksaan Terakhir: ${qaData['tanggal']}"),
                 Text("Nama Petugas: ${qaData['nama_petugas']}"),
@@ -449,13 +449,24 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveSample, child: const Text("Save & Tambah Pokok Sample")),
             const SizedBox(height: 16),
-            ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All")),
             const Divider(),
-            const Text("Daftar Sample"),
-            ..._samples.map((s) => ListTile(
-              title: Text("Baris: ${s['baris']}, Pokok Ke: ${s['pokok']}"),
-              subtitle: Text("Tenaga Tabur: ${s['tenagaTabur']}\nStatus: ${s['pokokTerpupuk']}\nKondisi: ${s['kondisiPiringan']}\nAplikasi: ${s['caraAplikasi']}"),
-            ))
+            const Text("Daftar Sample Yang Sudah Diinput"),
+            if (_samples.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text("Belum ada sample yang diinput."),
+              )
+            else
+              ..._samples.map(
+                (s) => ListTile(
+                  title: Text("Baris: ${s['baris']}, Pokok Ke: ${s['pokok']}"),
+                  subtitle: Text(
+                    "Tenaga Tabur: ${s['tenagaTabur']}\nStatus: ${s['pokokTerpupuk']}\nKondisi: ${s['kondisiPiringan']}\nAplikasi: ${s['caraAplikasi']}",
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
+            ElevatedButton( style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),onPressed: _saveAll, child: const Text("Save All")),
           ],
         ),
 ),
