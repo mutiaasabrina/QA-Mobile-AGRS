@@ -495,7 +495,7 @@ void _calculateDosisUjiPetik() {
                 (s) => ListTile(
                   title: Text("Uji Petik Ke: ${s['pokok']}"),
                   subtitle: Text(
-                    "Uji Petik: ${s['ujiPetik'] ? 'Ya' : 'Tidak'}, Kesesuaian: ${s['dosisAlatTabur']}",
+                    "Uji Petik: ${s['ujiPetik'] ? 'Ya' : 'Tidak'}\nKesessuaian: ${s['dosisAlatTabur']}",
                   ),
                 ),
               ),

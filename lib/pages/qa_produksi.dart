@@ -422,7 +422,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               Column(
                 children: _samples.map((p) => ListTile(
                       title: Text("Baris: ${p['baris']} - Pokok: ${p['pokok']}"),
-                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}, Buah Panen: ${(int.tryParse(p['buahDipanen'] ?? '0') ?? 0)}, Tidak Panen: ${(int.tryParse(p['buahMatangTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahBusukTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahTinggal'] ?? '0') ?? 0)}"),
+                      subtitle: Text("Dipanen: ${p['dipanen'] ? '√' : '✗'}\nBuah Panen: ${(int.tryParse(p['buahDipanen'] ?? '0') ?? 0)}\nTidak Panen: ${(int.tryParse(p['buahMatangTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahBusukTidakDipanen'] ?? '0') ?? 0) + (int.tryParse(p['buahTinggal'] ?? '0') ?? 0)}"),
                     )).toList(),
               ),
             const SizedBox(height: 16),

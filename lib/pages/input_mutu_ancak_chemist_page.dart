@@ -406,7 +406,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   ),
               TextField(controller: barisController, decoration: const InputDecoration(labelText: "Baris ke-"), enabled: !isTenagaSemprotLocked,),
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: "Pokok Tersemprot"),
+                decoration: const InputDecoration(labelText: "Status Pokok Tersemprot"),
                 value: selectedPokokTersemprot,
                 onChanged: (val) => setState(() => selectedPokokTersemprot = val),
                 items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
@@ -500,9 +500,11 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 if(qaData['chemist'] == 'Chemist CPT') ...[
                   ..._samples.map(
                     (s) => ListTile(
-                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
+                      title: Text(
+                        "Baris ke ${s['baris']} - Pokok ke ${s['pokok']}",
+                      ),
                       subtitle: Text(
-                        "Status: ${s['tersemprot']}, Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}",
+                        "Status: ${s['tersemprot']}\nCircle: ${s['gulmaCircle']}\nPath: ${s['gulmaPath']}\nTPH: ${s['gulmaTPH']}",
                       ),
                     ),
                   ),
@@ -510,9 +512,11 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 else if(qaData['chemist'] == 'Chemist Gawangan') ...[
                   ..._samples.map(
                     (s) => ListTile(
-                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
+                      title: Text(
+                        "Baris ke ${s['baris']} - Pokok ke ${s['pokok']}",
+                      ),
                       subtitle: Text(
-                        "Status: ${s['tersemprot']}, Gawangan: ${s['gulmaGawangan']}",
+                        "Status: ${s['tersemprot']}\nGawangan: ${s['gulmaGawangan']}",
                       ),
                     ),
                   ),
@@ -520,9 +524,11 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                 else if(qaData['chemist'] == 'Chemist CPT + Gawangan') ...[
                   ..._samples.map(
                     (s) => ListTile(
-                      title: Text("Baris ke ${s['baris']} - Pokok ke ${s['pokok']}"),
+                      title: Text(
+                        "Baris ke ${s['baris']} - Pokok ke ${s['pokok']}",
+                      ),
                       subtitle: Text(
-                        "Status: ${s['tersemprot']}, Circle: ${s['gulmaCircle']}, Path: ${s['gulmaPath']}, TPH: ${s['gulmaTPH']}, Gawangan: ${s['gulmaGawangan']}",
+                        "Status: ${s['tersemprot']}\nCircle: ${s['gulmaCircle']}\nPath: ${s['gulmaPath']}\nTPH: ${s['gulmaTPH']}\nGawangan: ${s['gulmaGawangan']}",
                       ),
                     ),
                   ),
