@@ -230,6 +230,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       
       _clearPokokForm();
       dropdownSelections.clear();
+      _cekTPH = false;;
     });
   }
 
