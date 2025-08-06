@@ -205,6 +205,37 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
       items: options.map((opt) => DropdownMenuItem(value: opt, child: Text(opt, overflow: TextOverflow.ellipsis, softWrap: false, style: const TextStyle(fontSize: 14),))).toList(),
     );
   }
+  
+  Widget _buildCheckbox(String label, List<String> options, String key) {
+    List<String> selectedOptions = dropdownSelections[key]?.split(',') ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ...options.map((opt) {
+          bool isSelected = selectedOptions.contains(opt);
+
+          return CheckboxListTile(
+            title: Text(opt, style: TextStyle(fontSize: 14)),
+            value: isSelected,
+            onChanged: (bool? value) {
+              setState(() {
+                if (value == true) {
+                  if (!selectedOptions.contains(opt)) {
+                    selectedOptions.add(opt);
+                  }
+                } else {
+                  selectedOptions.remove(opt);
+                }
+                dropdownSelections[key] = selectedOptions.join(',');
+              });
+            },
+          );
+        }).toList(),
+      ],
+    );
+  }
 
   void _savePokokSample() {
     if (_barisController.text.isEmpty) {
@@ -323,7 +354,13 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
     for (var s in _samples) {
       final drop = s['dropdowns'] as Map<String, String?>?;
       drop?.forEach((key, val) {
-        if (val != null) {
+        if (val != null && val.isNotEmpty && val.contains(',')) {
+          final options = val.split(',');
+          for (var option in options) {
+            dropdownCounters.update('$key: $option', (v) => v + 1, ifAbsent: () => 1);
+          }
+        }
+        else if (val != null && val.isNotEmpty) {
           dropdownCounters.update('$key: $val', (v) => v + 1, ifAbsent: () => 1);
         }
       });
@@ -351,12 +388,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
         result.writeln("  - $opt: $count");
       }
     });
-    // Hitung semua kolom dropdown
-    Map<String, dynamic> dropdownCounts = {};
-    dropdownCounters.forEach((key, value){
-      dropdownCounts[key.replaceAll(': ', '_')] = value;
-    });
-
+    
     // Gabung data jadi satu Map
     final qaData = {
       'tanggal': _tanggalPeriksa,
@@ -476,14 +508,16 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
             const Divider(),
             const Text("Masukkan Pokok Sample", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             TextField(controller: _barisController, decoration: const InputDecoration(labelText: "Baris ke-")),
-            _buildDropdown("Kondisi Circle", ["Baik", "Semak", "Dominan Anak Sawit", "Dominan Sampah (Berondolan Busuk)"], "Kondisi Circle"),
+            const SizedBox(height: 8),
+            _buildCheckbox("Kondisi Circle", ["Baik", "Semak", "Dominan Anak Sawit", "Dominan Sampah (Berondolan Busuk)"], "Kondisi Circle"),
             _buildDropdown("Kondisi Path", ["Baik", "Tidak Baik"], "Kondisi Path"),
             _buildDropdown("Lalang", ["Ada", "Tidak Ada"], "Lalang"),
             _buildDropdown("Anak Kayu", ["Ada", "Tidak Ada"], "Anak Kayu"),
             _buildDropdown("Perumpung", ["Ada", "Tidak Ada"], "Perumpung"),
             _buildDropdown("Purun Tikus", ["Ada", "Tidak Ada"], "Purun Tikus"),
             _buildDropdown("Pakis Udang", ["Ada", "Tidak Ada"], "Pakis Udang"),
-            _buildDropdown("Pruning", ["Baik", "Over", "Sengkleh", "Under"], "Pruning"),
+            const SizedBox(height: 8),
+            _buildCheckbox("Pruning", ["Baik", "Over", "Sengkleh", "Under"], "Pruning"),
             _buildDropdown("Susunan Pelepah", ["Rapi", "Tidak Rapi"], "Susunan Pelepah"),
             _buildDropdown("Serangan Tikus", ["Ada", "Tidak Ada"], "Serangan Tikus"),
             _buildDropdown("Serangan Rayap", ["Ada", "Tidak Ada"], "Serangan Rayap"),
