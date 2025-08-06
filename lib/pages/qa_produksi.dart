@@ -27,6 +27,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _barisController = TextEditingController();
   int pokokCounter = 1;
   bool _dipanen = false;
+  bool _cekTPH = false;
   final _buahDipanenController = TextEditingController();
   final _buahMatangTidakDipanenController = TextEditingController();
   final _buahBusukTidakDipanenController = TextEditingController();
@@ -40,7 +41,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   String? selectedDivisi;
   String? selectedKebun;
   String? selectedBlok;
-
   String? selectedBeneficialPlant;
   String? selectedPeilscale;
 
@@ -71,8 +71,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   }
 
   int _pokokCounter = 1; // Counter otomatis untuk pokok
-  int _lfTinggalTPHCounter = 1; // Counter otomatis LF tinggal TPH
-  int _buahTinggalTPHCounter = 1; // Counter otomatis buah tinggal TPH
+  int _tphCounter = 0; // Counter TPH
 
   Future<void> ambilFotoDenganWatermark({
     required String estate,
@@ -185,14 +184,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
 
       _pokokCounter++;
 
-      if(_lfTinggalTPHController.text.isNotEmpty && _lfTinggalTPHController.text != '0')
-      {
-        _lfTinggalTPHCounter++;
-      }
-
-      if(_buahTinggalTPHController.text.isNotEmpty && _buahTinggalTPHController.text != '0')
-      {
-        _buahTinggalTPHCounter++;
+      if (_cekTPH) {
+        _tphCounter++;
       }
       
       _clearPokokForm();
@@ -258,9 +251,9 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     result.writeln("Buah Matang Tdk di Panen: $totalBuahMatangTidakDipanen Jjg");
     result.writeln("Buah Busuk Tdk di Panen: $totalBuahBusukTidakDipanen Jjg");
     result.writeln("LF Tinggal (Pr): $totalLfTinggal");
-    result.writeln("LF Tinggal (TPH): $totalTphTinggal");
-    result.writeln("Buah Tinggal (Pr,PP,Pk,Lp): $totalBuahTinggal\n");
-    result.writeln("Buah Tinggal TPH: $totalBuahTinggalTPH\n");
+    result.writeln("Buah Tinggal (Pr,PP,Pk,Lp): $totalBuahTinggal");
+    result.writeln("LF Tinggal (TPH): $totalTphTinggal"); 
+    result.writeln("Buah Tinggal TPH: $totalBuahTinggalTPH");
     
     // Hitung semua kolom dropdown
     Map<String, dynamic> dropdownCounts = {};
@@ -282,11 +275,10 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'buah_matang_tidak_dipanen': totalBuahMatangTidakDipanen,
       'buah_busuk_tidak_dipanen': totalBuahBusukTidakDipanen,
       'lf_tinggal': totalLfTinggal,
-      'lf_tinggal_tph': totalTphTinggal,
-      'lf_tinggal_tph_counter': _lfTinggalTPHCounter,
       'buah_tinggal': totalBuahTinggal,
+      'lf_tinggal_tph': totalTphTinggal,
       'buah_tinggal_tph': totalBuahTinggalTPH,
-      'buah_tinggal_tph_counter': _buahTinggalTPHCounter,
+      'tph_counter': _tphCounter,
       'is_synced': 0,
       'timestamp_sync': null,
     };
@@ -376,9 +368,22 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
             TextField(controller: _buahMatangTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Matang Tidak di Panen (Jjg)")),
             TextField(controller: _buahBusukTidakDipanenController, decoration: const InputDecoration(labelText: "Buah Busuk Tidak di Panen (Jjg)")),
             TextField(controller: _lfTinggalController, decoration: const InputDecoration(labelText: "LF Tinggal (Pr,PP,Pk,Lp)")),
-            TextField(controller: _lfTinggalTPHController, decoration: const InputDecoration(labelText: "LF Tinggal (TPH)")),
             TextField(controller: _buahTinggalController, decoration: const InputDecoration(labelText: "Buah Tinggal (Pr,PP,Pk,Lp)")),
-            TextField(controller: _buahTinggalTPHController, decoration: const InputDecoration(labelText: "Buah Tinggal (TPH)")),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              title: const Text("Apakah melakukan pengecekan TPH?"),
+              value: _cekTPH,
+              onChanged: (val) {
+                setState(() {
+                  _cekTPH = val;
+                });
+              },
+            ),
+            if (_cekTPH) ...[
+              const SizedBox(height: 8),
+              TextField(controller: _lfTinggalTPHController, decoration: const InputDecoration(labelText: "LF Tinggal di TPH")),
+              TextField(controller: _buahTinggalTPHController, decoration: const InputDecoration(labelText: "Buah Tinggal di TPH")),
+            ],
             const Divider(),
             TextField(
               controller: _komentarController,

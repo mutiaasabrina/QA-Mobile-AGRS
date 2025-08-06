@@ -37,11 +37,10 @@ class QADatabase {
       buah_matang_tidak_dipanen INTEGER,
       buah_busuk_tidak_dipanen INTEGER,
       lf_tinggal INTEGER,
-      lf_tinggal_tph INTEGER,
-      lf_tinggal_tph_counter INTEGER,
       buah_tinggal INTEGER,
+      lf_tinggal_tph INTEGER,
       buah_tinggal_tph INTEGER,
-      buah_tinggal_tph_counter INTEGER,
+      tph_counter INTEGER,
 
       is_synced INTEGER,
       timestamp_sync TEXT

@@ -45,11 +45,10 @@ class GSheetService {
       'buah_matang_tidak_dipanen',
       'buah_busuk_tidak_dipanen',
       'lf_tinggal',
-      'lf_tinggal_tph',
-      'lf_tinggal_tph_counter',
       'buah_tinggal',
+      'lf_tinggal_tph',
       'buah_tinggal_tph',
-      'buah_tinggal_tph_counter',
+      'tph_counter',
 
       'is_synced',
       'timestamp_sync',
