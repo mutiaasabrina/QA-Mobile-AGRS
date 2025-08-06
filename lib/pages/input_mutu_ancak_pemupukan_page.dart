@@ -90,6 +90,32 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
   final List<String> caraAplikasiOptions = ['Standar', 'Tidak Standar'];
   final List<String> dosisUjiOptions = ['Sesuai', 'Tidak Sesuai'];
 
+  List<String> wrapText(String text, int maxCharsPerLine) {
+    final words = text.split(' ');
+    List<String> lines = [];
+    String currentLine = '';
+
+    for (final word in words) {
+      if ((currentLine + ' ' + word).trim().length <= maxCharsPerLine) {
+        currentLine += ' $word';
+      } else {
+        lines.add(currentLine.trim());
+        currentLine = word;
+      }
+    }
+    if (currentLine.isNotEmpty) {
+      lines.add(currentLine.trim());
+    }
+
+    return lines;
+  }
+
+  int getMaxLineWidth(List<String> lines, int avgCharWidth) {
+    return lines
+        .map((line) => line.length * avgCharWidth)
+        .reduce((a, b) => a > b ? a : b);
+  }
+
   Future<void> ambilFotoDenganWatermark({
     required String estate,
     required String divisi,
@@ -126,19 +152,28 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
 
       // Teks watermark
       final komentar = _komentarController.text;
-      final watermarkText =
-          "QA Pemupukan Mutu Ancak\nEstate: $estate\nDivisi: $divisi\nBlok: $blok\nBaris: $barisKe\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
+      final watermarkText = "QA Pemupukan Mutu Ancak\nEstate: $estate\nDivisi: $divisi\nBlok: $blok\nBaris: $barisKe\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
 
-      final font = img.arial48;
-      final avgCharWidth = 30;
-      final textWidth =
-          watermarkText.length * avgCharWidth ~/ 4; // karena banyak baris
-      final textHeight = font.lineHeight * 6;
-
+      final font = img.arial24;
       final margin = 30;
+      final maxTextWidthPx = (original.width * 0.5).toInt();
+      final avgCharWidth = font.lineHeight ~/ 2;
+      final maxCharsPerLine = maxTextWidthPx ~/ avgCharWidth;
+
+      // wrap baris demi baris
+      List<String> wrappedLines = [];
+      for (final line in watermarkText.split('\n')) {
+        wrappedLines.addAll(wrapText(line, maxCharsPerLine));
+      }
+
+      // GANTI: pakai maxLineWidth dari fungsi akurat
+      final textWidth = getMaxLineWidth(wrappedLines, avgCharWidth);
+      final textHeight = wrappedLines.length * font.lineHeight;
+
       final x = original.width - textWidth - margin;
       final y = original.height - textHeight - margin;
 
+      // Gambar background pas
       img.fillRect(
         original,
         x1: x - 10,
@@ -148,14 +183,18 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
         color: img.ColorRgba8(0, 0, 0, 150),
       );
 
-      img.drawString(
-        original,
-        font: font,
-        x: x,
-        y: y,
-        watermarkText,
-        color: img.ColorRgb8(255, 255, 255),
-      );
+      // Gambar teksnya
+      for (int i = 0; i < wrappedLines.length; i++) {
+        img.drawString(
+          original,
+          font: font,
+          x: x,
+          y: y + i * font.lineHeight,
+          wrappedLines[i],
+          color: img.ColorRgb8(255, 255, 255),
+        );
+      }
+
       // Simpan di local
       final path = '/storage/emulated/0/DCIM/QA_Agronomy';
       final directory = Directory(path);
@@ -164,7 +203,7 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
         await directory.create(recursive: true);
       }
 
-      final filename = 'foto_QA_Pemupukan_Mutu_Ancak_${DateTime.now().millisecondsSinceEpoch}.png';
+      final filename = 'foto_QA_Produksi_${DateTime.now().millisecondsSinceEpoch}.png';
       final imagePath = '$path/$filename';
 
       final file = File(imagePath);

@@ -11,7 +11,7 @@ class QADatabase {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('qa_local.db');
+    _database = await _initDB('qa_produksi.db');
     return _database!;
   }
 
