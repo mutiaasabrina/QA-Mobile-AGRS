@@ -154,7 +154,7 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
       final komentar = _komentarController.text;
       final watermarkText = "QA Pemupukan Mutu Ancak\nEstate: $estate\nDivisi: $divisi\nBlok: $blok\nBaris: $barisKe\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
 
-      final font = img.arial24;
+      final font = img.arial48;
       final margin = 30;
       final maxTextWidthPx = (original.width * 0.5).toInt();
       final avgCharWidth = font.lineHeight ~/ 2;

@@ -171,7 +171,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
       final komentar = _komentarController.text;
       final watermarkText = "QA Perawatan\nEstate: $estate\nDivisi: $divisi\nBlok: $blok\nBaris: $barisKe\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
 
-      final font = img.arial24;
+      final font = img.arial48;
       final margin = 30;
       final maxTextWidthPx = (original.width * 0.5).toInt();
       final avgCharWidth = font.lineHeight ~/ 2;
@@ -485,7 +485,8 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
         content: SingleChildScrollView(child: Text(result.toString())),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              await QADatabasePerawatan.instance.insertQA(qaData);
               setState(() {
                 _samples.clear();
                 _pokokCounter = 1;

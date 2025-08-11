@@ -174,7 +174,7 @@ class _QAChemistPageState extends State<QAChemistPage> {
       final komentar = _komentarController.text;
       final watermarkText = "QA Chemist\nEstate: $estate\nDivisi: $divisi\nBlok: $blok\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
 
-      final font = img.arial24;
+      final font = img.arial48;
       final margin = 30;
       final maxTextWidthPx = (original.width * 0.5).toInt();
       final avgCharWidth = font.lineHeight ~/ 2;

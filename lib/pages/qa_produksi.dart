@@ -138,7 +138,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       final komentar = _komentarController.text;
       final watermarkText = "QA Produksi\nEstate: $estate\nDivisi: $divisi\nBlok: $blok\nBaris: $barisKe\nPetugas: $petugas\nWaktu: $dateStr\nKeterangan: $komentar";
 
-      final font = img.arial24;
+      final font = img.arial48;
       final margin = 30;
       final maxTextWidthPx = (original.width * 0.5).toInt();
       final avgCharWidth = font.lineHeight ~/ 2;
@@ -323,7 +323,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       'is_synced': 0,
       'timestamp_sync': null,
     };
-    await QADatabase.instance.insertQA(qaData);
 
      showDialog(
       context: context,
@@ -332,14 +331,19 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         content: SingleChildScrollView(child: Text(result.toString())),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+
+              await QADatabase.instance.insertQA(qaData);
+
               setState(() {
                 _samples.clear();
                 _pokokCounter = 1;
                 dropdownSelections.clear();
               });
+
               Navigator.of(context).popUntil((route) => route.isFirst);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const MenuPage()));
             },
             child: const Text("OK"),
           ),
