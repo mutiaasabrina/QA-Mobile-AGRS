@@ -9,6 +9,7 @@ class GSheetService {
   static const _sheetNamePerawatan = 'Testing Perawatan';
   static const _sheetNamePemupukan = 'Testing Pemupukan';
   static const _sheetNameChemist = 'Testing Chemist';
+  static const _sheetNameGrading = 'Testing Grading';
 
   Worksheet? _sheet;
 
@@ -215,6 +216,48 @@ class GSheetService {
       'total_gulma_gawangan_mati',
       'ringkasan_chemist',
       'ringkasan_mutu_ancak',
+      'is_synced',
+      'timestamp_sync'
+    ];
+
+    final values = orderedKeys.map((k) => data[k]?.toString() ?? '').toList();
+    await sheet.values.appendRow(values);
+  }
+
+  Future<void> insertQAGrading(Map<String, dynamic> data) async {
+    final spreadsheet = await GSheets(json.decode(await rootBundle.loadString('assets/credentials/enginewaktuaplikasipemupukan-03e33861bae9.json',),),).spreadsheet(_spreadsheetId);
+    final sheet = await spreadsheet.worksheetByTitle(_sheetNameGrading);
+    if (sheet == null) return;
+
+    final orderedKeys = [
+      'id',
+      'tanggal',
+      'nama_petugas',
+      'kebun',
+      'divisi',
+      'blok',
+      'varietas',
+      'tahun_tanam',
+      'buah_a_mentah',
+      'bjr_buah_a_mentah',
+      'buah_b_mentah',
+      'bjr_buah_b_mentah',
+      'buah_c_mentah',
+      'bjr_buah_c_mentah',
+      'buah_d_mentah',
+      'bjr_buah_d_mentah',
+      'buah_a_matang',
+      'bjr_buah_a_matang',
+      'buah_b_matang',
+      'bjr_buah_b_matang',
+      'buah_c_matang',
+      'bjr_buah_c_matang',
+      'buah_d_matang',
+      'bjr_buah_d_matang',
+      'buah_kurang3kg_mentah',
+      'buah_kurang3kg_matang',
+      'total_buah_mentah',
+      'total_buah_matang',
       'is_synced',
       'timestamp_sync'
     ];

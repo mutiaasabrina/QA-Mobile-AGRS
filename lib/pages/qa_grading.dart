@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:qa_agronomy/database/qa_database_produksi.dart';
+import 'package:qa_agronomy/database/qa_database_grading.dart';
 import '../utils/constants.dart';
 import 'menu_page.dart';
+import 'qa_grading_summary.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import 'package:permission_handler/permission_handler.dart';
@@ -17,7 +18,6 @@ class QAGradingPage extends StatefulWidget {
 }
 
 class _QAGradingPageState extends State<QAGradingPage> {
-
   final _namaPetugasController = TextEditingController();
 
   final _varietasController = TextEditingController();
@@ -48,19 +48,8 @@ class _QAGradingPageState extends State<QAGradingPage> {
   bool get isLocked => _samples.isNotEmpty;
   final String _tanggalPeriksa = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-  final _barisController = TextEditingController();
   int TPHCounter = 1;
-  bool _dipanen = false;
-  bool _cekTPH = false;
-  final _buahDipanenController = TextEditingController();
-  final _buahMatangTidakDipanenController = TextEditingController();
-  final _buahBusukTidakDipanenController = TextEditingController();
-  final _lfTinggalController = TextEditingController();
-  final _lfTinggalTPHController = TextEditingController();
-  final _buahTinggalController = TextEditingController();
-  final _buahTinggalTPHController = TextEditingController();
   final _komentarController = TextEditingController();
-
 
   String? selectedDivisi;
   String? selectedKebun;
@@ -195,11 +184,23 @@ class _QAGradingPageState extends State<QAGradingPage> {
     final int buahCMentah = int.tryParse(_buahCMController.text) ?? 0;
     final int buahDMentah = int.tryParse(_buahDMController.text) ?? 0;
 
+    // Parse BJR mentah values
+    final double bjrAMentah = double.tryParse(_bjrAMController.text) ?? 0.0;
+    final double bjrBMentah = double.tryParse(_bjrBMController.text) ?? 0.0;
+    final double bjrCMentah = double.tryParse(_bjrCMController.text) ?? 0.0;
+    final double bjrDMentah = double.tryParse(_bjrDMController.text) ?? 0.0;
+
     // Parse matang values (>3kg)
     final int buahAMatang = int.tryParse(_buahAMatController.text) ?? 0;
     final int buahBMatang = int.tryParse(_buahBMatController.text) ?? 0;
     final int buahCMatang = int.tryParse(_buahCMatController.text) ?? 0;
     final int buahDMatang = int.tryParse(_buahDMatController.text) ?? 0;
+
+    // Parse BJR matang values
+    final double bjrAMatang = double.tryParse(_bjrAMatController.text) ?? 0.0;
+    final double bjrBMatang = double.tryParse(_bjrBMatController.text) ?? 0.0;
+    final double bjrCMatang = double.tryParse(_bjrCMatController.text) ?? 0.0;
+    final double bjrDMatang = double.tryParse(_bjrDMatController.text) ?? 0.0;
 
     // Parse <3kg
     final int buahMentahKecil = int.tryParse(_buahMentahKecilController.text) ?? 0;
@@ -213,21 +214,30 @@ class _QAGradingPageState extends State<QAGradingPage> {
       "TPH": TPHCounter.toString(),
 
       // Individual if you still want to store them
-      "Buah A Mentah": buahAMentah.toString(),
-      "Buah B Mentah": buahBMentah.toString(),
-      "Buah C Mentah": buahCMentah.toString(),
-      "Buah D Mentah": buahDMentah.toString(),
-      "Buah A Matang": buahAMatang.toString(),
-      "Buah B Matang": buahBMatang.toString(),
-      "Buah C Matang": buahCMatang.toString(),
-      "Buah D Matang": buahDMatang.toString(),
+      "buahAMentah": buahAMentah.toString(),
+      "bjrBuahAMentah": bjrAMentah.toStringAsFixed(2),
+      "buahBMentah": buahBMentah.toString(),
+      "bjrBuahBMentah": bjrBMentah.toStringAsFixed(2),
+      "buahCMentah": buahCMentah.toString(),
+      "bjrBuahCMentah": bjrCMentah.toStringAsFixed(2),
+      "buahDMentah": buahDMentah.toString(),
+      "bjrBuahDMentah": bjrDMentah.toStringAsFixed(2),
 
-      "Buah Mentah <3kg": buahMentahKecil.toString(),
-      "Buah Matang <3kg": buahMatangKecil.toString(),
+      "buahAMatang": buahAMatang.toString(),
+      "bjrBuahAMatang": bjrAMatang.toStringAsFixed(2),
+      "buahBMatang": buahBMatang.toString(),
+      "bjrBuahBMatang": bjrBMatang.toStringAsFixed(2),
+      "buahCMatang": buahCMatang.toString(),
+      "bjrBuahCMatang": bjrCMatang.toStringAsFixed(2),
+      "buahDMatang": buahDMatang.toString(),
+      "bjrBuahDMatang": bjrDMatang.toStringAsFixed(2),
+
+      "buahMentahKecil": buahMentahKecil.toString(),
+      "buahMatangKecil": buahMatangKecil.toString(),
 
       // Totals
-      "Total Buah Matang": totalBuahMatang.toString(),
-      "Total Buah Mentah": totalBuahMentah.toString(),
+      "totalBuahMentah": totalBuahMentah.toString(),
+      "totalBuahMatang": totalBuahMatang.toString(),
     });
 
     TPHCounter++;
@@ -254,70 +264,139 @@ class _QAGradingPageState extends State<QAGradingPage> {
     _buahMatangKecilController.clear();
   });
   }
-  
 
   // Save All function
   void _saveAll() async {
-    if (selectedKebun == null ||
+    if (_samples.isEmpty ||
+        selectedKebun == null ||
         selectedDivisi == null ||
         selectedBlok == null ||
-        _namaPetugasController.text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
+        _namaPetugasController.text.isEmpty ||
+        _varietasController.text.isEmpty ||
+        _tahunTanamController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
       return;
     }
 
-    final qaData = {
-      'tanggal': _tanggalPeriksa,
-      'nama_petugas': _namaPetugasController.text,
-      'kebun': selectedKebun,
-      'divisi': selectedDivisi,
-      'blok': selectedBlok,
-      'varietas': _varietasController.text,
-      'tahun_tanam': _tahunTanamController.text,
-      'buah_a_mentah': int.tryParse(_buahAMController.text) ?? 0,
-      'bjr_buah_a_mentah': double.tryParse(_bjrAMController.text) ?? 0.0,
-      'buah_b_mentah': int.tryParse(_buahBMController.text) ?? 0,
-      'bjr_buah_b_mentah': double.tryParse(_bjrBMController.text) ?? 0.0,
-      'buah_c_mentah': int.tryParse(_buahCMController.text) ?? 0,
-      'bjr_buah_c_mentah': double.tryParse(_bjrCMController.text) ?? 0.0,
-      'buah_d_mentah': int.tryParse(_buahDMController.text) ?? 0,
-      'bjr_buah_d_mentah': double.tryParse(_bjrDMController.text) ?? 0.0,
-      'buah_a_matang': int.tryParse(_buahAMatController.text) ?? 0,
-      'bjr_buah_a_matang': double.tryParse(_bjrAMatController.text) ?? 0.0,
-      'buah_b_matang': int.tryParse(_buahBMatController.text) ?? 0,
-      'bjr_buah_b_matang': double.tryParse(_bjrBMatController.text) ?? 0.0,
-      'buah_c_matang': int.tryParse(_buahCMatController.text) ?? 0,
-      'bjr_buah_c_matang': double.tryParse(_bjrCMatController.text) ?? 0.0,
-      'buah_d_matang': int.tryParse(_buahDMatController.text) ?? 0,
-      'bjr_buah_d_matang': double.tryParse(_bjrDMatController.text) ?? 0.0,
-      'buah_kurang3kg_mentah': int.tryParse(_buahMentahKecilController.text) ?? 0,
-      'buah_kurang3kg_matang': int.tryParse(_buahMatangKecilController.text) ?? 0,
-      'is_synced': 0,
-      'timestamp_sync': null,
-    };
+    int totalTPH = _samples.where((s) => s['TPH'] == true).length;
+    double totalBuahAMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahAMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBjrAMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahAMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBuahBMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahBMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBjrBMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahBMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBuahCMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahCMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBjrCMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahCMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBuahDMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahDMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBjrDMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahDMentah'] ?? '0') ?? 0; return sum + value;});
+
+    double totalBuahAMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahAMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBjrAMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahAMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBuahBMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahBMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBjrBMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahBMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBuahCMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahCMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBjrCMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahCMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBuahDMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahDMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBjrDMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahDMatang'] ?? '0') ?? 0; return sum + value;});
+
+    int totalBuahMentahKecil = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahMentahKecil'] ?? '0') ?? 0; return sum + value;});
+    int totalBuahMatangKecil = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahMatangKecil'] ?? '0') ?? 0; return sum + value;});
+
+    int totalBuahMentah = _samples.fold(0, (sum, s) {int value = int.tryParse(s['totalBuahMentah'] ?? '0') ?? 0; return sum + value;});
+    int totalBuahMatang = _samples.fold(0, (sum, s) {int value = int.tryParse(s['totalBuahMatang'] ?? '0') ?? 0; return sum + value;});
+
+    final summary = QAGradingSummary(
+      tanggalPeriksa: _tanggalPeriksa,
+      namaPetugas: _namaPetugasController.text,
+      kebun: selectedKebun ?? '',
+      divisi: selectedDivisi ?? '',
+      blok: selectedBlok ?? '',
+      varietas: _varietasController.text,
+      tahunTanam: _tahunTanamController.text,
+      totalTPH: totalTPH,
+      totalBuahAMentah: totalBuahAMentah,
+      totalBjrAMentah: totalBjrAMentah,
+      totalBuahBMentah: totalBuahBMentah,
+      totalBjrBMentah: totalBjrBMentah,
+      totalBuahCMentah: totalBuahCMentah,
+      totalBjrCMentah: totalBjrCMentah,
+      totalBuahDMentah: totalBuahDMentah,
+      totalBjrDMentah: totalBjrDMentah,
+      totalBuahAMatang: totalBuahAMatang,
+      totalBjrAMatang: totalBjrAMatang,
+      totalBuahBMatang: totalBuahBMatang,
+      totalBjrBMatang: totalBjrBMatang,
+      totalBuahCMatang: totalBuahCMatang,
+      totalBjrCMatang: totalBjrCMatang,
+      totalBuahDMatang: totalBuahDMatang,
+      totalBjrDMatang: totalBjrDMatang,
+      totalBuahMentahKecil: totalBuahMentahKecil,
+      totalBuahMatangKecil: totalBuahMatangKecil,
+      totalBuahMentah: totalBuahMentah,
+      totalBuahMatang: totalBuahMatang,
+    );
+
+    final ringkasan = generateRingkasanText(summary);
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Data Overview"),
-        content: SingleChildScrollView(
-          child: Text(qaData.entries.map((e) => "${e.key}: ${e.value}").join("\n")),
-        ),
+      title: const Text("Ringkasan QA Grading"),
+        content: SingleChildScrollView(child: Text(ringkasan)),
         actions: [
           TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
+          ),
+          ElevatedButton(
             onPressed: () async {
-              await QADatabase.instance.insertQA(qaData);
-              Navigator.of(context).popUntil((r) => r.isFirst);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const MenuPage()));
+              Navigator.pop(context);
+
+              await QADatabaseGrading.instance.insertQA({
+                'tanggal': summary.tanggalPeriksa,
+                'nama_petugas': summary.namaPetugas,
+                'kebun': summary.kebun,
+                'divisi': summary.divisi,
+                'blok': summary.blok,
+                'varietas': summary.varietas,
+                'tahun_tanam': summary.tahunTanam,
+                'buah_a_mentah': summary.totalBuahAMentah,
+                'bjr_buah_a_mentah': summary.totalBjrAMentah,
+                'buah_b_mentah': summary.totalBuahBMentah,
+                'bjr_buah_b_mentah': summary.totalBjrBMentah,
+                'buah_c_mentah': summary.totalBuahCMentah,
+                'bjr_buah_c_mentah': summary.totalBjrCMentah,
+                'buah_d_mentah': summary.totalBuahDMentah,
+                'bjr_buah_d_mentah': summary.totalBjrDMentah,
+                'buah_a_matang': summary.totalBuahAMatang,
+                'bjr_buah_a_matang': summary.totalBjrAMatang,
+                'buah_b_matang': summary.totalBuahBMatang,
+                'bjr_buah_b_matang': summary.totalBjrBMatang,
+                'buah_c_matang': summary.totalBuahCMatang,
+                'bjr_buah_c_matang': summary.totalBjrCMatang,
+                'buah_d_matang': summary.totalBuahDMatang,
+                'bjr_buah_d_matang': summary.totalBjrDMatang,
+                'buah_kurang3kg_mentah': summary.totalBuahMentahKecil,
+                'buah_kurang3kg_matang': summary.totalBuahMatangKecil,
+                'total_buah_mentah': summary.totalBuahMentah,
+                'total_buah_matang': summary.totalBuahMatang,
+                'is_synced': 0,
+                'timestamp_sync': null,
+              });
+
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MenuPage()),
+              );
             },
-            child: const Text("OK"),
+            child: const Text("Ok"),
           ),
         ],
       ),
     );
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -327,27 +406,30 @@ class _QAGradingPageState extends State<QAGradingPage> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("Tanggal Pemeriksaan: $_tanggalPeriksa", style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas")),
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(labelText: "Kebun"),
-            value: selectedKebun,
-            onChanged: (val) => setState(() {
-              selectedKebun = val; selectedDivisi = null; selectedBlok = null;
-            }),
-            items: kebunOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-          ),
+          TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas"), enabled: !isLocked,),
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: "Kebun"),
+              value: selectedKebun,
+              onChanged: isLocked ? null : (val) => setState(() {
+                selectedKebun = val;
+                selectedDivisi = null;
+                selectedBlok = null;
+              }),
+              items: kebunOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Divisi"),
             value: selectedDivisi,
-            onChanged: (val) => setState(() {
-              selectedDivisi = val; selectedBlok = null;
+            onChanged: isLocked ? null : (val) => setState(() {
+              selectedDivisi = val; 
+              selectedBlok = null;
             }),
             items: divisiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Blok"),
             value: selectedBlok,
-            onChanged: (val) => setState(() => selectedBlok = val),
+            onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
             items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),
           const Divider(),

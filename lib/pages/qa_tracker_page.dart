@@ -4,6 +4,7 @@ import 'package:qa_agronomy/database/qa_database_produksi.dart';
 import 'package:qa_agronomy/database/qa_database_perawatan.dart';
 import 'package:qa_agronomy/database/input_mutu_ancak_database_pemupukan.dart';
 import 'package:qa_agronomy/database/input_mutu_ancak_database_chemist.dart';
+import 'package:qa_agronomy/database/qa_database_grading.dart';
 import 'package:qa_agronomy/gsheet_service.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -20,6 +21,7 @@ class _QATrackerPageState extends State<QATrackerPage> {
   List<Map<String, dynamic>> _qaListPerawatan = [];
   List<Map<String, dynamic>> _qaListPemupukan = [];
   List<Map<String, dynamic>> _qaListChemist = [];
+  List<Map<String, dynamic>> _qaListGrading = [];
 
   final List<String> SkippedDetails = [
     'Daftar Tenaga Tabur',
@@ -42,12 +44,14 @@ class _QATrackerPageState extends State<QATrackerPage> {
     final perawatan = await QADatabasePerawatan.instance.getAllQAHariIni(tanggal);
     final pupuk = await QADatabasePemupukanGulmaAncak.instance.getAllQABasedTanggalMutuAncak(tanggal);
     final chemist = await QADatabaseChemistGulmaAncak.instance.getAllQABasedTanggalMutuAncak(tanggal);
+    final grading = await QADatabaseGrading.instance.getAllQAHariIni(tanggal);
 
     setState(() {
       _qaListProduksi = produksi;
       _qaListPerawatan = perawatan;
       _qaListPemupukan = pupuk;
       _qaListChemist = chemist;
+      _qaListGrading = grading;
     });
   }
 
@@ -139,6 +143,18 @@ String _formatKey(String key) {
 
         await gsheet.insertQAChemist(updatedQA);
 
+      } else if (title == "Grading") {
+        await QADatabaseGrading.instance.updateSyncStatusWithTimestamp(qa['id'], true, nowFormatted);
+        final db = await QADatabaseGrading.instance.database;
+
+        final updatedQA = (await db.query(
+          'qa_grading_samples',
+          where: 'id =?',
+          whereArgs: [qa['id']],
+        )).first;
+
+        await gsheet.insertQAGrading(updatedQA);
+
       }
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -205,7 +221,9 @@ Widget _buildListSection(
                 } else if (title == 'Pemupukan') {
                   return "Jenis Pupuk: ${qa['jenis_pupuk']}\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp";
                 } else if (title == 'Chemist') {
-                  return "Jenis Chemist: ${qa['jenis_chemist']}\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp";;
+                  return "Jenis Chemist: ${qa['jenis_chemist']}\nPokok: ${qa['jumlah_pokok']}\nSync: $timestamp";
+                } else if (title == 'Grading') {
+                  return "Varietas: ${qa['varietas']}\nTahun Tanam: ${qa['tahun_tanam']}\nSync: $timestamp";
                 } else {
                   return "";
                 }
@@ -239,7 +257,7 @@ Widget _buildListSection(
 
   @override
   Widget build(BuildContext context) {
-    final isAllEmpty = _qaListProduksi.isEmpty && _qaListPerawatan.isEmpty && _qaListPemupukan.isEmpty && _qaListChemist.isEmpty;
+    final isAllEmpty = _qaListProduksi.isEmpty && _qaListPerawatan.isEmpty && _qaListPemupukan.isEmpty && _qaListChemist.isEmpty && _qaListGrading.isEmpty;
 
     return Scaffold(
       appBar: AppBar(title: const Text("Tracking QA Hari Ini")),
@@ -272,6 +290,12 @@ Widget _buildListSection(
                     _qaListChemist,
                     tableName: 'qa_chemist_mutu_ancak_samples',
                     getDb: () => QADatabaseChemistGulmaAncak.instance.database,
+                  ),
+                  _buildListSection(
+                    "Grading",
+                    _qaListGrading,
+                    tableName: 'qa_grading_samples',
+                    getDb: () => QADatabaseGrading.instance.database,
                   ),
                   const SizedBox(height: 24),
                 ],

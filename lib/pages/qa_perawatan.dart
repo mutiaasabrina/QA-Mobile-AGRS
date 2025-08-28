@@ -513,7 +513,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
           children: [
             Text("Tanggal Periksa: $_tanggalPeriksa", style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas")),
+            TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas"), enabled: !isLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kebun"),
               value: selectedKebun,
@@ -523,7 +523,6 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
                   selectedDivisi = null;
                   selectedBlok = null;
                 });
-                
               }),              
               items: kebunOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
