@@ -491,9 +491,9 @@ class _QAGradingPageState extends State<QAGradingPage> {
                 children: _samples.map((sample) => ListTile(
                       title: Text("TPH: ${sample['TPH']}"),
                       subtitle: Text(
-                        "Total Buah Matang: ${sample['Total Buah Matang']}\n"
-                        "Total Buah Mentah: ${sample['Total Buah Mentah']}\n"
-                        "Matang <3kg: ${sample['Buah Matang <3kg']}, Mentah <3kg: ${sample['Buah Mentah <3kg']}"
+                        "Total Buah Matang: ${sample['totalBuahMatang']}\n"
+                        "Total Buah Mentah: ${sample['totalBuahMentah']}\n"
+                        "Matang <3kg: ${sample['buahMatangKecil']}, Mentah <3kg: ${sample['buahMentahKecil']}"
                       ),
                     )).toList(),
               ),
