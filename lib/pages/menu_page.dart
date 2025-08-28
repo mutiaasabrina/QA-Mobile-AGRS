@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import 'qa_produksi.dart';
 import 'qa_perawatan.dart';
+import 'qa_grading.dart';
 import 'qa_tracker_page.dart';
 import 'qa_chemist_menu_page.dart';
 import 'package:qa_agronomy/database/qa_database_chemist.dart';
@@ -99,6 +100,19 @@ class _MenuPageState extends State<MenuPage> {
             child: const Text("QA Chemist"),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const QAChemistMenuPage()));
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+            ),
+            child: const Text("QA Grading"),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const QAGradingPage()));
             },
           ),
           const SizedBox(height: 16),
