@@ -125,7 +125,7 @@ class _QAGradingPageState extends State<QAGradingPage> {
 
     final now = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
     final watermarkText = StringBuffer()
-      ..writeln("QA Produksi")
+      ..writeln("QA Grading")
       ..writeln("Estate: ${selectedKebun ?? ''}")
       ..writeln("Divisi: ${selectedDivisi ?? ''}")
       ..writeln("Blok: ${selectedBlok ?? ''}")
@@ -159,7 +159,7 @@ class _QAGradingPageState extends State<QAGradingPage> {
 
     final dir = Directory('/storage/emulated/0/DCIM/QA_Agronomy');
     if (!await dir.exists()) await dir.create(recursive: true);
-    final filename = 'foto_QA_Produksi_${DateTime.now().millisecondsSinceEpoch}.png';
+    final filename = 'foto_QA_Grading_${DateTime.now().millisecondsSinceEpoch}.png';
     await File('${dir.path}/$filename').writeAsBytes(img.encodePng(original));
 
     ScaffoldMessenger.of(context).showSnackBar(

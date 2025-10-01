@@ -26,6 +26,10 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
   final _alatTaburTidakSeragamController = TextEditingController();
   final _komentarController = TextEditingController();
 
+  final TextEditingController _titikPocketController =
+    TextEditingController(text: "4"); // default 4 titik pocket
+
+
   List<TextEditingController> _dosisSampleControllers =[];
   String dosisUjiPetikResult ="";
 
@@ -363,13 +367,16 @@ class _QAPemupukanPageState extends State<QAPemupukanPage> {
 );
 } 
   final TextEditingController _hasilUjiPetikController = TextEditingController();
+
   
 void _calculateDosisUjiPetik() {
   if (_dosisController.text.isEmpty || _hasilUjiPetikController.text.isEmpty) return;
 
   final double dosisPerPokokKg = double.tryParse(_dosisController.text) ?? 0;
   final double dosisPerPokokGram = dosisPerPokokKg * 1000;
-  final double targetPerTitik = dosisPerPokokGram / 4;
+  final int titikPocket = int.tryParse(_titikPocketController.text) ?? 4;
+  final double targetPerTitik = dosisPerPokokGram / titikPocket;
+
 
   final double hasilUji = double.tryParse(_hasilUjiPetikController.text) ?? 0;
   final double toleransi = targetPerTitik * 0.05;
@@ -432,6 +439,13 @@ void _calculateDosisUjiPetik() {
               items: jenisPupukOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             TextField(controller: _dosisController, decoration: const InputDecoration(labelText: "Dosis/Pokok"), enabled: !_isLocked),
+            TextField(
+                controller: _titikPocketController,
+                decoration: const InputDecoration(labelText: "Jumlah Titik Pocket"),
+                keyboardType: TextInputType.number,
+                onChanged: (_) => _calculateDosisUjiPetik(),
+              ),
+              const SizedBox(height: 16),            
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "APD Pekerja"),
               value: selectedAPD,
