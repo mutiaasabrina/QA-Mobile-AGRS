@@ -30,7 +30,7 @@ class _MutuAncakChemistPageState extends State<MutuAncakChemistPage> {
 
   void _showDetailDialog(Map<String, dynamic> qa) {
     final DateTime tanggalPeriksa = DateFormat('yyyy-MM-dd').parse(qa["tanggal"]);
-    if (tanggalPeriksa.difference(DateTime.now()).inDays < 14) 
+    if (DateTime.now().difference(tanggalPeriksa).inDays < 14)
     {
       showDialog(
         context: context,
