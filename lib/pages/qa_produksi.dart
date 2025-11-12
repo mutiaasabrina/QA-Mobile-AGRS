@@ -28,6 +28,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   int pokokCounter = 1;
   bool _dipanen = false;
   bool _cekTPH = false;
+  bool _blokSelesai = false;
   final _buahDipanenController = TextEditingController();
   final _buahMatangTidakDipanenController = TextEditingController();
   final _buahBusukTidakDipanenController = TextEditingController();
@@ -72,6 +73,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
 
   int _pokokCounter = 1; // Counter otomatis untuk pokok
   int _tphCounter = 0; // Counter TPH
+
+  Map<String, dynamic>? _lastSavedSummary;
 
 
   List<String> wrapText(String text, int maxCharsPerLine) {
@@ -232,6 +235,9 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       dropdownSelections.clear();
       _cekTPH = false;;
     });
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Pokok sample ditambahkan. Belum disimpan ke database.")),
+  );
   }
 
   void _clearPokokForm() {
@@ -247,110 +253,202 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   }
 
   void _saveAll() async {
-    if (_samples.isEmpty ||
-        selectedKebun == null ||
-        selectedDivisi == null ||
-        selectedBlok == null ||
-        _namaPetugasController.text.isEmpty ||
-        _rotasiController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
-      return;
-    }
-    
-    dropdownCounters.clear();
-
-    for (var s in _samples) {
-      final drop = s['dropdowns'] as Map<String, String?>?;
-      drop?.forEach((key, val) {
-        if (val != null) {
-          dropdownCounters.update('$key: $val', (v) => v + 1, ifAbsent: () => 1);
-        }
-      });
-    }
-
-    int totalDipanen = _samples.where((s) => s['dipanen'] == true).length;
-    int totalBuahDipanen = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahDipanen'] ?? '0') ?? 0; return sum + value;});
-    int totalBuahMatangTidakDipanen = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahMatangTidakDipanen'] ?? '0') ?? 0; return sum + value;});
-    int totalBuahBusukTidakDipanen = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahBusukTidakDipanen'] ?? '0') ?? 0; return sum + value;});
-    int totalLfTinggal = _samples.fold(0, (sum, s) {int value = int.tryParse(s['lfTinggal'] ?? '0') ?? 0; return sum + value;});
-    int totalTphTinggal = _samples.fold(0, (sum, s) {int value = int.tryParse(s['tphTinggal'] ?? '0') ?? 0; return sum + value;});
-    int totalBuahTinggal = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahTinggal'] ?? '0') ?? 0; return sum + value;});
-    int totalBuahTinggalTPH = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahTinggalTPH'] ?? '0') ?? 0; return sum + value;});
-
-    StringBuffer result = StringBuffer();
-    result.writeln("Tanggal Periksa: $_tanggalPeriksa");
-    result.writeln("Nama Petugas: ${_namaPetugasController.text}");
-    result.writeln("Kebun: $selectedKebun");
-    result.writeln("Divisi: $selectedDivisi");
-    result.writeln("Kode Blok: $selectedBlok");
-    result.writeln("Rotasi: ${_rotasiController.text} hari\n");
-    result.writeln("Jumlah Pokok Sample: ${_samples.length}");
-    result.writeln("Pkk dipanen: $totalDipanen");
-    result.writeln("Buah di Panen: $totalBuahDipanen Jjg");
-    result.writeln("Buah Matang Tdk di Panen: $totalBuahMatangTidakDipanen Jjg");
-    result.writeln("Buah Busuk Tdk di Panen: $totalBuahBusukTidakDipanen Jjg");
-    result.writeln("LF Tinggal (Pr): $totalLfTinggal");
-    result.writeln("Buah Tinggal (Pr,PP,Pk,Lp): $totalBuahTinggal");
-    result.writeln("LF Tinggal (TPH): $totalTphTinggal"); 
-    result.writeln("Buah Tinggal TPH: $totalBuahTinggalTPH");
-    
-    // Hitung semua kolom dropdown
-    Map<String, dynamic> dropdownCounts = {};
-    dropdownCounters.forEach((key, value){
-      dropdownCounts[key.replaceAll(': ', '_')] = value;
-    });
-
-    // Gabung data jadi satu Map
-    final qaData = {
-      'tanggal': _tanggalPeriksa,
-      'nama_petugas': _namaPetugasController.text,
-      'kebun': selectedKebun,
-      'divisi': selectedDivisi,
-      'blok': selectedBlok,
-      'rotasi': int.tryParse(_rotasiController.text) ?? 0,
-      'jumlah_pokok': _samples.length,
-      'pkk_dipanen': totalDipanen,
-      'buah_dipanen': totalBuahDipanen,
-      'buah_matang_tidak_dipanen': totalBuahMatangTidakDipanen,
-      'buah_busuk_tidak_dipanen': totalBuahBusukTidakDipanen,
-      'lf_tinggal': totalLfTinggal,
-      'buah_tinggal': totalBuahTinggal,
-      'lf_tinggal_tph': totalTphTinggal,
-      'buah_tinggal_tph': totalBuahTinggalTPH,
-      'tph_counter': _tphCounter,
-      'is_synced': 0,
-      'timestamp_sync': null,
-    };
-
-     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Data Overview"),
-        content: SingleChildScrollView(child: Text(result.toString())),
-        actions: [
-          TextButton(
-            onPressed: () async {
-
-              await QADatabase.instance.insertQA(qaData);
-
-              setState(() {
-                _samples.clear();
-                _pokokCounter = 1;
-                dropdownSelections.clear();
-              });
-
-              Navigator.of(context).popUntil((route) => route.isFirst);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const MenuPage()));
-            },
-            child: const Text("OK"),
-          ),
-        ],
-      ),
+  if (_samples.isEmpty ||
+      selectedKebun == null ||
+      selectedDivisi == null ||
+      selectedBlok == null ||
+      _namaPetugasController.text.isEmpty ||
+      _rotasiController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Lengkapi semua data sebelum menyimpan.")),
     );
+    return;
   }
+
+  dropdownCounters.clear();
+
+  for (var s in _samples) {
+    final drop = s['dropdowns'] as Map<String, String?>?;
+    drop?.forEach((key, val) {
+      if (val != null) {
+        dropdownCounters.update('$key: $val', (v) => v + 1, ifAbsent: () => 1);
+      }
+    });
+  }
+
+  int totalDipanen = _samples.where((s) => s['dipanen'] == true).length;
+  int totalBuahDipanen = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahDipanen'] ?? '0') ?? 0));
+  int totalBuahMatangTidakDipanen = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahMatangTidakDipanen'] ?? '0') ?? 0));
+  int totalBuahBusukTidakDipanen = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahBusukTidakDipanen'] ?? '0') ?? 0));
+  int totalLfTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['lfTinggal'] ?? '0') ?? 0));
+  int totalTphTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['tphTinggal'] ?? '0') ?? 0));
+  int totalBuahTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahTinggal'] ?? '0') ?? 0));
+  int totalBuahTinggalTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahTinggalTPH'] ?? '0') ?? 0));
+
+  // Gabung data untuk database
+  final qaData = {
+    'tanggal': _tanggalPeriksa,
+    'nama_petugas': _namaPetugasController.text,
+    'kebun': selectedKebun,
+    'divisi': selectedDivisi,
+    'blok': selectedBlok,
+    'rotasi': int.tryParse(_rotasiController.text) ?? 0,
+    'jumlah_pokok': _samples.length,
+    'pkk_dipanen': totalDipanen,
+    'buah_dipanen': totalBuahDipanen,
+    'buah_matang_tidak_dipanen': totalBuahMatangTidakDipanen,
+    'buah_busuk_tidak_dipanen': totalBuahBusukTidakDipanen,
+    'lf_tinggal': totalLfTinggal,
+    'buah_tinggal': totalBuahTinggal,
+    'lf_tinggal_tph': totalTphTinggal,
+    'buah_tinggal_tph': totalBuahTinggalTPH,
+    'tph_counter': _tphCounter,
+    'is_synced': 0,
+    'timestamp_sync': null,
+  };
+
+  await QADatabase.instance.insertQA(qaData);
+
+  _lastSavedSummary = {
+  "jumlah_pokok": _samples.length,
+  "pkk_dipanen": totalDipanen,
+  "buah_dipanen": totalBuahDipanen,
+  "buah_matang_tidak_dipanen": totalBuahMatangTidakDipanen,
+  "buah_busuk_tidak_dipanen": totalBuahBusukTidakDipanen,
+  "lf_tinggal": totalLfTinggal,
+  "buah_tinggal": totalBuahTinggal,
+  "lf_tinggal_tph": totalTphTinggal,
+  "buah_tinggal_tph": totalBuahTinggalTPH,
+  "tph_counter": _tphCounter,
+};
+
+
+  setState(() {
+    _samples.clear(); // kosongkan list sementara
+    _blokSelesai = false; 
+  });
+}
+
+void _selesaiBlok() async {
+  if (_samples.isNotEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Masih ada sample yang belum di-save. Tekan 'Save All' dulu.")),
+    );
+    return;
+  }
+
+  // 🔍 Ambil semua data QA dari database untuk blok ini
+  final allData = await QADatabase.instance.getAllQA();
+  final blokData = allData.where((d) =>
+      d['blok'] == selectedBlok &&
+      d['kebun'] == selectedKebun &&
+      d['divisi'] == selectedDivisi &&
+      d['tanggal'] == _tanggalPeriksa).toList();
+
+  if (blokData.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Belum ada data tersimpan untuk blok ini.")),
+    );
+    return;
+  }
+
+  // 🧮 Hitung total semua nilai dari blok tersebut
+  int totalPokok = 0;
+  int totalPkkDipanen = 0;
+  int totalBuahDipanen = 0;
+  int totalBuahMatangTidakDipanen = 0;
+  int totalBuahBusukTidakDipanen = 0;
+  int totalLfTinggal = 0;
+  int totalBuahTinggal = 0;
+  int totalLfTinggalTPH = 0;
+  int totalBuahTinggalTPH = 0;
+  int totalTPHCounter = 0;
+
+for (var item in blokData) {
+  totalPokok += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0;
+  totalPkkDipanen += int.tryParse(item['pkk_dipanen']?.toString() ?? '0') ?? 0;
+  totalBuahDipanen += int.tryParse(item['buah_dipanen']?.toString() ?? '0') ?? 0;
+  totalBuahMatangTidakDipanen += int.tryParse(item['buah_matang_tidak_dipanen']?.toString() ?? '0') ?? 0;
+  totalBuahBusukTidakDipanen += int.tryParse(item['buah_busuk_tidak_dipanen']?.toString() ?? '0') ?? 0;
+  totalLfTinggal += int.tryParse(item['lf_tinggal']?.toString() ?? '0') ?? 0;
+  totalBuahTinggal += int.tryParse(item['buah_tinggal']?.toString() ?? '0') ?? 0;
+  totalLfTinggalTPH += int.tryParse(item['lf_tinggal_tph']?.toString() ?? '0') ?? 0;
+  totalBuahTinggalTPH += int.tryParse(item['buah_tinggal_tph']?.toString() ?? '0') ?? 0;
+  totalTPHCounter += int.tryParse(item['tph_counter']?.toString() ?? '0') ?? 0;
+}
+
+
+  // 🧾 Buat ringkasan hasil total
+  StringBuffer result = StringBuffer();
+  result.writeln("Tanggal Periksa: $_tanggalPeriksa");
+  result.writeln("Nama Petugas: ${_namaPetugasController.text}");
+  result.writeln("Kebun: $selectedKebun");
+  result.writeln("Divisi: $selectedDivisi");
+  result.writeln("Kode Blok: $selectedBlok");
+  result.writeln("Rotasi: ${_rotasiController.text} hari\n");
+
+  result.writeln("=== Ringkasan Total Blok ===");
+  result.writeln("Jumlah Pokok Diperiksa: $totalPokok");
+  result.writeln("Pokok Dipanen: $totalPkkDipanen");
+  result.writeln("Buah Dipanen: $totalBuahDipanen");
+  result.writeln("Buah Matang Tidak Dipanen: $totalBuahMatangTidakDipanen");
+  result.writeln("Buah Busuk Tidak Dipanen: $totalBuahBusukTidakDipanen");
+  result.writeln("LF Tinggal: $totalLfTinggal");
+  result.writeln("Buah Tinggal: $totalBuahTinggal");
+  result.writeln("LF Tinggal di TPH: $totalLfTinggalTPH");
+  result.writeln("Buah Tinggal di TPH: $totalBuahTinggalTPH");
+  result.writeln("Jumlah TPH Dicek: $totalTPHCounter\n");
+
+  result.writeln("Data dari blok ini sudah tersimpan di database.\nApakah ingin menutup blok dan kembali ke menu utama?");
+
+  // 🪟 Tampilkan dialog
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Data Overview"),
+      content: SingleChildScrollView(child: Text(result.toString())),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Batal"),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Data pemeriksaan untuk blok $selectedBlok sudah tercatat.")),
+            );
+
+            // Reset form dan balik ke menu
+            setState(() {
+              _blokSelesai = true;
+              _namaPetugasController.clear();
+              _rotasiController.clear();
+              selectedKebun = null;
+              selectedDivisi = null;
+              selectedBlok = null;
+              dropdownSelections.clear();
+              dropdownCounters.clear();
+              _pokokCounter = 1;
+              _tphCounter = 0;
+            });
+
+            Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MenuPage()),
+              );
+          },
+          child: const Text("OK"),
+        ),
+      ],
+    ),
+  );
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +458,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
           // kalau user sudah berhasil keluar (jarang terjadi krn canPop:false)
           if (didPop) return;
 
-          if (_samples.isNotEmpty) {
+          if (_samples.isNotEmpty || !_blokSelesai) {
             final shouldLeave = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
@@ -515,8 +613,28 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
               onPressed: _saveAll,
               child: const Text("Save All"),
             ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: _selesaiBlok,
+              child: const Text("Selesai"),
+            ),
+            const SizedBox(height: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Save Pokok Sample = Simpan 1 sample", style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 58, 58, 58))),
+                Text("Save All = Simpan 1 pasar", style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 58, 58, 58))),
+                Text("Selesai = Tutup blok", style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 58, 58, 58))),
+              ],
+            ),
+
           ],
         ),
+        
       ),
     ));
   }
