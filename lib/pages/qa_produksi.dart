@@ -354,11 +354,45 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("QA Produksi")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: Column(
+        return PopScope(
+        canPop: false, // kita kendalikan aksi "back"
+        onPopInvokedWithResult: (didPop, result) async {
+          // kalau user sudah berhasil keluar (jarang terjadi krn canPop:false)
+          if (didPop) return;
+
+          if (_samples.isNotEmpty) {
+            final shouldLeave = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text("Peringatan"),
+                content: const Text(
+                  "Data belum disimpan. Apakah yakin ingin keluar tanpa menyimpan?",
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text("Batal"),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text("Ya, keluar"),
+                  ),
+                ],
+              ),
+            );
+
+            if (shouldLeave == true && context.mounted) {
+              Navigator.of(context).pop(result); // keluar halaman
+            }
+          } else {
+            Navigator.of(context).pop(result); // langsung keluar kalau gak ada data
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(title: const Text("QA Produksi")),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(12),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Tanggal Periksa: $_tanggalPeriksa", style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -484,6 +518,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
           ],
         ),
       ),
-    );
+    ));
   }
 }
