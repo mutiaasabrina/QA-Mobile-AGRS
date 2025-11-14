@@ -20,6 +20,10 @@ class QADatabasePerawatan {
     final path = join(documentsDirectory.path, fileName);
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
+  Future<List<Map<String, dynamic>>> getDataByBlok(String blok) async {
+  final db = await instance.database;
+  return await db.query('qa_perawatan', where: 'blok = ?', whereArgs: [blok]);
+}
 
  Future _createDB(Database db, int version) async {
   await db.execute('''

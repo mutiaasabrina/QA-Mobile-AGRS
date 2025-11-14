@@ -25,6 +25,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
   final _barisController = TextEditingController();
   int pokokCounter = 1;
   bool _dipanen = false;
+  bool _blokSelesai = false;
   final _buahDipanenController = TextEditingController();
   final _buahMatangTidakDipanenController = TextEditingController();
   final _buahBusukTidakDipanenController = TextEditingController();
@@ -501,9 +502,121 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
     );
   }
 
+  void _selesaiBlok() async {
+    if (_samples.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Masih ada sample yang belum di-save. Tekan 'Save All' dulu.")),
+      );
+      return;
+    }
+
+    final dataBlok = await QADatabasePerawatan.instance.getDataByBlok(selectedBlok ?? "");
+    if (dataBlok.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Belum ada data tersimpan untuk blok ini.")),
+      );
+      return;
+    }
+
+    // Hitung total dari semua pasar
+    int totalPokok = 0;
+    Map<String, int> counter = {};
+
+    for (var d in dataBlok) {
+      totalPokok += int.tryParse(d['jumlah_pokok'].toString()) ?? 0;
+      d.forEach((key, value) {
+        if (value is int && !['id', 'jumlah_pokok'].contains(key)) {
+          counter.update(key, (v) => v + value, ifAbsent: () => value);
+        }
+      });
+    }
+
+    // Buat ringkasan
+    StringBuffer result = StringBuffer();
+    result.writeln("Tanggal Periksa: $_tanggalPeriksa");
+    result.writeln("Nama Petugas: ${_namaPetugasController.text}");
+    result.writeln("Kebun: $selectedKebun");
+    result.writeln("Divisi: $selectedDivisi");
+    result.writeln("Kode Blok: $selectedBlok");
+    result.writeln("Jumlah Pokok: $totalPokok");
+    result.writeln("\n=== Ringkasan Perawatan ===");
+    counter.forEach((key, value) => result.writeln("$key: $value"));
+    _blokSelesai = true;
+
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Rekap Data Blok"),
+        content: SingleChildScrollView(child: Text(result.toString())),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Data blok $selectedBlok selesai disimpan.")),
+              );
+              setState(() {
+                _samples.clear();
+                _namaPetugasController.clear();
+                selectedKebun = null;
+                selectedDivisi = null;
+                selectedBlok = null;
+                dropdownSelections.clear();
+                dropdownCounters.clear();
+                _pokokCounter = 1;
+              });
+              Navigator.of(context).popUntil((r) => r.isFirst);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const MenuPage()));
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+   return PopScope(
+    canPop: false, // cegah langsung keluar
+    onPopInvokedWithResult: (didPop, result) async {
+      if (didPop) return;
+
+      // Kalau masih ada data sample atau blok belum selesai
+      if (_samples.isNotEmpty || !_blokSelesai) {
+        final shouldLeave = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Peringatan"),
+            content: const Text(
+              "Data belum disimpan. Apakah yakin ingin keluar tanpa menyimpan?",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text("Batal"),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text("Ya, keluar"),
+              ),
+            ],
+          ),
+        );
+
+        if (shouldLeave == true && context.mounted) {
+          Navigator.of(context).pop(result);
+        }
+      } else {
+        Navigator.of(context).pop(result);
+      }
+    },
+    child: Scaffold(
       appBar: AppBar(title: const Text("QA Perawatan")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
@@ -612,9 +725,28 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
               onPressed: _saveAll,
               child: const Text("Save All"),
             ),
+             const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: _selesaiBlok,
+              child: const Text("Selesai"),
+            ),
+            const SizedBox(height: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Save Pokok Sample = Simpan 1 sample", style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 58, 58, 58))),
+                Text("Save All = Simpan 1 pasar", style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 58, 58, 58))),
+                Text("Selesai = Tutup blok", style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 58, 58, 58))),
+              ],
+            ),
+
           ],
         ),
       ),
-    );
+    ));
   }
 }
