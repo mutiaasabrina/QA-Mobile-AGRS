@@ -468,10 +468,7 @@ for (var item in _qaDatas) {
             }
 
             Navigator.of(context).popUntil((route) => route.isFirst);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MenuPage()),
-              );
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()),);
           },
           child: const Text("OK"),
         ),

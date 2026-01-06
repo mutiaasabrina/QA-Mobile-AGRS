@@ -45,6 +45,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
 
   final Map<String, String?> dropdownSelections = {};
   final Map<String, int> dropdownCounters = {};
+  List<Map<String, Object?>> _qaDatas = [];
 
  final List<String> kondisiTPHOptions = [
     "Baik", 
@@ -318,6 +319,107 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data.")));
       return;
     }
+
+    dropdownCounters.clear();
+
+    for (var s in _samples) {
+      final drop = s['dropdowns'] as Map<String, String?>?;
+      drop?.forEach((key, val) {
+        if (val != null && val.isNotEmpty && val.contains(',')) {
+          final options = val.split(',');
+          for (var option in options) {
+            dropdownCounters.update('$key: $option', (v) => v + 1, ifAbsent: () => 1);
+          }
+        }
+        else if (val != null && val.isNotEmpty) {
+          dropdownCounters.update('$key: $val', (v) => v + 1, ifAbsent: () => 1);
+        }
+      });
+    }
+    
+    // Gabung data jadi satu Map
+    final qaData = {
+      'tanggal': _tanggalPeriksa,
+      'nama_petugas': _namaPetugasController.text,
+      'kebun': selectedKebun,
+      'divisi': selectedDivisi,
+      'blok': selectedBlok,
+      'jumlah_pokok': _samples.length,
+      'is_synced': 0,
+      'timestamp_sync': null,
+
+      // Ini bagian dropdown counter
+      'kondisi_circle_baik': dropdownCounters['Kondisi Circle: Baik'] ?? 0,
+      'kondisi_circle_semak': dropdownCounters['Kondisi Circle: Semak'] ?? 0,
+      'kondisi_circle_dominan_anak_sawit': dropdownCounters['Kondisi Circle: Dominan Anak Sawit'] ?? 0,
+      'kondisi_circle_dominan_sampah': dropdownCounters['Kondisi Circle: Dominan Sampah (Berondolan Busuk)'] ?? 0,
+      'kondisi_path_baik': dropdownCounters['Kondisi Path: Baik'] ?? 0,
+      'kondisi_path_tidak_baik': dropdownCounters['Kondisi Path: Tidak Baik'] ?? 0,
+      'lalang_ada': dropdownCounters['Lalang: Ada'] ?? 0,
+      'lalang_tidak_ada': dropdownCounters['Lalang: Tidak Ada'] ?? 0,
+      'anak_kayu_ada': dropdownCounters['Anak Kayu: Ada'] ?? 0,
+      'anak_kayu_tidak_ada': dropdownCounters['Anak Kayu: Tidak Ada'] ?? 0,
+      'perumpung_ada': dropdownCounters['Perumpung: Ada'] ?? 0,
+      'perumpung_tidak_ada': dropdownCounters['Perumpung: Tidak Ada'] ?? 0,
+      'purun_tikus_ada': dropdownCounters['Purun Tikus: Ada'] ?? 0,
+      'purun_tikus_tidak_ada': dropdownCounters['Purun Tikus: Tidak Ada'] ?? 0,
+      'pakis_udang_ada': dropdownCounters['Pakis Udang: Ada'] ?? 0,
+      'pakis_udang_tidak_ada': dropdownCounters['Pakis Udang: Tidak Ada'] ?? 0,
+      'pruning_baik': dropdownCounters['Pruning: Baik'] ?? 0,
+      'pruning_over': dropdownCounters['Pruning: Over'] ?? 0,
+      'pruning_sengkleh': dropdownCounters['Pruning: Sengkleh'] ?? 0,
+      'pruning_under': dropdownCounters['Pruning: Under'] ?? 0,
+      'susunan_pelepah_rapi': dropdownCounters['Susunan Pelepah: Rapi'] ?? 0,
+      'susunan_pelepah_tidak_rapi': dropdownCounters['Susunan Pelepah: Tidak Rapi'] ?? 0,
+      'serangan_tikus_ada': dropdownCounters['Serangan Tikus: Ada'] ?? 0,
+      'serangan_tikus_tidak_ada': dropdownCounters['Serangan Tikus: Tidak Ada'] ?? 0,
+      'serangan_rayap_ada': dropdownCounters['Serangan Rayap: Ada'] ?? 0,
+      'serangan_rayap_tidak_ada': dropdownCounters['Serangan Rayap: Tidak Ada'] ?? 0,
+      'thirathaba_ada': dropdownCounters['Thirathaba: Ada'] ?? 0,
+      'thirathaba_tidak_ada': dropdownCounters['Thirathaba: Tidak Ada'] ?? 0,
+      'updpks_ada': dropdownCounters['UPDPKS: Ada'] ?? 0,
+      'updpks_tidak_ada': dropdownCounters['UPDPKS: Tidak Ada'] ?? 0,
+    };
+    
+  _qaDatas.add(qaData);
+
+  setState(() {
+    _samples.clear(); // kosongkan list sementara
+    _blokSelesai = false; 
+  });
+  }
+
+  void _selesaiBlok() async {
+    if (_samples.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Masih ada sample yang belum di-save. Tekan 'Save All' dulu.")),
+      );
+      return;
+    }
+
+    if (_qaDatas.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Belum ada data tersimpan untuk blok ini.")),
+      );
+      return;
+    }
+
+    Map<String, Set<String>> dropdownOptions = {
+      "Kondisi Circle": {"Baik", "Semak", "Dominan Anak Sawit", "Dominan Sampah (Berondolan Busuk)"},
+      "Kondisi Path": {"Baik", "Tidak Baik"},
+      "Lalang": {"Ada", "Tidak Ada"},
+      "Anak Kayu": {"Ada", "Tidak Ada"},
+      "Perumpung": {"Ada", "Tidak Ada"},
+      "Purun Tikus": {"Ada", "Tidak Ada"},
+      "Pakis Udang": {"Ada", "Tidak Ada"},
+      "Pruning": {"Baik", "Over", "Sengkleh", "Under"},
+      "Susunan Pelepah": {"Rapi", "Tidak Rapi"},
+      "Serangan Tikus": {"Ada", "Tidak Ada"},
+      "Serangan Rayap": {"Ada", "Tidak Ada"},
+      "Thirathaba": {"Ada", "Tidak Ada"},
+      "UPDPKS": {"Ada", "Tidak Ada"},
+    };
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -371,65 +473,84 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
       ),
     );
 
-    dropdownCounters.clear();
-    Map<String, Set<String>> dropdownOptions = {
-      "Kondisi Circle": {"Baik", "Semak", "Dominan Anak Sawit", "Dominan Sampah (Berondolan Busuk)"},
-      "Kondisi Path": {"Baik", "Tidak Baik"},
-      "Kondisi TPH": {"Baik", "Tidak Baik"},
-      "Lalang": {"Ada", "Tidak Ada"},
-      "Anak Kayu": {"Ada", "Tidak Ada"},
-      "Perumpung": {"Ada", "Tidak Ada"},
-      "Purun Tikus": {"Ada", "Tidak Ada"},
-      "Pakis Udang": {"Ada", "Tidak Ada"},
-      "Titi Panen": {"Rasio Standar, Permanen, Kondisi Baik", "Rasio Standar, Semi Permanen, Kondisi Baik", "Rasio Kurang Standar, Semi Permanen, Kondisi Baik", "Rasio Kurang Standar, Permanen, Kondisi Rusak", "Tidak Ada Sama Sekali"},
-      "Jalan dan Jembatan": {"Jalan Rata (Tidak Lubang/Rel), Jembatan Permanen", "Jalan Kondisi Sedang, Jembatan Permanen", "Jalan Rusak Sebagian, Jembatan Rusak Sebagian", "Jalanan Dominan Rusak, Jembatan Rusak", "Jalan Rusak Parah, Jembatan Rusak Parah"},
-      "Pruning": {"Baik", "Over", "Sengkleh", "Under"},
-      "Susunan Pelepah": {"Rapi", "Tidak Rapi"},
-      "Serangan Tikus": {"Ada", "Tidak Ada"},
-      "Serangan Rayap": {"Ada", "Tidak Ada"},
-      "Thirathaba": {"Ada", "Tidak Ada"},
-      "UPDPKS": {"Ada", "Tidak Ada"},
-    };
+    // Hitung total dari semua pasar
+    int totalPokok = 0;
+    Map<String, int> counter = {};
 
-    for (var s in _samples) {
-      final drop = s['dropdowns'] as Map<String, String?>?;
-      drop?.forEach((key, val) {
-        if (val != null && val.isNotEmpty && val.contains(',')) {
-          final options = val.split(',');
-          for (var option in options) {
-            dropdownCounters.update('$key: $option', (v) => v + 1, ifAbsent: () => 1);
-          }
-        }
-        else if (val != null && val.isNotEmpty) {
-          dropdownCounters.update('$key: $val', (v) => v + 1, ifAbsent: () => 1);
+    for (var d in _qaDatas) {
+      totalPokok += int.tryParse(d['jumlah_pokok'].toString()) ?? 0;
+      d.forEach((key, value) {
+        if (value is int && !['id', 'jumlah_pokok'].contains(key)) {
+          counter.update(key, (v) => v + value, ifAbsent: () => value);
         }
       });
     }
 
-    StringBuffer result = StringBuffer();
-    result.writeln("Tanggal Periksa: $_tanggalPeriksa");
-    result.writeln("Nama Petugas: ${_namaPetugasController.text}");
-    result.writeln("Kebun: $selectedKebun");
-    result.writeln("Divisi: $selectedDivisi");
-    result.writeln("Kode Blok: $selectedBlok");
-    result.writeln("Jumlah Pokok Sample: ${_samples.length}");
-    result.writeln("== Ringkasan Kondisi ==");
-    result.writeln("Kondisi TPH: $selectedKondisiTPH");
-    result.writeln("Titi Panen: $selectedTitiPanen");
-    result.writeln("Jalan & Jembatan: $selectedJalanJembatan");
-    result.writeln("Beneficial Plant: $selectedBeneficialPlant");
-    result.writeln("Peilscale: $selectedPeilscale");
-
-    dropdownOptions.forEach((label, options) {
-      result.writeln("$label:");
-      for (var opt in options) {
-        final key = "$label: $opt";
-        final count = dropdownCounters[key] ?? 0;
-        result.writeln("  - $opt: $count");
-      }
-    });
+  // 🧮 Hitung total semua nilai dari blok tersebut
+  int kondisiCircleBaik = 0;
+  int kondisiCircleSemak = 0;
+  int kondisiCircleDominanAnakSawit = 0;
+  int kondisiCircleDominanSampah = 0;
+  int kondisiPathBaik = 0;
+  int kondisiPathTidakBaik = 0;
+  int lalangAda = 0;
+  int lalangTidakAda = 0;
+  int anakKayuAda = 0;
+  int anakKayuTidakAda = 0;
+  int perumpungAda = 0;
+  int perumpungTidakAda = 0;
+  int purunTikusAda = 0;
+  int purunTikusTidakAda = 0;
+  int pakisUdangAda = 0;
+  int pakisUdangTidakAda = 0;
+  int pruningBaik = 0;
+  int pruningOver = 0;
+  int pruningSengkleh = 0;
+  int pruningUnder = 0;
+  int susunanPelepahRapi = 0;
+  int susunanPelepahTidakRapi = 0;
+  int seranganTikusAda = 0;
+  int seranganTikusTidakAda = 0;
+  int seranganRayapAda = 0;
+  int seranganRayapTidakAda = 0;
+  int thirathabaAda = 0;
+  int thirathabaTidakAda = 0;
+  int updpksAda = 0;
+  int updpksTidakAda = 0;
     
-    // Gabung data jadi satu Map
+  for (var item in _qaDatas) {
+    kondisiCircleBaik += int.tryParse(item['kondisi_circle_baik']?.toString() ?? '0') ?? 0;
+    kondisiCircleSemak += int.tryParse(item['kondisi_circle_semak']?.toString() ?? '0') ?? 0;
+    kondisiCircleDominanAnakSawit += int.tryParse(item['kondisi_circle_dominan_anak_sawit']?.toString() ?? '0') ?? 0;
+    kondisiCircleDominanSampah += int.tryParse(item['kondisi_circle_dominan_sampah']?.toString() ?? '0') ?? 0;
+    kondisiPathBaik += int.tryParse(item['kondisi_path_baik']?.toString() ?? '0') ?? 0;
+    kondisiPathTidakBaik += int.tryParse(item['kondisi_path_tidak_baik']?.toString() ?? '0') ?? 0;
+    lalangAda += int.tryParse(item['lalang_ada']?.toString() ?? '0') ?? 0;
+    lalangTidakAda += int.tryParse(item['lalang_tidak_ada']?.toString() ?? '0') ?? 0;
+    anakKayuAda += int.tryParse(item['anak_kayu_ada']?.toString() ?? '0') ?? 0;
+    anakKayuTidakAda += int.tryParse(item['anak_kayu_tidak_ada']?.toString() ?? '0') ?? 0;
+    perumpungAda += int.tryParse(item['perumpung_ada']?.toString() ?? '0') ?? 0;
+    perumpungTidakAda += int.tryParse(item['perumpung_tidak_ada']?.toString() ?? '0') ?? 0;
+    purunTikusAda += int.tryParse(item['purun_tikus_ada']?.toString() ?? '0') ?? 0;
+    purunTikusTidakAda += int.tryParse(item['purun_tikus_tidak_ada']?.toString() ?? '0') ?? 0;
+    pakisUdangAda += int.tryParse(item['pakis_udang_ada']?.toString() ?? '0') ?? 0;
+    pakisUdangTidakAda += int.tryParse(item['pakis_udang_tidak_ada']?.toString() ?? '0') ?? 0;
+    pruningBaik += int.tryParse(item['pruning_baik']?.toString() ?? '0') ?? 0;
+    pruningOver += int.tryParse(item['pruning_over']?.toString() ?? '0') ?? 0;
+    pruningSengkleh += int.tryParse(item['pruning_sengkleh']?.toString() ?? '0') ?? 0;
+    pruningUnder += int.tryParse(item['pruning_under']?.toString() ?? '0') ?? 0;
+    susunanPelepahRapi += int.tryParse(item['susunan_pelepah_rapi']?.toString() ?? '0') ?? 0;
+    susunanPelepahTidakRapi += int.tryParse(item['susunan_pelepah_tidak_rapi']?.toString() ?? '0') ?? 0;
+    seranganTikusAda += int.tryParse(item['serangan_tikus_ada']?.toString() ?? '0') ?? 0;
+    seranganTikusTidakAda += int.tryParse(item['serangan_tikus_tidak_ada']?.toString() ?? '0') ?? 0;
+    seranganRayapAda += int.tryParse(item['serangan_rayap_ada']?.toString() ?? '0') ?? 0;
+    seranganRayapTidakAda += int.tryParse(item['serangan_rayap_tidak_ada']?.toString() ?? '0') ?? 0;
+    thirathabaAda += int.tryParse(item['thirathaba_ada']?.toString() ?? '0') ?? 0;
+    thirathabaTidakAda += int.tryParse(item['thirathaba_tidak_ada']?.toString() ?? '0') ?? 0;
+    updpksAda += int.tryParse(item['updpks_ada']?.toString() ?? '0') ?? 0;
+    updpksTidakAda += int.tryParse(item['updpks_tidak_ada']?.toString() ?? '0') ?? 0;
+  }
+
     final qaData = {
       'tanggal': _tanggalPeriksa,
       'nama_petugas': _namaPetugasController.text,
@@ -443,93 +564,40 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
       // Ini bagian dropdown counter
       'beneficial_plant': selectedBeneficialPlant,
       'peilscale': selectedPeilscale,
-      'kondisi_circle_baik': dropdownCounters['Kondisi Circle: Baik'] ?? 0,
-      'kondisi_circle_semak': dropdownCounters['Kondisi Circle: Semak'] ?? 0,
-      'kondisi_circle_dominan_anak_sawit': dropdownCounters['Kondisi Circle: Dominan Anak Sawit'] ?? 0,
-      'kondisi_circle_dominan_sampah': dropdownCounters['Kondisi Circle: Dominan Sampah (Berondolan Busuk)'] ?? 0,
-      'kondisi_path_baik': dropdownCounters['Kondisi Path: Baik'] ?? 0,
-      'kondisi_path_tidak_baik': dropdownCounters['Kondisi Path: Tidak Baik'] ?? 0,
+      'kondisi_circle_baik': kondisiCircleBaik,
+      'kondisi_circle_semak': kondisiCircleSemak,
+      'kondisi_circle_dominan_anak_sawit': kondisiCircleDominanAnakSawit,
+      'kondisi_circle_dominan_sampah': kondisiCircleDominanSampah,
+      'kondisi_path_baik': kondisiPathBaik,
+      'kondisi_path_tidak_baik': kondisiPathTidakBaik,
       'kondisi_tph': selectedKondisiTPH,
-      'lalang_ada': dropdownCounters['Lalang: Ada'] ?? 0,
-      'lalang_tidak_ada': dropdownCounters['Lalang: Tidak Ada'] ?? 0,
-      'anak_kayu_ada': dropdownCounters['Anak Kayu: Ada'] ?? 0,
-      'anak_kayu_tidak_ada': dropdownCounters['Anak Kayu: Tidak Ada'] ?? 0,
-      'perumpung_ada': dropdownCounters['Perumpung: Ada'] ?? 0,
-      'perumpung_tidak_ada': dropdownCounters['Perumpung: Tidak Ada'] ?? 0,
-      'purun_tikus_ada': dropdownCounters['Purun Tikus: Ada'] ?? 0,
-      'purun_tikus_tidak_ada': dropdownCounters['Purun Tikus: Tidak Ada'] ?? 0,
-      'pakis_udang_ada': dropdownCounters['Pakis Udang: Ada'] ?? 0,
-      'pakis_udang_tidak_ada': dropdownCounters['Pakis Udang: Tidak Ada'] ?? 0,
+      'lalang_ada': lalangAda,
+      'lalang_tidak_ada': lalangTidakAda,
+      'anak_kayu_ada': anakKayuAda,
+      'anak_kayu_tidak_ada': anakKayuTidakAda,
+      'perumpung_ada': perumpungAda,
+      'perumpung_tidak_ada': perumpungTidakAda,
+      'purun_tikus_ada': purunTikusAda,
+      'purun_tikus_tidak_ada': purunTikusTidakAda,
+      'pakis_udang_ada': pakisUdangAda,
+      'pakis_udang_tidak_ada': pakisUdangTidakAda,
       'titi_panen': selectedTitiPanen,
       'jalan_jembatan': selectedJalanJembatan,
-      'pruning_baik': dropdownCounters['Pruning: Baik'] ?? 0,
-      'pruning_over': dropdownCounters['Pruning: Over'] ?? 0,
-      'pruning_sengkleh': dropdownCounters['Pruning: Sengkleh'] ?? 0,
-      'pruning_under': dropdownCounters['Pruning: Under'] ?? 0,
-      'susunan_pelepah_rapi': dropdownCounters['Susunan Pelepah: Rapi'] ?? 0,
-      'susunan_pelepah_tidak_rapi': dropdownCounters['Susunan Pelepah: Tidak Rapi'] ?? 0,
-      'serangan_tikus_ada': dropdownCounters['Serangan Tikus: Ada'] ?? 0,
-      'serangan_tikus_tidak_ada': dropdownCounters['Serangan Tikus: Tidak Ada'] ?? 0,
-      'serangan_rayap_ada': dropdownCounters['Serangan Rayap: Ada'] ?? 0,
-      'serangan_rayap_tidak_ada': dropdownCounters['Serangan Rayap: Tidak Ada'] ?? 0,
-      'thirathaba_ada': dropdownCounters['Thirathaba: Ada'] ?? 0,
-      'thirathaba_tidak_ada': dropdownCounters['Thirathaba: Tidak Ada'] ?? 0,
-      'updpks_ada': dropdownCounters['UPDPKS: Ada'] ?? 0,
-      'updpks_tidak_ada': dropdownCounters['UPDPKS: Tidak Ada'] ?? 0,
+      'pruning_baik': pruningBaik,
+      'pruning_over': pruningOver,
+      'pruning_sengkleh': pruningSengkleh,
+      'pruning_under': pruningUnder,
+      'susunan_pelepah_rapi': susunanPelepahRapi,
+      'susunan_pelepah_tidak_rapi': susunanPelepahTidakRapi,
+      'serangan_tikus_ada': seranganTikusAda,
+      'serangan_tikus_tidak_ada': seranganTikusTidakAda,
+      'serangan_rayap_ada': seranganRayapAda,
+      'serangan_rayap_tidak_ada': seranganRayapTidakAda,
+      'thirathaba_ada': thirathabaAda,
+      'thirathaba_tidak_ada': thirathabaTidakAda,
+      'updpks_ada': updpksAda,
+      'updpks_tidak_ada': updpksTidakAda,
     };
-
-     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Data Overview"),
-        content: SingleChildScrollView(child: Text(result.toString())),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await QADatabasePerawatan.instance.insertQA(qaData);
-              setState(() {
-                _samples.clear();
-                _pokokCounter = 1;
-                dropdownSelections.clear();
-              });
-              Navigator.of(context).popUntil((route) => route.isFirst);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()));
-            },
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _selesaiBlok() async {
-    if (_samples.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Masih ada sample yang belum di-save. Tekan 'Save All' dulu.")),
-      );
-      return;
-    }
-
-    final dataBlok = await QADatabasePerawatan.instance.getDataByBlok(selectedBlok ?? "");
-    if (dataBlok.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Belum ada data tersimpan untuk blok ini.")),
-      );
-      return;
-    }
-
-    // Hitung total dari semua pasar
-    int totalPokok = 0;
-    Map<String, int> counter = {};
-
-    for (var d in dataBlok) {
-      totalPokok += int.tryParse(d['jumlah_pokok'].toString()) ?? 0;
-      d.forEach((key, value) {
-        if (value is int && !['id', 'jumlah_pokok'].contains(key)) {
-          counter.update(key, (v) => v + value, ifAbsent: () => value);
-        }
-      });
-    }
 
     // Buat ringkasan
     StringBuffer result = StringBuffer();
@@ -540,9 +608,25 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
     result.writeln("Kode Blok: $selectedBlok");
     result.writeln("Jumlah Pokok: $totalPokok");
     result.writeln("\n=== Ringkasan Perawatan ===");
-    counter.forEach((key, value) => result.writeln("$key: $value"));
-    _blokSelesai = true;
 
+    result.writeln("\n");
+    result.writeln("Kondisi TPH: $selectedKondisiTPH");
+    result.writeln("Titi Panen: $selectedTitiPanen");
+    result.writeln("Jalan & Jembatan: $selectedJalanJembatan");
+    result.writeln("Beneficial Plant: $selectedBeneficialPlant");
+    result.writeln("Peilscale: $selectedPeilscale");
+
+    result.writeln("\n");
+    dropdownOptions.forEach((label, options) {
+      result.writeln("$label:");
+      for (var opt in options) {
+        final key = "$label: $opt";
+        final count = dropdownCounters[key] ?? 0;
+        result.writeln("  - $opt: $count");
+      }
+    });
+
+    _blokSelesai = true;
 
     showDialog(
       context: context,
@@ -551,15 +635,29 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
         content: SingleChildScrollView(child: Text(result.toString())),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text("Batal"),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Data blok $selectedBlok selesai disimpan.")),
+            onPressed: () async {
+              Navigator.of(context).pop(true);
+
+            for (var item in _qaDatas) {
+              await QADatabasePerawatan.instance.deleteQA(
+                item['blok'].toString(),
+                item['kebun'].toString(),
+                item['divisi'].toString(),
+                item['tanggal'].toString(),
               );
+            }
+
+              await QADatabasePerawatan.instance.insertQA(qaData);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Data pemeriksaan untuk blok $selectedBlok sudah tercatat.")),
+            );
+
+              // Reset form dan balik ke menu
               setState(() {
                 _samples.clear();
                 _namaPetugasController.clear();
@@ -569,9 +667,11 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
                 dropdownSelections.clear();
                 dropdownCounters.clear();
                 _pokokCounter = 1;
+                _qaDatas.clear();
               });
-              Navigator.of(context).popUntil((r) => r.isFirst);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const MenuPage()));
+
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()),);
             },
             child: const Text("OK"),
           ),
