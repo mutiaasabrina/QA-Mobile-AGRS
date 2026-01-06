@@ -75,7 +75,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   int _tphCounter = 0; // Counter TPH
 
   Map<String, dynamic>? _lastSavedSummary;
-
+  List<Map<String, Object?>> _qaDatas = [];
 
   List<String> wrapText(String text, int maxCharsPerLine) {
     final words = text.split(' ');
@@ -233,7 +233,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
       
       _clearPokokForm();
       dropdownSelections.clear();
-      _cekTPH = false;;
+      _cekTPH = false;
     });
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(content: Text("Pokok sample ditambahkan. Belum disimpan ke database.")),
@@ -281,8 +281,8 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   int totalBuahMatangTidakDipanen = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahMatangTidakDipanen'] ?? '0') ?? 0));
   int totalBuahBusukTidakDipanen = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahBusukTidakDipanen'] ?? '0') ?? 0));
   int totalLfTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['lfTinggal'] ?? '0') ?? 0));
-  int totalTphTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['tphTinggal'] ?? '0') ?? 0));
   int totalBuahTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahTinggal'] ?? '0') ?? 0));
+  int totalTphTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['tphTinggal'] ?? '0') ?? 0));
   int totalBuahTinggalTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahTinggalTPH'] ?? '0') ?? 0));
 
   // Gabung data untuk database
@@ -307,7 +307,7 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     'timestamp_sync': null,
   };
 
-  await QADatabase.instance.insertQA(qaData);
+  _qaDatas.add(qaData);
 
   _lastSavedSummary = {
   "jumlah_pokok": _samples.length,
@@ -322,10 +322,13 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   "tph_counter": _tphCounter,
 };
 
-
   setState(() {
     _samples.clear(); // kosongkan list sementara
     _blokSelesai = false; 
+    _cekTPH = false;
+    if(_tphCounter != 0){
+      _tphCounter = 0;
+    }
   });
 }
 
@@ -337,15 +340,7 @@ void _selesaiBlok() async {
     return;
   }
 
-  // 🔍 Ambil semua data QA dari database untuk blok ini
-  final allData = await QADatabase.instance.getAllQA();
-  final blokData = allData.where((d) =>
-      d['blok'] == selectedBlok &&
-      d['kebun'] == selectedKebun &&
-      d['divisi'] == selectedDivisi &&
-      d['tanggal'] == _tanggalPeriksa).toList();
-
-  if (blokData.isEmpty) {
+  if (_qaDatas.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Belum ada data tersimpan untuk blok ini.")),
     );
@@ -353,6 +348,7 @@ void _selesaiBlok() async {
   }
 
   // 🧮 Hitung total semua nilai dari blok tersebut
+  int totalDipanen = 0;
   int totalPokok = 0;
   int totalPkkDipanen = 0;
   int totalBuahDipanen = 0;
@@ -360,11 +356,13 @@ void _selesaiBlok() async {
   int totalBuahBusukTidakDipanen = 0;
   int totalLfTinggal = 0;
   int totalBuahTinggal = 0;
+  int totalTphTinggal = 0;
   int totalLfTinggalTPH = 0;
   int totalBuahTinggalTPH = 0;
   int totalTPHCounter = 0;
 
-for (var item in blokData) {
+for (var item in _qaDatas) {
+  totalDipanen += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0;
   totalPokok += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0;
   totalPkkDipanen += int.tryParse(item['pkk_dipanen']?.toString() ?? '0') ?? 0;
   totalBuahDipanen += int.tryParse(item['buah_dipanen']?.toString() ?? '0') ?? 0;
@@ -372,11 +370,32 @@ for (var item in blokData) {
   totalBuahBusukTidakDipanen += int.tryParse(item['buah_busuk_tidak_dipanen']?.toString() ?? '0') ?? 0;
   totalLfTinggal += int.tryParse(item['lf_tinggal']?.toString() ?? '0') ?? 0;
   totalBuahTinggal += int.tryParse(item['buah_tinggal']?.toString() ?? '0') ?? 0;
+  totalTphTinggal += int.tryParse(item['tphTinggal']?.toString() ?? '0') ?? 0;
   totalLfTinggalTPH += int.tryParse(item['lf_tinggal_tph']?.toString() ?? '0') ?? 0;
   totalBuahTinggalTPH += int.tryParse(item['buah_tinggal_tph']?.toString() ?? '0') ?? 0;
   totalTPHCounter += int.tryParse(item['tph_counter']?.toString() ?? '0') ?? 0;
 }
 
+  final qaData = {
+    'tanggal': _tanggalPeriksa,
+    'nama_petugas': _namaPetugasController.text,
+    'kebun': selectedKebun,
+    'divisi': selectedDivisi,
+    'blok': selectedBlok,
+    'rotasi': int.tryParse(_rotasiController.text) ?? 0,
+    'jumlah_pokok': _samples.length,
+    'pkk_dipanen': totalDipanen,
+    'buah_dipanen': totalBuahDipanen,
+    'buah_matang_tidak_dipanen': totalBuahMatangTidakDipanen,
+    'buah_busuk_tidak_dipanen': totalBuahBusukTidakDipanen,
+    'lf_tinggal': totalLfTinggal,
+    'buah_tinggal': totalBuahTinggal,
+    'lf_tinggal_tph': totalTphTinggal,
+    'buah_tinggal_tph': totalBuahTinggalTPH,
+    'tph_counter': _tphCounter,
+    'is_synced': 0,
+    'timestamp_sync': null,
+  };
 
   // 🧾 Buat ringkasan hasil total
   StringBuffer result = StringBuffer();
@@ -409,30 +428,44 @@ for (var item in blokData) {
       content: SingleChildScrollView(child: Text(result.toString())),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.of(context).pop(false),
           child: const Text("Batal"),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pop(context);
+          onPressed: () async {
+            Navigator.of(context).pop(true);
+
+            for (var item in _qaDatas) {
+              await QADatabase.instance.deleteQA(
+                item['blok'].toString(),
+                item['kebun'].toString(),
+                item['divisi'].toString(),
+                item['tanggal'].toString(),
+              );
+            }
+
+            await QADatabase.instance.insertQA(qaData);
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Data pemeriksaan untuk blok $selectedBlok sudah tercatat.")),
             );
 
             // Reset form dan balik ke menu
-            setState(() {
-              _blokSelesai = true;
-              _namaPetugasController.clear();
-              _rotasiController.clear();
-              selectedKebun = null;
-              selectedDivisi = null;
-              selectedBlok = null;
-              dropdownSelections.clear();
-              dropdownCounters.clear();
-              _pokokCounter = 1;
-              _tphCounter = 0;
-            });
+            if (mounted) {
+              setState(() {
+                _blokSelesai = true;
+                _namaPetugasController.clear();
+                _rotasiController.clear();
+                selectedKebun = null;
+                selectedDivisi = null;
+                selectedBlok = null;
+                dropdownSelections.clear();
+                dropdownCounters.clear();
+                _pokokCounter = 1;
+                _tphCounter = 0;
+                _qaDatas.clear();
+              });
+            }
 
             Navigator.of(context).popUntil((route) => route.isFirst);
               Navigator.push(

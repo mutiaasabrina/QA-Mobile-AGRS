@@ -92,6 +92,15 @@ class QADatabase {
     );
   }
 
+  Future<void> deleteQA(String blok, String kebun, String divisi, String tanggal) async {
+    final db = await instance.database;
+    await db.delete(
+      'qa_samples',
+      where: 'blok = ? AND kebun = ? AND divisi = ? AND tanggal = ?',
+      whereArgs: [blok, kebun, divisi, tanggal],
+      );
+  }
+
   Future<void> deleteSyncedQA() async {
     final db = await instance.database;
     await db.delete('qa_samples', where: 'is_synced = ?', whereArgs: [1]);
