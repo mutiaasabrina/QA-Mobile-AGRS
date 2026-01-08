@@ -24,22 +24,22 @@ class _QAGradingPageState extends State<QAGradingPage> {
   final _tahunTanamController = TextEditingController();
 
   final _buahAMController = TextEditingController();
-  final _bjrAMController = TextEditingController();
+  final _BeratAMController = TextEditingController();
   final _buahBMController = TextEditingController();
-  final _bjrBMController = TextEditingController();
+  final _BeratBMController = TextEditingController();
   final _buahCMController = TextEditingController();
-  final _bjrCMController = TextEditingController();
+  final _BeratCMController = TextEditingController();
   final _buahDMController = TextEditingController();
-  final _bjrDMController = TextEditingController();
+  final _BeratDMController = TextEditingController();
 
   final _buahAMatController = TextEditingController();
-  final _bjrAMatController = TextEditingController();
+  final _BeratAMatController = TextEditingController();
   final _buahBMatController = TextEditingController();
-  final _bjrBMatController = TextEditingController();
+  final _BeratBMatController = TextEditingController();
   final _buahCMatController = TextEditingController();
-  final _bjrCMatController = TextEditingController();
+  final _BeratCMatController = TextEditingController();
   final _buahDMatController = TextEditingController();
-  final _bjrDMatController = TextEditingController();
+  final _BeratDMatController = TextEditingController();
 
   final _buahMentahKecilController = TextEditingController();
   final _buahMatangKecilController = TextEditingController();
@@ -184,11 +184,11 @@ class _QAGradingPageState extends State<QAGradingPage> {
     final int buahCMentah = int.tryParse(_buahCMController.text) ?? 0;
     final int buahDMentah = int.tryParse(_buahDMController.text) ?? 0;
 
-    // Parse BJR mentah values
-    final double bjrAMentah = double.tryParse(_bjrAMController.text) ?? 0.0;
-    final double bjrBMentah = double.tryParse(_bjrBMController.text) ?? 0.0;
-    final double bjrCMentah = double.tryParse(_bjrCMController.text) ?? 0.0;
-    final double bjrDMentah = double.tryParse(_bjrDMController.text) ?? 0.0;
+    // Parse Berat mentah values
+    final double BeratAMentah = double.tryParse(_BeratAMController.text) ?? 0.0;
+    final double BeratBMentah = double.tryParse(_BeratBMController.text) ?? 0.0;
+    final double BeratCMentah = double.tryParse(_BeratCMController.text) ?? 0.0;
+    final double BeratDMentah = double.tryParse(_BeratDMController.text) ?? 0.0;
 
     // Parse matang values (>3kg)
     final int buahAMatang = int.tryParse(_buahAMatController.text) ?? 0;
@@ -196,11 +196,11 @@ class _QAGradingPageState extends State<QAGradingPage> {
     final int buahCMatang = int.tryParse(_buahCMatController.text) ?? 0;
     final int buahDMatang = int.tryParse(_buahDMatController.text) ?? 0;
 
-    // Parse BJR matang values
-    final double bjrAMatang = double.tryParse(_bjrAMatController.text) ?? 0.0;
-    final double bjrBMatang = double.tryParse(_bjrBMatController.text) ?? 0.0;
-    final double bjrCMatang = double.tryParse(_bjrCMatController.text) ?? 0.0;
-    final double bjrDMatang = double.tryParse(_bjrDMatController.text) ?? 0.0;
+    // Parse Berat matang values
+    final double BeratAMatang = double.tryParse(_BeratAMatController.text) ?? 0.0;
+    final double BeratBMatang = double.tryParse(_BeratBMatController.text) ?? 0.0;
+    final double BeratCMatang = double.tryParse(_BeratCMatController.text) ?? 0.0;
+    final double BeratDMatang = double.tryParse(_BeratDMatController.text) ?? 0.0;
 
     // Parse <3kg
     final int buahMentahKecil = int.tryParse(_buahMentahKecilController.text) ?? 0;
@@ -215,22 +215,22 @@ class _QAGradingPageState extends State<QAGradingPage> {
 
       // Individual if you still want to store them
       "buahAMentah": buahAMentah.toString(),
-      "bjrBuahAMentah": bjrAMentah.toStringAsFixed(2),
+      "BeratBuahAMentah": BeratAMentah.toStringAsFixed(2),
       "buahBMentah": buahBMentah.toString(),
-      "bjrBuahBMentah": bjrBMentah.toStringAsFixed(2),
+      "BeratBuahBMentah": BeratBMentah.toStringAsFixed(2),
       "buahCMentah": buahCMentah.toString(),
-      "bjrBuahCMentah": bjrCMentah.toStringAsFixed(2),
+      "BeratBuahCMentah": BeratCMentah.toStringAsFixed(2),
       "buahDMentah": buahDMentah.toString(),
-      "bjrBuahDMentah": bjrDMentah.toStringAsFixed(2),
+      "BeratBuahDMentah": BeratDMentah.toStringAsFixed(2),
 
       "buahAMatang": buahAMatang.toString(),
-      "bjrBuahAMatang": bjrAMatang.toStringAsFixed(2),
+      "BeratBuahAMatang": BeratAMatang.toStringAsFixed(2),
       "buahBMatang": buahBMatang.toString(),
-      "bjrBuahBMatang": bjrBMatang.toStringAsFixed(2),
+      "BeratBuahBMatang": BeratBMatang.toStringAsFixed(2),
       "buahCMatang": buahCMatang.toString(),
-      "bjrBuahCMatang": bjrCMatang.toStringAsFixed(2),
+      "BeratBuahCMatang": BeratCMatang.toStringAsFixed(2),
       "buahDMatang": buahDMatang.toString(),
-      "bjrBuahDMatang": bjrDMatang.toStringAsFixed(2),
+      "BeratBuahDMatang": BeratDMatang.toStringAsFixed(2),
 
       "buahMentahKecil": buahMentahKecil.toString(),
       "buahMatangKecil": buahMatangKecil.toString(),
@@ -243,22 +243,22 @@ class _QAGradingPageState extends State<QAGradingPage> {
     TPHCounter++;
 
     _buahAMController.clear();
-    _bjrAMController.clear();
+    _BeratAMController.clear();
     _buahBMController.clear();
-    _bjrBMController.clear();
+    _BeratBMController.clear();
     _buahCMController.clear();
-    _bjrCMController.clear();
+    _BeratCMController.clear();
     _buahDMController.clear();
-    _bjrDMController.clear();
+    _BeratDMController.clear();
 
     _buahAMatController.clear();
-    _bjrAMatController.clear();
+    _BeratAMatController.clear();
     _buahBMatController.clear();
-    _bjrBMatController.clear();
+    _BeratBMatController.clear();
     _buahCMatController.clear();
-    _bjrCMatController.clear();
+    _BeratCMatController.clear();
     _buahDMatController.clear();
-    _bjrDMatController.clear();
+    _BeratDMatController.clear();
 
     _buahMentahKecilController.clear();
     _buahMatangKecilController.clear();
@@ -282,22 +282,22 @@ class _QAGradingPageState extends State<QAGradingPage> {
 
     int totalTPH = _samples.where((s) => s['TPH'] == true).length;
     double totalBuahAMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahAMentah'] ?? '0') ?? 0; return sum + value;});
-    double totalBjrAMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahAMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBeratAMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['BeratBuahAMentah'] ?? '0') ?? 0; return sum + value;});
     double totalBuahBMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahBMentah'] ?? '0') ?? 0; return sum + value;});
-    double totalBjrBMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahBMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBeratBMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['BeratBuahBMentah'] ?? '0') ?? 0; return sum + value;});
     double totalBuahCMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahCMentah'] ?? '0') ?? 0; return sum + value;});
-    double totalBjrCMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahCMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBeratCMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['BeratBuahCMentah'] ?? '0') ?? 0; return sum + value;});
     double totalBuahDMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahDMentah'] ?? '0') ?? 0; return sum + value;});
-    double totalBjrDMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahDMentah'] ?? '0') ?? 0; return sum + value;});
+    double totalBeratDMentah = _samples.fold(0, (sum, s) {double value = double.tryParse(s['BeratBuahDMentah'] ?? '0') ?? 0; return sum + value;});
 
     double totalBuahAMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahAMatang'] ?? '0') ?? 0; return sum + value;});
-    double totalBjrAMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahAMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBeratAMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['BeratBuahAMatang'] ?? '0') ?? 0; return sum + value;});
     double totalBuahBMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahBMatang'] ?? '0') ?? 0; return sum + value;});
-    double totalBjrBMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahBMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBeratBMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['BeratBuahBMatang'] ?? '0') ?? 0; return sum + value;});
     double totalBuahCMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahCMatang'] ?? '0') ?? 0; return sum + value;});
-    double totalBjrCMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahCMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBeratCMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['BeratBuahCMatang'] ?? '0') ?? 0; return sum + value;});
     double totalBuahDMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['buahDMatang'] ?? '0') ?? 0; return sum + value;});
-    double totalBjrDMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['bjrBuahDMatang'] ?? '0') ?? 0; return sum + value;});
+    double totalBeratDMatang = _samples.fold(0, (sum, s) {double value = double.tryParse(s['BeratBuahDMatang'] ?? '0') ?? 0; return sum + value;});
 
     int totalBuahMentahKecil = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahMentahKecil'] ?? '0') ?? 0; return sum + value;});
     int totalBuahMatangKecil = _samples.fold(0, (sum, s) {int value = int.tryParse(s['buahMatangKecil'] ?? '0') ?? 0; return sum + value;});
@@ -315,21 +315,21 @@ class _QAGradingPageState extends State<QAGradingPage> {
       tahunTanam: _tahunTanamController.text,
       totalTPH: totalTPH,
       totalBuahAMentah: totalBuahAMentah,
-      totalBjrAMentah: totalBjrAMentah,
+      totalBeratAMentah: totalBeratAMentah,
       totalBuahBMentah: totalBuahBMentah,
-      totalBjrBMentah: totalBjrBMentah,
+      totalBeratBMentah: totalBeratBMentah,
       totalBuahCMentah: totalBuahCMentah,
-      totalBjrCMentah: totalBjrCMentah,
+      totalBeratCMentah: totalBeratCMentah,
       totalBuahDMentah: totalBuahDMentah,
-      totalBjrDMentah: totalBjrDMentah,
+      totalBeratDMentah: totalBeratDMentah,
       totalBuahAMatang: totalBuahAMatang,
-      totalBjrAMatang: totalBjrAMatang,
+      totalBeratAMatang: totalBeratAMatang,
       totalBuahBMatang: totalBuahBMatang,
-      totalBjrBMatang: totalBjrBMatang,
+      totalBeratBMatang: totalBeratBMatang,
       totalBuahCMatang: totalBuahCMatang,
-      totalBjrCMatang: totalBjrCMatang,
+      totalBeratCMatang: totalBeratCMatang,
       totalBuahDMatang: totalBuahDMatang,
-      totalBjrDMatang: totalBjrDMatang,
+      totalBeratDMatang: totalBeratDMatang,
       totalBuahMentahKecil: totalBuahMentahKecil,
       totalBuahMatangKecil: totalBuahMatangKecil,
       totalBuahMentah: totalBuahMentah,
@@ -361,21 +361,21 @@ class _QAGradingPageState extends State<QAGradingPage> {
                 'varietas': summary.varietas,
                 'tahun_tanam': summary.tahunTanam,
                 'buah_a_mentah': summary.totalBuahAMentah,
-                'bjr_buah_a_mentah': summary.totalBjrAMentah,
+                'Berat_buah_a_mentah': summary.totalBeratAMentah,
                 'buah_b_mentah': summary.totalBuahBMentah,
-                'bjr_buah_b_mentah': summary.totalBjrBMentah,
+                'Berat_buah_b_mentah': summary.totalBeratBMentah,
                 'buah_c_mentah': summary.totalBuahCMentah,
-                'bjr_buah_c_mentah': summary.totalBjrCMentah,
+                'Berat_buah_c_mentah': summary.totalBeratCMentah,
                 'buah_d_mentah': summary.totalBuahDMentah,
-                'bjr_buah_d_mentah': summary.totalBjrDMentah,
+                'Berat_buah_d_mentah': summary.totalBeratDMentah,
                 'buah_a_matang': summary.totalBuahAMatang,
-                'bjr_buah_a_matang': summary.totalBjrAMatang,
+                'Berat_buah_a_matang': summary.totalBeratAMatang,
                 'buah_b_matang': summary.totalBuahBMatang,
-                'bjr_buah_b_matang': summary.totalBjrBMatang,
+                'Berat_buah_b_matang': summary.totalBeratBMatang,
                 'buah_c_matang': summary.totalBuahCMatang,
-                'bjr_buah_c_matang': summary.totalBjrCMatang,
+                'Berat_buah_c_matang': summary.totalBeratCMatang,
                 'buah_d_matang': summary.totalBuahDMatang,
-                'bjr_buah_d_matang': summary.totalBjrDMatang,
+                'Berat_buah_d_matang': summary.totalBeratDMatang,
                 'buah_kurang3kg_mentah': summary.totalBuahMentahKecil,
                 'buah_kurang3kg_matang': summary.totalBuahMatangKecil,
                 'total_buah_mentah': summary.totalBuahMentah,
@@ -438,23 +438,23 @@ class _QAGradingPageState extends State<QAGradingPage> {
           const Divider(),
           const Text("Buah Mentah", style: TextStyle(fontWeight: FontWeight.bold)),
           TextField(controller: _buahAMController, decoration: const InputDecoration(labelText: "Buah A Mentah")),
-          TextField(controller: _bjrAMController, decoration: const InputDecoration(labelText: "BJR Buah A Mentah")),
+          TextField(controller: _BeratAMController, decoration: const InputDecoration(labelText: "Berat Buah A Mentah")),
           TextField(controller: _buahBMController, decoration: const InputDecoration(labelText: "Buah B Mentah")),
-          TextField(controller: _bjrBMController, decoration: const InputDecoration(labelText: "BJR Buah B Mentah")),
+          TextField(controller: _BeratBMController, decoration: const InputDecoration(labelText: "Berat Buah B Mentah")),
           TextField(controller: _buahCMController, decoration: const InputDecoration(labelText: "Buah C Mentah")),
-          TextField(controller: _bjrCMController, decoration: const InputDecoration(labelText: "BJR Buah C Mentah")),
+          TextField(controller: _BeratCMController, decoration: const InputDecoration(labelText: "Berat Buah C Mentah")),
           TextField(controller: _buahDMController, decoration: const InputDecoration(labelText: "Buah D Mentah")),
-          TextField(controller: _bjrDMController, decoration: const InputDecoration(labelText: "BJR Buah D Mentah")),
+          TextField(controller: _BeratDMController, decoration: const InputDecoration(labelText: "Berat Buah D Mentah")),
           const Divider(),
           const Text("Buah Matang", style: TextStyle(fontWeight: FontWeight.bold)),
           TextField(controller: _buahAMatController, decoration: const InputDecoration(labelText: "Buah A Matang")),
-          TextField(controller: _bjrAMatController, decoration: const InputDecoration(labelText: "BJR Buah A Matang")),
+          TextField(controller: _BeratAMatController, decoration: const InputDecoration(labelText: "Berat Buah A Matang")),
           TextField(controller: _buahBMatController, decoration: const InputDecoration(labelText: "Buah B Matang")),
-          TextField(controller: _bjrBMatController, decoration: const InputDecoration(labelText: "BJR Buah B Matang")),
+          TextField(controller: _BeratBMatController, decoration: const InputDecoration(labelText: "Berat Buah B Matang")),
           TextField(controller: _buahCMatController, decoration: const InputDecoration(labelText: "Buah C Matang")),
-          TextField(controller: _bjrCMatController, decoration: const InputDecoration(labelText: "BJR Buah C Matang")),
+          TextField(controller: _BeratCMatController, decoration: const InputDecoration(labelText: "Berat Buah C Matang")),
           TextField(controller: _buahDMatController, decoration: const InputDecoration(labelText: "Buah D Matang")),
-          TextField(controller: _bjrDMatController, decoration: const InputDecoration(labelText: "BJR Buah D Matang")),
+          TextField(controller: _BeratDMatController, decoration: const InputDecoration(labelText: "Berat Buah D Matang")),
           const Divider(),
           const Text("Buah < 3 kg", style: TextStyle(fontWeight: FontWeight.bold)),
           TextField(controller: _buahMentahKecilController, decoration: const InputDecoration(labelText: "Buah < 3 kg Mentah")),
