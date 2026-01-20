@@ -109,6 +109,18 @@ class _MenuPageState extends State<MenuPage> {
               foregroundColor: Colors.white,
               padding: const EdgeInsets.all(16),
             ),
+            child: const Text("QA Grading"),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const QAGradingPage()));
+            },
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+            ),
             child: const Text("QA Tracker Hari Ini"),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const QATrackerPage()));

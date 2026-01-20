@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qa_agronomy/pages/qa_produksi.dart';
-import 'package:qa_agronomy/pages/qa_grading.dart';
 import 'package:qa_agronomy/utils/constants.dart';
+import 'package:qa_agronomy/pages/qa_kualitas_tbs.dart';
 
 class QAProduksiMenuPage extends StatelessWidget {
   const QAProduksiMenuPage({super.key});
@@ -22,10 +22,10 @@ class QAProduksiMenuPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const QAGradingPage()),
+                MaterialPageRoute(builder: (_) => const QAKualitasTBSPage()),
               );
             },
-            child: const Text("QA Grading"),
+            child: const Text("Kualitas TBS"),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
