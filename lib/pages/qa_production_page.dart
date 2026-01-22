@@ -40,7 +40,7 @@ class QAProduksiMenuPage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const QAProduksiPage()),
               );
             },
-            child: const Text("QA Produksi"),
+            child: const Text("Mutu Ancak Panen"),
           ),
         ],
       ),

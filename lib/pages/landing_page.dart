@@ -36,7 +36,7 @@ class LandingPage extends StatelessWidget {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
                 ),
-                child: const Text("Start QA", style: TextStyle(fontSize: 18)),
+                child: const Text("Start", style: TextStyle(fontSize: 18)),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuPage()));
                 },

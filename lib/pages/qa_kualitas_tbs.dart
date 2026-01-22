@@ -24,7 +24,6 @@ class _QAKualitasTBSPageState extends State<QAKualitasTBSPage> {
   final _komentarController = TextEditingController();
 
   final _mentahTPHController = TextEditingController();
-  final _mengkalTPHController = TextEditingController();
   final _masakTPHController = TextEditingController();
   final _overripeTPHController = TextEditingController();
   final _busukkosongTPHController = TextEditingController();
@@ -133,7 +132,6 @@ Ket    : ${_komentarController.text}
   void _saveTPHSample() {
     setState(() {
       final int mentah = int.tryParse(_mentahTPHController.text) ?? 0;
-      final int mengkal = int.tryParse(_mengkalTPHController.text) ?? 0;
       final int masak = int.tryParse(_masakTPHController.text) ?? 0;
       final int overripe = int.tryParse(_overripeTPHController.text) ?? 0;
       final int busukKosong =
@@ -141,7 +139,6 @@ Ket    : ${_komentarController.text}
       final int abnormal = int.tryParse(_abnormalTPHController.text) ?? 0;
 
       final total = mentah +
-          mengkal +
           masak +
           overripe +
           busukKosong +
@@ -150,7 +147,6 @@ Ket    : ${_komentarController.text}
       _samples.add({
         "TPH": TPHCounter,
         "mentah": mentah,
-        "mengkal": mengkal,
         "masak": masak,
         "overripe": overripe,
         "busuk_kosong": busukKosong,
@@ -161,7 +157,6 @@ Ket    : ${_komentarController.text}
       TPHCounter++;
 
       _mentahTPHController.clear();
-      _mengkalTPHController.clear();
       _masakTPHController.clear();
       _overripeTPHController.clear();
       _busukkosongTPHController.clear();
@@ -185,7 +180,6 @@ Ket    : ${_komentarController.text}
       'varietas': _varietasController.text,
       'tahun_tanam': _tahunTanamController.text,
       'mentah': sum('mentah'),
-      'mengkal': sum('mengkal'),
       'masak': sum('masak'),
       'overripe': sum('overripe'),
       'busuk_kosong': sum('busuk_kosong'),
@@ -201,10 +195,71 @@ Ket    : ${_komentarController.text}
     );
   }
 
+  Future<bool> _onWillPop() async {
+  if (_samples.isEmpty) {
+    return true; // tidak ada data → boleh keluar
+  }
+
+  final shouldExit = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Peringatan"),
+      content: const Text(
+        "Data belum disimpan.\nApakah yakin ingin keluar tanpa menyimpan?",
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text("Batal"),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text("Ya, keluar"),
+        ),
+      ],
+    ),
+  );
+
+  return shouldExit ?? false;
+}
+
+
   // ===================== UI =====================
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+Widget build(BuildContext context) {
+  return PopScope(
+  canPop: false,
+  onPopInvokedWithResult: (didPop, result) async {
+    if (didPop) return;
+
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Peringatan"),
+        content: const Text(
+          "Data belum disimpan. Apakah yakin ingin keluar tanpa menyimpan?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Ya, keluar"),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLeave == true && context.mounted) {
+      Navigator.of(context).pop(result);
+    }
+  },
+    child : Scaffold(
       appBar: AppBar(title: const Text("QA Grading TBS")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
@@ -257,7 +312,6 @@ Ket    : ${_komentarController.text}
               style: TextStyle(fontWeight: FontWeight.bold)),
 
           _numField(_mentahTPHController, "Mentah"),
-          _numField(_mengkalTPHController, "Mengkal"),
           _numField(_masakTPHController, "Masak"),
           _numField(_overripeTPHController, "Overripe"),
           _numField(_busukkosongTPHController, "Busuk / Kosong"),
@@ -266,7 +320,7 @@ Ket    : ${_komentarController.text}
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: _saveTPHSample,
-            style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+            style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
             child: const Text("Save TPH"),
           ),
 
@@ -277,17 +331,18 @@ Ket    : ${_komentarController.text}
           ..._samples.map((s) => ListTile(
                 title: Text("TPH ${s['TPH']}"),
                 subtitle: Text(
-                    "Mentah ${s['mentah']} | Mengkal ${s['mengkal']} | Masak ${s['masak']}"),
+                    "Mentah ${s['mentah']} | Masak ${s['masak']}"),
               )),
 
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _saveAll,
-            style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+            style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
             child: const Text("Save All"),
           ),
         ]),
       ),
+    )
     );
   }
 
