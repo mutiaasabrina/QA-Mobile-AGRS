@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:gsheets/gsheets.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -10,6 +9,7 @@ class GSheetService {
   static const _sheetNamePemupukan = 'Testing Pemupukan';
   static const _sheetNameChemist = 'Testing Chemist';
   static const _sheetNameGrading = 'Testing Grading';
+  static const _sheetNameTBS = 'TBS Produksi';
 
   Worksheet? _sheet;
 
@@ -260,6 +260,34 @@ class GSheetService {
       'total_buah_matang',
       'is_synced',
       'timestamp_sync'
+    ];
+
+    final values = orderedKeys.map((k) => data[k]?.toString() ?? '').toList();
+    await sheet.values.appendRow(values);
+  }
+
+  Future<void> insertQATBSProduksi(Map<String, dynamic> data) async {
+    final spreadsheet = await GSheets(json.decode(await rootBundle.loadString('assets/credentials/enginewaktuaplikasipemupukan-03e33861bae9.json',),),).spreadsheet(_spreadsheetId);
+    final sheet = await spreadsheet.worksheetByTitle(_sheetNameTBS);
+    if (sheet == null) return;
+
+    final orderedKeys = [
+      'id',
+      'tanggal',
+      'nama_petugas',
+      'kebun',
+      'divisi',
+      'blok',
+      'mentah', 
+      'masak',
+      'overripe',
+      'busuk_kosong',
+      'abnormal',
+      'total_buah',
+      'tph_counter',
+
+      'is_synced',
+      'timestamp_sync',
     ];
 
     final values = orderedKeys.map((k) => data[k]?.toString() ?? '').toList();

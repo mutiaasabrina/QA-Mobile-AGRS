@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'qa_pemupukan_page.dart';
-import 'package:qa_agronomy/pages/mutu_ancak_pemupukan_page.dart';
+import 'package:qa_agronomy/pages/Pemupukan/mutu_ancak_pemupukan_page.dart';
 import 'package:qa_agronomy/utils/constants.dart';
 
 class QAPupukMenuPage extends StatelessWidget {

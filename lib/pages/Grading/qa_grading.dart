@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_grading.dart';
-import '../utils/constants.dart';
-import 'menu_page.dart';
+import '../../utils/constants.dart';
+import '../menu_page.dart';
 import 'qa_grading_summary.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
@@ -456,7 +456,7 @@ class _QAGradingPageState extends State<QAGradingPage> {
           TextField(controller: _buahDMatController, decoration: const InputDecoration(labelText: "Buah D Matang")),
           TextField(controller: _BeratDMatController, decoration: const InputDecoration(labelText: "Berat Buah D Matang")),
           const Divider(),
-          const Text("Buah < 3 kg", style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text("Buah < 3 kg", style: TextStyle(fontWeight: FontWeight.bold)),
           TextField(controller: _buahMentahKecilController, decoration: const InputDecoration(labelText: "Buah < 3 kg Mentah")),
           TextField(controller: _buahMatangKecilController, decoration: const InputDecoration(labelText: "Buah < 3 kg Matang")),
           const Divider(),

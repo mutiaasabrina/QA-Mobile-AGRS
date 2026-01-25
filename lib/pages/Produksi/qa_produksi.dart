@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_produksi.dart';
-import '../utils/constants.dart';
-import 'menu_page.dart';
+import '../../utils/constants.dart';
+import '../menu_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import 'package:permission_handler/permission_handler.dart';
@@ -74,7 +74,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   int _pokokCounter = 1; // Counter otomatis untuk pokok
   int _tphCounter = 0; // Counter TPH
 
-  Map<String, dynamic>? _lastSavedSummary;
   List<Map<String, Object?>> _qaDatas = [];
 
   List<String> wrapText(String text, int maxCharsPerLine) {
@@ -308,19 +307,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   };
 
   _qaDatas.add(qaData);
-
-  _lastSavedSummary = {
-  "jumlah_pokok": _samples.length,
-  "pkk_dipanen": totalDipanen,
-  "buah_dipanen": totalBuahDipanen,
-  "buah_matang_tidak_dipanen": totalBuahMatangTidakDipanen,
-  "buah_busuk_tidak_dipanen": totalBuahBusukTidakDipanen,
-  "lf_tinggal": totalLfTinggal,
-  "buah_tinggal": totalBuahTinggal,
-  "lf_tinggal_tph": totalTphTinggal,
-  "buah_tinggal_tph": totalBuahTinggalTPH,
-  "tph_counter": _tphCounter,
-};
 
   setState(() {
     _samples.clear(); // kosongkan list sementara

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:qa_agronomy/database/qa_database_grading.dart';
-import '../utils/constants.dart';
-import 'menu_page.dart';
+import 'package:qa_agronomy/database/qa_database_tbs_produksi.dart';
+import '../../utils/constants.dart';
+import '../menu_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
-
 
 class QAKualitasTBSPage extends StatefulWidget {
   const QAKualitasTBSPage({super.key});
@@ -19,8 +18,6 @@ class QAKualitasTBSPage extends StatefulWidget {
 class _QAKualitasTBSPageState extends State<QAKualitasTBSPage> {
   // ===================== CONTROLLER =====================
   final _namaPetugasController = TextEditingController();
-  final _varietasController = TextEditingController();
-  final _tahunTanamController = TextEditingController();
   final _komentarController = TextEditingController();
 
   final _mentahTPHController = TextEditingController();
@@ -33,19 +30,13 @@ class _QAKualitasTBSPageState extends State<QAKualitasTBSPage> {
   final List<Map<String, dynamic>> _samples = [];
   bool get isLocked => _samples.isNotEmpty;
 
-  final String _tanggalPeriksa =
-      DateFormat('yyyy-MM-dd').format(DateTime.now());
+  final String _tanggalPeriksa = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-  int TPHCounter = 1;
+  int TPHCounter = 0;
 
   String? selectedKebun;
   String? selectedDivisi;
   String? selectedBlok;
-  String? selectedBeneficialPlant;
-  String? selectedPeilscale;
-
-  final Map<String, String?> dropdownSelections = {};
-  final Map<String, int> dropdownCounters = {};
 
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
   final List<String> kebunOptions = ['Inti', 'Plasma'];
@@ -93,15 +84,16 @@ class _QAKualitasTBSPageState extends State<QAKualitasTBSPage> {
 
     final now = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
 
-    final text = """
-QA Kualitas TBS
-Estate : ${selectedKebun ?? ''}
-Divisi : ${selectedDivisi ?? ''}
-Blok   : ${selectedBlok ?? ''}
-Petugas: ${_namaPetugasController.text}
-Waktu  : $now
-Ket    : ${_komentarController.text}
-""";
+    final text =
+        """
+    QA Kualitas TBS
+    Estate : ${selectedKebun ?? ''}
+    Divisi : ${selectedDivisi ?? ''}
+    Blok   : ${selectedBlok ?? ''}
+    Petugas: ${_namaPetugasController.text}
+    Waktu  : $now
+    Ket    : ${_komentarController.text}
+    """;
 
     final font = img.arial48;
     img.drawString(
@@ -130,19 +122,21 @@ Ket    : ${_komentarController.text}
 
   // ===================== SAVE TPH =====================
   void _saveTPHSample() {
+    if (_namaPetugasController.text.isEmpty ) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi Data.")));
+      return;
+    }
+
     setState(() {
       final int mentah = int.tryParse(_mentahTPHController.text) ?? 0;
       final int masak = int.tryParse(_masakTPHController.text) ?? 0;
       final int overripe = int.tryParse(_overripeTPHController.text) ?? 0;
-      final int busukKosong =
-          int.tryParse(_busukkosongTPHController.text) ?? 0;
+      final int busukKosong = int.tryParse(_busukkosongTPHController.text) ?? 0;
       final int abnormal = int.tryParse(_abnormalTPHController.text) ?? 0;
 
-      final total = mentah +
-          masak +
-          overripe +
-          busukKosong +
-          abnormal;
+      final total = mentah + masak + overripe + busukKosong + abnormal;
+
+      TPHCounter++;
 
       _samples.add({
         "TPH": TPHCounter,
@@ -154,8 +148,6 @@ Ket    : ${_komentarController.text}
         "total": total,
       });
 
-      TPHCounter++;
-
       _mentahTPHController.clear();
       _masakTPHController.clear();
       _overripeTPHController.clear();
@@ -166,32 +158,100 @@ Ket    : ${_komentarController.text}
 
   // ===================== SAVE ALL =====================
   Future<void> _saveAll() async {
-    if (_samples.isEmpty) return;
+    if (_samples.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Tidak ada sample TPH untuk disimpan")),
+      );
+      return;
+    };
 
-    int sum(String key) =>
-        _samples.fold(0, (a, b) => a + (b[key] as int));
+    int sum(String key) => _samples.fold(0, (a, b) => a + (b[key] as int));
 
-    await QADatabaseGrading.instance.insertQA({
+    final qaData = {
       'tanggal': _tanggalPeriksa,
       'nama_petugas': _namaPetugasController.text,
       'kebun': selectedKebun,
       'divisi': selectedDivisi,
       'blok': selectedBlok,
-      'varietas': _varietasController.text,
-      'tahun_tanam': _tahunTanamController.text,
       'mentah': sum('mentah'),
       'masak': sum('masak'),
       'overripe': sum('overripe'),
       'busuk_kosong': sum('busuk_kosong'),
       'abnormal': sum('abnormal'),
       'total_buah': sum('total'),
+      'tph_counter': TPHCounter,
       'is_synced': 0,
       'timestamp_sync': null,
-    });
+    };
 
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const MenuPage()),
-      (route) => false,
+    // 🧾 Buat ringkasan hasil total
+    StringBuffer result = StringBuffer();
+    result.writeln("Tanggal Periksa: $_tanggalPeriksa");
+    result.writeln("Nama Petugas: ${_namaPetugasController.text}");
+    result.writeln("Kebun: $selectedKebun");
+    result.writeln("Divisi: $selectedDivisi");
+    result.writeln("Kode Blok: $selectedBlok");
+
+    result.writeln("=== Ringkasan Total Blok ===");
+    result.writeln("Mentah: ${qaData['mentah']}");
+    result.writeln("Masak: ${qaData['masak']}");
+    result.writeln("Overripe: ${qaData['overripe']}");
+    result.writeln("Busuk / Kosong: ${qaData['busuk_kosong']}");
+    result.writeln("Abnormal: ${qaData['abnormal']}");
+    result.writeln("Total Buah: ${qaData['total_buah']}");
+    result.writeln("Jumlah TPH Dicek: $TPHCounter\n");
+
+    result.writeln("Data dari blok akan tersimpan di database.\nApakah ingin menutup blok dan kembali ke menu utama?");
+
+    // 🪟 Tampilkan dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Data Overview"),
+        content: SingleChildScrollView(child: Text(result.toString())),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(true);
+              
+              await QADatabaseTBSProduksi.instance.insertQA(qaData);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Data pemeriksaan untuk blok $selectedBlok sudah tercatat.")),
+              );
+
+              // Reset form dan balik ke menu
+              if (mounted) {
+                setState(() {
+                  _namaPetugasController.clear();
+                  _komentarController.clear();
+                  _mentahTPHController.clear();
+                  _masakTPHController.clear();
+                  _overripeTPHController.clear();
+                  _busukkosongTPHController.clear();
+                  _abnormalTPHController.clear();
+                  selectedKebun = null;
+                  selectedDivisi = null;
+                  selectedBlok = null;
+                  TPHCounter = 1;
+                  _samples.clear();
+                });
+              }
+
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MenuPage()),
+              );
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -226,7 +286,6 @@ Ket    : ${_komentarController.text}
 
   return shouldExit ?? false;
 }
-
 
   // ===================== UI =====================
 Widget build(BuildContext context) {
@@ -317,7 +376,21 @@ Widget build(BuildContext context) {
           _numField(_busukkosongTPHController, "Busuk / Kosong"),
           _numField(_abnormalTPHController, "Abnormal"),
 
-          const SizedBox(height: 12),
+          const Divider(),
+          TextField(
+            controller: _komentarController,
+            decoration: InputDecoration(labelText: 'Keterangan Foto', border: OutlineInputBorder()),
+            maxLines: 3,
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: () => ambilFotoDenganWatermark(context),
+            icon: const Icon(Icons.camera_alt),
+            label: const Text("Ambil Foto"),
+            style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
+          ),
+
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _saveTPHSample,
             style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white),
@@ -325,15 +398,22 @@ Widget build(BuildContext context) {
           ),
 
           const Divider(),
-          const Text("Sample Tersimpan",
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text("Sample Tersimpan", style: TextStyle(fontWeight: FontWeight.bold)),
 
-          ..._samples.map((s) => ListTile(
-                title: Text("TPH ${s['TPH']}"),
-                subtitle: Text(
-                    "Mentah ${s['mentah']} | Masak ${s['masak']}"),
-              )),
-
+          if (_samples.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text("Belum ada sample yang diinput."),
+            )
+          else
+            Column(
+              children: _samples.map((p) => ListTile(
+                      title: Text("TPH ${p['TPH']}"),
+                      subtitle: Text("Mentah ${p['mentah']} | Masak ${p['masak']} | Overripe ${p['overripe']} | Busuk/Kosong ${p['busuk_kosong']} | Abnormal ${p['abnormal']}"),
+                    )).toList(),
+            
+            ),
+            
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _saveAll,
@@ -354,4 +434,3 @@ Widget build(BuildContext context) {
     );
   }
 }
-

@@ -5,6 +5,7 @@ import 'package:qa_agronomy/database/qa_database_perawatan.dart';
 import 'package:qa_agronomy/database/input_mutu_ancak_database_pemupukan.dart';
 import 'package:qa_agronomy/database/input_mutu_ancak_database_chemist.dart';
 import 'package:qa_agronomy/database/qa_database_grading.dart';
+import 'package:qa_agronomy/database/qa_database_tbs_produksi.dart';
 import 'package:qa_agronomy/gsheet_service.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -16,12 +17,12 @@ class QATrackerPage extends StatefulWidget {
 }
 
 class _QATrackerPageState extends State<QATrackerPage> {
-  final String _today = DateFormat('yyyy-MM-dd').format(DateTime.now());
   List<Map<String, dynamic>> _qaListProduksi = [];
   List<Map<String, dynamic>> _qaListPerawatan = [];
   List<Map<String, dynamic>> _qaListPemupukan = [];
   List<Map<String, dynamic>> _qaListChemist = [];
   List<Map<String, dynamic>> _qaListGrading = [];
+  List<Map<String, dynamic>> _qaListTBS = [];
 
   final List<String> SkippedDetails = [
     'Daftar Tenaga Tabur',
@@ -45,6 +46,7 @@ class _QATrackerPageState extends State<QATrackerPage> {
     final pupuk = await QADatabasePemupukanGulmaAncak.instance.getAllQABasedTanggalMutuAncak(tanggal);
     final chemist = await QADatabaseChemistGulmaAncak.instance.getAllQABasedTanggalMutuAncak(tanggal);
     final grading = await QADatabaseGrading.instance.getAllQAHariIni(tanggal);
+    final tbs = await QADatabaseTBSProduksi.instance.getAllQAHariIni(tanggal);
 
     setState(() {
       _qaListProduksi = produksi;
@@ -52,6 +54,7 @@ class _QATrackerPageState extends State<QATrackerPage> {
       _qaListPemupukan = pupuk;
       _qaListChemist = chemist;
       _qaListGrading = grading;
+      _qaListTBS = tbs;
     });
   }
 
@@ -155,6 +158,18 @@ String _formatKey(String key) {
 
         await gsheet.insertQAGrading(updatedQA);
 
+      } else if (title == "TBS") {
+        await QADatabaseTBSProduksi.instance.updateSyncStatusWithTimestamp(qa['id'], true, nowFormatted);
+        final db = await QADatabaseTBSProduksi.instance.database;
+
+        final updatedQA = (await db.query(
+          'qa_tbs',
+          where: 'id =?',
+          whereArgs: [qa['id']],
+        )).first;
+
+        await gsheet.insertQATBSProduksi(updatedQA);
+
       }
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -257,7 +272,7 @@ Widget _buildListSection(
 
   @override
   Widget build(BuildContext context) {
-    final isAllEmpty = _qaListProduksi.isEmpty && _qaListPerawatan.isEmpty && _qaListPemupukan.isEmpty && _qaListChemist.isEmpty && _qaListGrading.isEmpty;
+    final isAllEmpty = _qaListProduksi.isEmpty && _qaListPerawatan.isEmpty && _qaListPemupukan.isEmpty && _qaListChemist.isEmpty && _qaListGrading.isEmpty && _qaListTBS.isEmpty;
 
     return Scaffold(
       appBar: AppBar(title: const Text("Tracking QA Hari Ini")),
@@ -295,6 +310,12 @@ Widget _buildListSection(
                     "Grading",
                     _qaListGrading,
                     tableName: 'qa_grading_samples',
+                    getDb: () => QADatabaseGrading.instance.database,
+                  ),
+                  _buildListSection(
+                    "TBS",
+                    _qaListTBS,
+                    tableName: 'qa_tbs',
                     getDb: () => QADatabaseGrading.instance.database,
                   ),
                   const SizedBox(height: 24),

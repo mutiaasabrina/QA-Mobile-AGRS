@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:qa_agronomy/database/qa_database_pemupukan.dart';
 import 'input_mutu_ancak_pemupukan_page.dart';
 import 'package:sqflite/sqflite.dart';

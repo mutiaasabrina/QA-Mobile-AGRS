@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
-import 'qa_perawatan.dart';
-import 'qa_grading.dart';
+import 'Perawatan/qa_perawatan.dart';
+import 'Grading/qa_grading.dart';
 import 'qa_tracker_page.dart';
-import 'qa_chemist_menu_page.dart';
+import 'Chemist/qa_chemist_menu_page.dart';
 import 'package:qa_agronomy/database/qa_database_chemist.dart';
-import 'package:qa_agronomy/pages/qa_pemupukan_menu.dart';
-import 'package:qa_agronomy/pages/qa_production_page.dart';
+import 'package:qa_agronomy/pages/Pemupukan/qa_pemupukan_menu.dart';
+import 'package:qa_agronomy/pages/Produksi/qa_production_page.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});

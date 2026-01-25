@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:qa_agronomy/pages/qa_produksi.dart';
+import 'package:qa_agronomy/pages/Produksi/qa_produksi.dart';
 import 'package:qa_agronomy/utils/constants.dart';
-import 'package:qa_agronomy/pages/qa_kualitas_tbs.dart';
+import 'package:qa_agronomy/pages/Produksi/qa_kualitas_tbs.dart';
 
 class QAProduksiMenuPage extends StatelessWidget {
   const QAProduksiMenuPage({super.key});
