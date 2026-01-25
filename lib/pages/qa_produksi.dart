@@ -33,15 +33,9 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   final _buahMatangTidakDipanenController = TextEditingController();
   final _buahBusukTidakDipanenController = TextEditingController();
   final _lfTinggalController = TextEditingController();
-  final _buahTinggalController = TextEditingController();
   final _lfTinggalTPHController = TextEditingController();
+  final _buahTinggalController = TextEditingController();
   final _buahTinggalTPHController = TextEditingController();
-  final _mentahTPHController = TextEditingController();
-  final _mengkalTPHController = TextEditingController();
-  final _masakTPHController = TextEditingController();
-  final _overripeTPHController = TextEditingController();
-  final _busukkosongTPHController = TextEditingController();
-  final _abnormalTPHController = TextEditingController();
   final _komentarController = TextEditingController();
 
 
@@ -228,12 +222,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
         "tphTinggal": _lfTinggalTPHController.text.isEmpty ? '0' : _lfTinggalTPHController.text,
         "buahTinggal": _buahTinggalController.text.isEmpty ? '0' : _buahTinggalController.text,
         "buahTinggalTPH": _buahTinggalTPHController.text.isEmpty ? '0' : _buahTinggalTPHController.text,
-        "mentahTPH": _mentahTPHController.text.isEmpty ? '0' : _mentahTPHController.text,
-        "mengkalTPH": _mengkalTPHController.text.isEmpty ? '0' : _mengkalTPHController.text,
-        "masakTPH": _masakTPHController.text.isEmpty ? '0' : _masakTPHController.text,
-        "overripeTPH": _overripeTPHController.text.isEmpty ? '0' : _overripeTPHController.text,
-        "busukkosongTPH": _busukkosongTPHController.text.isEmpty ? '0' : _busukkosongTPHController.text,
-        "abnormalTPH": _abnormalTPHController.text.isEmpty ? '0' : _abnormalTPHController.text,
         "dropdowns": Map<String, String?>.from(dropdownSelections),
       });
 
@@ -262,12 +250,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     _lfTinggalTPHController.clear();
     _buahTinggalController.clear();
     _buahTinggalTPHController.clear();
-    _mentahTPHController.clear();
-    _mengkalTPHController.clear();
-    _masakTPHController.clear();
-    _overripeTPHController.clear();
-    _busukkosongTPHController.clear();
-    _abnormalTPHController.clear();
   }
 
   void _saveAll() async {
@@ -302,12 +284,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   int totalBuahTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahTinggal'] ?? '0') ?? 0));
   int totalTphTinggal = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['tphTinggal'] ?? '0') ?? 0));
   int totalBuahTinggalTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['buahTinggalTPH'] ?? '0') ?? 0));
-  int mentahTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['mentahTPH'] ?? '0') ?? 0));
-  int mengkalTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['mengkalTPH'] ?? '0') ?? 0));
-  int masakTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['masakTPH'] ?? '0') ?? 0));
-  int overripeTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['overripeTPH'] ?? '0') ?? 0));
-  int busukkosongTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['busukkosongTPH'] ?? '0') ?? 0));
-  int abnormalTPH = _samples.fold(0, (sum, s) => sum + (int.tryParse(s['abnormalTPH'] ?? '0') ?? 0));
 
   // Gabung data untuk database
   final qaData = {
@@ -326,12 +302,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
     'buah_tinggal': totalBuahTinggal,
     'lf_tinggal_tph': totalTphTinggal,
     'buah_tinggal_tph': totalBuahTinggalTPH,
-    'buah_mentah_tph': mentahTPH,
-    'buah_mengkal_tph': mengkalTPH,
-    'buah_masak_tph': masakTPH,
-    'buah_overripe_tph': overripeTPH,
-    'buah_busuk_jjg_kosong_tph': busukkosongTPH,
-    'buah_abnormal_tph': abnormalTPH,
     'tph_counter': _tphCounter,
     'is_synced': 0,
     'timestamp_sync': null,
@@ -349,12 +319,6 @@ class _QAProduksiPageState extends State<QAProduksiPage> {
   "buah_tinggal": totalBuahTinggal,
   "lf_tinggal_tph": totalTphTinggal,
   "buah_tinggal_tph": totalBuahTinggalTPH,
-  "buah_mentah_tph": mentahTPH,
-  "buah_mengkal_tph": mengkalTPH,
-  "buah_masak_tph": masakTPH,
-  "buah_overripe_tph": overripeTPH,
-  "buah_busuk_jjg_kosong_tph": busukkosongTPH,
-  "buah_abnormal_tph": abnormalTPH,
   "tph_counter": _tphCounter,
 };
 
@@ -395,12 +359,6 @@ void _selesaiBlok() async {
   int totalTphTinggal = 0;
   int totalLfTinggalTPH = 0;
   int totalBuahTinggalTPH = 0;
-  int mentahTPH = 0;
-  int mengkalTPH = 0;
-  int masakTPH = 0;
-  int overripeTPH = 0;
-  int busukkosongTPH = 0;
-  int abnormalTPH = 0;
   int totalTPHCounter = 0;
 
 for (var item in _qaDatas) {
@@ -415,12 +373,6 @@ for (var item in _qaDatas) {
   totalTphTinggal += int.tryParse(item['tphTinggal']?.toString() ?? '0') ?? 0;
   totalLfTinggalTPH += int.tryParse(item['lf_tinggal_tph']?.toString() ?? '0') ?? 0;
   totalBuahTinggalTPH += int.tryParse(item['buah_tinggal_tph']?.toString() ?? '0') ?? 0;
-  mentahTPH += int.tryParse(item['buah_mentah_tph']?.toString() ?? '0') ?? 0;
-  mengkalTPH += int.tryParse(item['buah_mengkal_tph']?.toString() ?? '0') ?? 0;
-  masakTPH += int.tryParse(item['buah_masak_tph']?.toString() ?? '0') ?? 0;
-  overripeTPH += int.tryParse(item['buah_overripe_tph']?.toString() ?? '0') ?? 0;
-  busukkosongTPH += int.tryParse(item['buah_busuk_jjg_kosong_tph']?.toString() ?? '0') ?? 0;
-  abnormalTPH += int.tryParse(item['buah_abnormal_tph']?.toString() ?? '0') ?? 0;
   totalTPHCounter += int.tryParse(item['tph_counter']?.toString() ?? '0') ?? 0;
 }
 
@@ -440,12 +392,6 @@ for (var item in _qaDatas) {
     'buah_tinggal': totalBuahTinggal,
     'lf_tinggal_tph': totalTphTinggal,
     'buah_tinggal_tph': totalBuahTinggalTPH,
-    'buah_mentah_tph': mentahTPH,
-    'buah_mengkal_tph': mengkalTPH,
-    'buah_masak_tph': masakTPH,
-    'buah_overripe_tph': overripeTPH,
-    'buah_busuk_jjg_kosong_tph': busukkosongTPH,
-    'buah_abnormal_tph': abnormalTPH,
     'tph_counter': _tphCounter,
     'is_synced': 0,
     'timestamp_sync': null,
@@ -470,12 +416,6 @@ for (var item in _qaDatas) {
   result.writeln("Buah Tinggal: $totalBuahTinggal");
   result.writeln("LF Tinggal di TPH: $totalLfTinggalTPH");
   result.writeln("Buah Tinggal di TPH: $totalBuahTinggalTPH");
-  result.writeln("Buah Mentah di TPH: $mentahTPH");
-  result.writeln("Buah Mengkal di TPH: $mengkalTPH");
-  result.writeln("Buah Masak di TPH: $masakTPH");
-  result.writeln("Buah Overripe di TPH: $overripeTPH");
-  result.writeln("Buah Busuk/Jjg Kosong di TPH: $busukkosongTPH");
-  result.writeln("Buah Abnormal di TPH: $abnormalTPH");
   result.writeln("Jumlah TPH Dicek: $totalTPHCounter\n");
 
   result.writeln("Data dari blok ini sudah tersimpan di database.\nApakah ingin menutup blok dan kembali ke menu utama?");
@@ -650,14 +590,6 @@ for (var item in _qaDatas) {
               const SizedBox(height: 8),
               TextField(controller: _lfTinggalTPHController, decoration: const InputDecoration(labelText: "LF Tinggal di TPH")),
               TextField(controller: _buahTinggalTPHController, decoration: const InputDecoration(labelText: "Buah Tinggal di TPH")),
-              const Divider(),
-              const Text("Kualitas TBS", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              TextField(controller: _mentahTPHController, decoration: const InputDecoration(labelText: "Buah Mentah di TPH")),
-              TextField(controller: _mengkalTPHController, decoration: const InputDecoration(labelText: "Buah Mengkal di TPH")),
-              TextField(controller: _masakTPHController, decoration: const InputDecoration(labelText: "Buah Masak di TPH")),
-              TextField(controller: _overripeTPHController, decoration: const InputDecoration(labelText: "Buah Overripe di TPH")),
-              TextField(controller: _busukkosongTPHController, decoration: const InputDecoration(labelText: "Buah Busuk/Jjg Kosong di TPH")),
-              TextField(controller: _abnormalTPHController, decoration: const InputDecoration(labelText: "Buah Abnormal di TPH")),
             ],
             const Divider(),
             TextField(
