@@ -636,7 +636,7 @@ for (var item in _qaDatas) {
                 foregroundColor: Colors.white,
               ),
               onPressed: _selesaiBlok,
-              child: const Text("Selesai"),
+              child: const Text("Selesai Blok"),
             ),
             const SizedBox(height: 6),
             Column(
