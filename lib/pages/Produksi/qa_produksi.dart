@@ -348,8 +348,8 @@ void _selesaiBlok() async {
   int totalTPHCounter = 0;
 
 for (var item in _qaDatas) {
-  totalDipanen += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0;
-  totalPokok += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0;
+  totalDipanen += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0; // p mksd nya kak???
+  totalPokok += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0; // p mksd lg kak^_^
   totalPkkDipanen += int.tryParse(item['pkk_dipanen']?.toString() ?? '0') ?? 0;
   totalBuahDipanen += int.tryParse(item['buah_dipanen']?.toString() ?? '0') ?? 0;
   totalBuahMatangTidakDipanen += int.tryParse(item['buah_matang_tidak_dipanen']?.toString() ?? '0') ?? 0;
