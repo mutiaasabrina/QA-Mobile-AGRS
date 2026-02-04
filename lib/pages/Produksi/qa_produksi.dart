@@ -333,7 +333,7 @@ void _selesaiBlok() async {
     return;
   }
 
-  // 🧮 Hitung total semua nilai dari blok tersebut
+  // Hitung total semua nilai dari blok tersebut
   int totalDipanen = 0;
   int totalPokok = 0;
   int totalPkkDipanen = 0;
@@ -348,8 +348,8 @@ void _selesaiBlok() async {
   int totalTPHCounter = 0;
 
 for (var item in _qaDatas) {
-  totalDipanen += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0; // p mksd nya kak???
-  totalPokok += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0; // p mksd lg kak^_^
+  totalDipanen += int.tryParse(item['pkk_dipanen']?.toString() ?? '0') ?? 0;
+  totalPokok += int.tryParse(item['jumlah_pokok']?.toString() ?? '0') ?? 0;
   totalPkkDipanen += int.tryParse(item['pkk_dipanen']?.toString() ?? '0') ?? 0;
   totalBuahDipanen += int.tryParse(item['buah_dipanen']?.toString() ?? '0') ?? 0;
   totalBuahMatangTidakDipanen += int.tryParse(item['buah_matang_tidak_dipanen']?.toString() ?? '0') ?? 0;
@@ -369,16 +369,16 @@ for (var item in _qaDatas) {
     'divisi': selectedDivisi,
     'blok': selectedBlok,
     'rotasi': int.tryParse(_rotasiController.text) ?? 0,
-    'jumlah_pokok': _samples.length,
+    'jumlah_pokok': totalPokok,
     'pkk_dipanen': totalDipanen,
     'buah_dipanen': totalBuahDipanen,
     'buah_matang_tidak_dipanen': totalBuahMatangTidakDipanen,
     'buah_busuk_tidak_dipanen': totalBuahBusukTidakDipanen,
     'lf_tinggal': totalLfTinggal,
     'buah_tinggal': totalBuahTinggal,
-    'lf_tinggal_tph': totalTphTinggal,
+    'lf_tinggal_tph': totalLfTinggalTPH,
     'buah_tinggal_tph': totalBuahTinggalTPH,
-    'tph_counter': _tphCounter,
+    'tph_counter': totalTPHCounter,
     'is_synced': 0,
     'timestamp_sync': null,
   };
