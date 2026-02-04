@@ -239,7 +239,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
    Widget _buildDropdown(String label, List<String> options, String key) {
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(labelText: label),
-      value: dropdownSelections[key],
+      initialValue: dropdownSelections[key],
       onChanged: (val) => setState(() {
         dropdownSelections[key] = val;
       }),
@@ -430,35 +430,35 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kondisi TPH"),
               isExpanded: true,
-              value: selectedKondisiTPH,
+              initialValue: selectedKondisiTPH,
               onChanged: (val) => setState(() => selectedKondisiTPH = val),
               items: kondisiTPHOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Titi Panen"),
               isExpanded: true,
-              value: selectedTitiPanen,
+              initialValue: selectedTitiPanen,
               onChanged: (val) => setState(() => selectedTitiPanen = val),
               items: titiPanenOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Jalan & Jembatan"),
               isExpanded: true,
-              value: selectedJalanJembatan,
+              initialValue: selectedJalanJembatan,
               onChanged: (val) => setState(() => selectedJalanJembatan = val),
               items: JalanJembatanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Beneficial Plant"),
               isExpanded: true,
-              value: selectedBeneficialPlant,
+              initialValue: selectedBeneficialPlant,
               onChanged: (val) => setState(() => selectedBeneficialPlant = val),
               items: beneficialPlantOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Peilscale"),
                isExpanded: true,
-              value: selectedPeilscale,
+              initialValue: selectedPeilscale,
               onChanged: (val) => setState(() => selectedPeilscale = val),
               items: peilscaleOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
             ),
@@ -728,7 +728,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
             TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas"), enabled: !isLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kebun"),
-              value: selectedKebun,
+              initialValue: selectedKebun,
               onChanged: isLocked ? null : (val) => setState(() {
                 setState(() {
                   selectedKebun = val;
@@ -740,7 +740,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Divisi"),
-              value: selectedDivisi,
+              initialValue: selectedDivisi,
               onChanged: isLocked ? null : (val) => setState(() {
                 setState(() {
                   selectedDivisi = val;
@@ -752,7 +752,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kode Blok"),
-              value: selectedBlok,
+              initialValue: selectedBlok,
               onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
               items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),

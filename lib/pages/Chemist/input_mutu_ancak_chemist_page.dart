@@ -446,7 +446,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
               TextField(controller: barisController, decoration: const InputDecoration(labelText: "Baris ke-"), enabled: !isTenagaSemprotLocked,),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: "Status Pokok Tersemprot"),
-                value: selectedPokokTersemprot,
+                initialValue: selectedPokokTersemprot,
                 onChanged: (val) => setState(() => selectedPokokTersemprot = val),
                 items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
               ),

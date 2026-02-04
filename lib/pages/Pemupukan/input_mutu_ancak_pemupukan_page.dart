@@ -443,19 +443,19 @@ class _InputMutuAncakPemupukanPageState extends State<InputMutuAncakPemupukanPag
             TextField(controller: _barisController, decoration: const InputDecoration(labelText: "Baris ke-"), enabled: !isTenagaTaburLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Pokok Terpupuk"),
-              value: selectedPokokTerpupuk,
+              initialValue: selectedPokokTerpupuk,
               onChanged: (val) => setState(() => selectedPokokTerpupuk = val),
               items: pokokOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kondisi Piringan/Gawangan"),
-              value: selectedKondisiPiringan,
+              initialValue: selectedKondisiPiringan,
               onChanged: (val) => setState(() => selectedKondisiPiringan = val),
               items: piringanOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Cara Aplikasi"),
-              value: selectedCaraAplikasi,
+              initialValue: selectedCaraAplikasi,
               onChanged: (val) => setState(() => selectedCaraAplikasi = val),
               items: caraAplikasiOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),

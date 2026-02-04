@@ -409,7 +409,7 @@ class _QAGradingPageState extends State<QAGradingPage> {
           TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas"), enabled: !isLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kebun"),
-              value: selectedKebun,
+              initialValue: selectedKebun,
               onChanged: isLocked ? null : (val) => setState(() {
                 selectedKebun = val;
                 selectedDivisi = null;
@@ -419,7 +419,7 @@ class _QAGradingPageState extends State<QAGradingPage> {
             ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Divisi"),
-            value: selectedDivisi,
+            initialValue: selectedDivisi,
             onChanged: isLocked ? null : (val) => setState(() {
               selectedDivisi = val; 
               selectedBlok = null;
@@ -428,7 +428,7 @@ class _QAGradingPageState extends State<QAGradingPage> {
           ),
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(labelText: "Blok"),
-            value: selectedBlok,
+            initialValue: selectedBlok,
             onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
             items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           ),

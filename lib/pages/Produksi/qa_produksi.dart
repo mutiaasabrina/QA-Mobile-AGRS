@@ -514,7 +514,7 @@ for (var item in _qaDatas) {
             TextField(controller: _namaPetugasController, decoration: const InputDecoration(labelText: "Nama Petugas"), enabled: !isLocked,),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kebun"),
-              value: selectedKebun,
+              initialValue: selectedKebun,
               onChanged: isLocked ? null : (val) => setState(() {
                 setState(() {
                   selectedKebun = val;
@@ -527,7 +527,7 @@ for (var item in _qaDatas) {
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Divisi"),
-              value: selectedDivisi,
+              initialValue: selectedDivisi,
               onChanged: isLocked ? null : (val) => setState(() {
                 setState(() {
                   selectedDivisi = val;
@@ -539,7 +539,7 @@ for (var item in _qaDatas) {
             ),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: "Kode Blok"),
-              value: selectedBlok,
+              initialValue: selectedBlok,
               onChanged: isLocked ? null : (val) => setState(() => selectedBlok = val),
               items: availableBloks.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             ),
@@ -585,6 +585,7 @@ for (var item in _qaDatas) {
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
+
             ),
             const SizedBox(height: 8),
             ElevatedButton.icon(
@@ -636,8 +637,9 @@ for (var item in _qaDatas) {
                 foregroundColor: Colors.white,
               ),
               onPressed: _selesaiBlok,
-              child: const Text("Selesai Blok"),
+              child: const Text("Selesai"),
             ),
+            
             const SizedBox(height: 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

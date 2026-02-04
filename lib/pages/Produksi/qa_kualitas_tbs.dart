@@ -334,7 +334,7 @@ Widget build(BuildContext context) {
 
           DropdownButtonFormField(
             decoration: const InputDecoration(labelText: "Kebun"),
-            value: selectedKebun,
+            initialValue: selectedKebun,
             onChanged:
                 isLocked ? null : (v) => setState(() => selectedKebun = v as String?),
             items: kebunOptions
@@ -344,7 +344,7 @@ Widget build(BuildContext context) {
 
           DropdownButtonFormField(
             decoration: const InputDecoration(labelText: "Divisi"),
-            value: selectedDivisi,
+            initialValue: selectedDivisi,
             onChanged: isLocked
                 ? null
                 : (v) => setState(() {
@@ -358,7 +358,7 @@ Widget build(BuildContext context) {
 
           DropdownButtonFormField(
             decoration: const InputDecoration(labelText: "Blok"),
-            value: selectedBlok,
+            initialValue: selectedBlok,
             onChanged:
                 isLocked ? null : (v) => setState(() => selectedBlok = v as String?),
             items: availableBloks

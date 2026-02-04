@@ -37,7 +37,7 @@ class SampleDropdown extends StatelessWidget {
         final options = entry.value;
         return DropdownButtonFormField<String>(
           decoration: InputDecoration(labelText: label),
-          value: dropdownSelections[label],
+          initialValue: dropdownSelections[label],
           onChanged: (val) {
             dropdownSelections[label] = val;
             onChanged();
