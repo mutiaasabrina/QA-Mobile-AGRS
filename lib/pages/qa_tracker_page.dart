@@ -316,7 +316,7 @@ Widget _buildListSection(
                     "TBS",
                     _qaListTBS,
                     tableName: 'qa_tbs',
-                    getDb: () => QADatabaseGrading.instance.database,
+                    getDb: () => QADatabaseTBSProduksi.instance.database,
                   ),
                   const SizedBox(height: 24),
                 ],
