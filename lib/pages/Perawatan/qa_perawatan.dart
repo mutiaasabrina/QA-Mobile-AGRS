@@ -557,7 +557,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
       'kebun': selectedKebun,
       'divisi': selectedDivisi,
       'blok': selectedBlok,
-      'jumlah_pokok': _samples.length,
+      'jumlah_pokok': totalPokok,
       'is_synced': 0,
       'timestamp_sync': null,
 
