@@ -30,6 +30,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
   final kematianGulmaGawanganController = TextEditingController();
   final _komentarController = TextEditingController();
   final String tanggalPemeriksaanMutuAncak = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  bool _cekTPH = false;
 
   String? selectedPokokTersemprot;
 
@@ -187,7 +188,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
         barisController.text.isEmpty ||
         kematianGulmaCircleController.text.isEmpty ||
         kematianGulmaPathontroller.text.isEmpty ||
-        kematianGulmaTPHController.text.isEmpty ||
+        (_cekTPH && kematianGulmaTPHController.text.isEmpty) ||
         (isGawanganUsed && kematianGulmaGawanganController.text.isEmpty)) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lengkapi semua data pokok sample dengan benar.")));
           return;
@@ -203,6 +204,7 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
       'gulmaPath': kematianGulmaPathontroller.text,
       'gulmaTPH': kematianGulmaTPHController.text,
       'gulmaGawangan': kematianGulmaGawanganController.text,
+      'CekTPH' : _cekTPH,
     });
 
     if (!_tenagaSemprot.containsKey(_tenagaSemprotKey)) {
@@ -461,6 +463,14 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   decoration: const InputDecoration(labelText: "Jumlah Kematian Gulma Path"),
                   keyboardType: TextInputType.number,
                 ),
+                SwitchListTile(title: const Text("Apakah melakukan pengecekan TPH?"),
+                value: _cekTPH, onChanged: (val){
+                  setState((){
+                    _cekTPH = val;
+                    if(!val){kematianGulmaTPHController.clear();}
+                  });
+                },),
+                if (_cekTPH)
                 TextField(
                   controller: kematianGulmaTPHController,
                   decoration: const InputDecoration(labelText: "Jumlah Kematian Gulma TPH"),
@@ -485,9 +495,17 @@ class _InputMutuAncakChemistPageState extends State<InputMutuAncakChemistPage> {
                   decoration: const InputDecoration(labelText: "Kematian Gulma Path"),
                   keyboardType: TextInputType.number,
                 ),
+                SwitchListTile(title: const Text("Apakah melakukan pengecekan TPH?"),
+                value: _cekTPH, onChanged: (val){
+                  setState((){
+                    _cekTPH = val;
+                    if(!val){kematianGulmaTPHController.clear();}
+                  });
+                },),
+                if (_cekTPH)
                 TextField(
                   controller: kematianGulmaTPHController,
-                  decoration: const InputDecoration(labelText: "Kematian Gulma TPH"),
+                  decoration: const InputDecoration(labelText: "Jumlah Kematian Gulma TPH"),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
