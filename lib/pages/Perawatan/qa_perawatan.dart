@@ -17,6 +17,7 @@ class QAPerawatanPage extends StatefulWidget {
 
 class _QAPerawatanPageState extends State<QAPerawatanPage> {
   final _namaPetugasController = TextEditingController();
+  final _coverCropController = TextEditingController();
 
   final List<Map<String, dynamic>> _samples = [];
   bool get isLocked => _samples.isNotEmpty;
@@ -42,6 +43,8 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
   String? selectedJalanJembatan;
   String? selectedBeneficialPlant;
   String? selectedPeilscale;
+  String? selectedCoverCrop;
+  String? selectedBarnOwl;
 
   final Map<String, String?> dropdownSelections = {};
   final Map<String, int> dropdownCounters = {};
@@ -83,6 +86,21 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
     '-10cm sampai 0cm, kondisi rusak, update',
     '>0cm, kondisi rusak, tidak ada sama sekali, tidak update'
   ];
+
+  final List<String> coverCropOptions = [
+    '>=90%',
+    '>80% - 90%',
+    '>70% - 80%',
+    '>60% - 70%',
+    '<60%'];
+
+  final List<String> barnOwlOptions = [
+    'Rasio gupon <40 ha, Ada burung hantu, gupon aktif, kondisi baik, sensus rutin',
+    'Ada burung hantu, gupon aktif, kondisi baik, sensus rutin',
+    'Ada atau tidak ada burung hantu, gupon aktif, kondisi baik atau rusak, sensus jarang',
+    'Tidak ada burung hantu, ada gupon, kondisi baik atau rusak, sensus jarang',
+    'Tidak ada burung hantu, tidak ada gupon, sensus tidak ada'];
+  
 
   final List<String> divisiOptions = ['1', '2', '3', '4', '5'];
   final List<String> kebunOptions = ['Inti', 'Plasma'];
@@ -462,6 +480,13 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
               onChanged: (val) => setState(() => selectedPeilscale = val),
               items: peilscaleOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
             ),
+             DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: "Barn Owl"),
+               isExpanded: true,
+              initialValue: selectedBarnOwl,
+              onChanged: (val) => setState(() => selectedBarnOwl = val),
+              items: barnOwlOptions.map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.visible, softWrap: true, style: const TextStyle(fontSize: 12),))).toList(),
+            ),
           ],
         ),
         actions: [
@@ -774,6 +799,9 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
             _buildDropdown("Serangan Rayap", ["Ada", "Tidak Ada"], "Serangan Rayap"),
             _buildDropdown("Thirathaba", ["Ada", "Tidak Ada"], "Thirathaba"),
             _buildDropdown("UPDPKS", ["Ada", "Tidak Ada"], "UPDPKS"),
+            const Divider(),
+            const Text("Cover Crop", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            TextField(controller: _coverCropController, decoration: const InputDecoration(labelText: "Kerapatan Cover Crop (%)")),
             const Divider(),
             TextField(
               controller: _komentarController,
