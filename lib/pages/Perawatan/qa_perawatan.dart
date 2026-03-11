@@ -666,16 +666,7 @@ class _QAPerawatanPageState extends State<QAPerawatanPage> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop(true);
-
-            for (var item in _qaDatas) {
-              await QADatabasePerawatan.instance.deleteQA(
-                item['blok'].toString(),
-                item['kebun'].toString(),
-                item['divisi'].toString(),
-                item['tanggal'].toString(),
-              );
-            }
-
+              
               await QADatabasePerawatan.instance.insertQA(qaData);
 
             ScaffoldMessenger.of(context).showSnackBar(

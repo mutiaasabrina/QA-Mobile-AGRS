@@ -421,15 +421,6 @@ for (var item in _qaDatas) {
           onPressed: () async {
             Navigator.of(context).pop(true);
 
-            for (var item in _qaDatas) {
-              await QADatabase.instance.deleteQA(
-                item['blok'].toString(),
-                item['kebun'].toString(),
-                item['divisi'].toString(),
-                item['tanggal'].toString(),
-              );
-            }
-
             await QADatabase.instance.insertQA(qaData);
 
             ScaffoldMessenger.of(context).showSnackBar(
